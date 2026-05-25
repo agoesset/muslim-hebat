@@ -1,0 +1,24 @@
+{
+  "name": "muslim-hebat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production web app for Muslim Hebat.",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @muslim-hebat/web",
+    "dev:web": "npm run dev -w @muslim-hebat/web",
+    "dev:api": "npm run dev -w @muslim-hebat/api",
+    "build": "npm run build --workspaces --if-present",
+    "build:web": "npm run build -w @muslim-hebat/web",
+    "build:api": "npm run build -w @muslim-hebat/api",
+    "preview": "npm run preview -w @muslim-hebat/web",
+    "test": "npm run test --workspaces --if-present",
+    "db:generate": "npm run prisma:generate -w @muslim-hebat/api",
+    "db:migrate": "npm run prisma:migrate -w @muslim-hebat/api",
+    "db:seed": "npm run seed -w @muslim-hebat/api"
+  }
+}

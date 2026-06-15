@@ -75,13 +75,53 @@
 .admin-form input,
 .admin-form select,
 .admin-form textarea,
-.admin-login input {
+.admin-login input,
+.admin-search {
   border: 1px solid rgba(31,58,45,0.2);
   border-radius: 10px;
   padding: 11px 12px;
   font: inherit;
   background: #fff;
   resize: vertical;
+}
+
+.admin-search {
+  width: 100%;
+}
+
+.admin-list-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.admin-list-head h2,
+.admin-list-head p {
+  margin: 0;
+}
+
+.admin-list-head p {
+  color: var(--ink-soft);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.admin-source-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 0;
+}
+
+.admin-source-chips .pill {
+  cursor: pointer;
+  border: 1px solid rgba(31,58,45,0.14);
+}
+
+.admin-list small {
+  color: var(--ink-soft);
+  font-size: 12px;
 }
 
 .admin-list {

@@ -2,19 +2,37 @@ import React, { createContext, useContext, useState, useCallback } from "react";
 import { api } from "../api.js";
 
 const CtaContext = createContext(null);
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER;
+
+function buildWhatsAppUrl({ title, source, email, name }) {
+  if (!WHATSAPP_NUMBER) return "";
+  const message = [
+    "Assalamu'alaikum, saya mau lanjut daftar/minat di Muslim Hebat.",
+    "",
+    `Minat: ${title || "-"}`,
+    `Source: ${source || "-"}`,
+    `Nama: ${name || "-"}`,
+    `Email: ${email || "-"}`,
+  ].join("\n");
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
 
 export function CtaProvider({ children }) {
   const [open, setOpen] = useState(false);
   const [meta, setMeta] = useState({ title: "", source: "" });
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [msg, setMsg] = useState("");
+  const [whatsappUrl, setWhatsappUrl] = useState("");
 
   const openInterest = useCallback((m) => {
     setMeta(m);
     setEmail("");
+    setName("");
     setStatus("idle");
     setMsg("");
+    setWhatsappUrl("");
     setOpen(true);
   }, []);
 
@@ -25,14 +43,16 @@ export function CtaProvider({ children }) {
     if (!email || status === "loading") return;
     setStatus("loading");
     setMsg("");
+    setWhatsappUrl("");
     try {
       await api("/public/subscribers", {
         method: "POST",
-        body: JSON.stringify({ email, source: meta.source }),
+        body: JSON.stringify({ email, name: name || undefined, source: meta.source }),
       });
+      const wa = buildWhatsAppUrl({ ...meta, email, name });
       setStatus("success");
-      setMsg("Tercatat! Kami kabari lewat email.");
-      setEmail("");
+      setMsg(wa ? "Tercatat! Mau lanjut cepat? Klik WhatsApp di bawah." : "Tercatat! Kami kabari lewat email.");
+      setWhatsappUrl(wa);
     } catch (err) {
       setStatus("error");
       setMsg(err.message || "Gagal mengirim. Coba lagi ya.");
@@ -55,9 +75,16 @@ export function CtaProvider({ children }) {
               {meta.title}
             </h3>
             <p style={{ marginTop: 8, color: "var(--ink-soft)", fontSize: 14 }}>
-              Masukkan email, kami kabari info selanjutnya.
+              Tinggal isi data singkat. Kami simpan sebagai lead, lalu bisa follow-up via email/WhatsApp.
             </p>
-            <form onSubmit={submit} style={{ display: "flex", gap: 8, marginTop: 16 }}>
+            <form onSubmit={submit} style={{ display: "grid", gap: 10, marginTop: 16 }}>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Nama (opsional)"
+                disabled={status === "loading"}
+              />
               <input
                 type="email"
                 required
@@ -65,14 +92,13 @@ export function CtaProvider({ children }) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="kamu@email.com"
                 disabled={status === "loading"}
-                style={{ flex: 1 }}
               />
               <button
                 type="submit"
                 className="btn btn--primary"
                 disabled={status === "loading" || !email}
               >
-                {status === "loading" ? "Mengirim..." : "Kirim"}
+                {status === "loading" ? "Mengirim..." : "Simpan minat"}
               </button>
             </form>
             {msg && (
@@ -83,11 +109,22 @@ export function CtaProvider({ children }) {
                   marginTop: 12,
                   fontSize: 14,
                   fontWeight: 600,
-                  color: status === "error" ? "var(--coral-deep)" : "var(--leaf)",
+                  color: status === "error" ? "var(--coral-deep)" : "var(--sage-deep)",
                 }}
               >
                 {msg}
               </div>
+            )}
+            {whatsappUrl && (
+              <a
+                className="btn btn--sage"
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{ marginTop: 12, width: "100%" }}
+              >
+                Lanjut via WhatsApp
+              </a>
             )}
             <button
               onClick={close}

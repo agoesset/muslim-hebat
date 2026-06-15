@@ -96,7 +96,7 @@ function Dashboard({ user, onLogout }) {
         <button className={active === "settings" ? "active" : ""} onClick={() => setActive("settings")}>Settings</button>
       </div>
       {resources.map((resource) => active === resource.key && <ResourcePanel key={resource.key} resource={resource} />)}
-      {active === "subscribers" && <ReadOnlyPanel path="/admin/subscribers" title="Subscribers" />}
+      {active === "subscribers" && <SubscribersPanel />}
       {active === "settings" && <SettingsPanel />}
     </AdminShell>
   );
@@ -171,16 +171,98 @@ function ResourcePanel({ resource }) {
   );
 }
 
-function ReadOnlyPanel({ path, title }) {
+function SubscribersPanel() {
   const [items, setItems] = React.useState([]);
-  React.useEffect(() => { api(path).then(setItems).catch(() => setItems([])); }, [path]);
+  const [query, setQuery] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    api("/admin/subscribers")
+      .then(setItems)
+      .catch((err) => setError(err.message));
+  }, []);
+
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((item) => [item.email, item.name, item.source]
+      .filter(Boolean)
+      .some((value) => value.toLowerCase().includes(q)));
+  }, [items, query]);
+
+  const sourceCounts = React.useMemo(() => {
+    return filtered.reduce((acc, item) => {
+      const key = item.source || "unknown";
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+  }, [filtered]);
+
+  function exportCsv() {
+    const rows = [["email", "name", "source", "createdAt"], ...filtered.map((item) => [item.email, item.name || "", item.source || "", item.createdAt || ""] )];
+    const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `muslim-hebat-leads-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="admin-card admin-list">
-      <h2>{title}</h2>
-      {items.length === 0 && <p>Belum ada data.</p>}
-      {items.map((item) => <article key={item.id}><strong>{item.email}</strong><span>{item.name || item.source || "-"}</span></article>)}
+      <div className="admin-list-head">
+        <div>
+          <h2>Leads / Subscribers</h2>
+          <p>{filtered.length} dari {items.length} kontak</p>
+        </div>
+        <button className="btn btn--sm btn--primary" onClick={exportCsv} disabled={filtered.length === 0}>Export CSV</button>
+      </div>
+
+      <input
+        className="admin-search"
+        placeholder="Cari email, nama, source..."
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+
+      {Object.keys(sourceCounts).length > 0 && (
+        <div className="admin-source-chips">
+          {Object.entries(sourceCounts).slice(0, 12).map(([source, count]) => (
+            <button key={source} className="pill" onClick={() => setQuery(source)}>
+              {source} · {count}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {error && <p className="admin-error">{error}</p>}
+      {filtered.length === 0 && <p>Belum ada data.</p>}
+      {filtered.map((item) => (
+        <article key={item.id}>
+          <strong>{item.email}</strong>
+          <span>{item.name || "Tanpa nama"}</span>
+          <small>{item.source || "unknown"} · {formatDate(item.createdAt)}</small>
+        </article>
+      ))}
     </div>
   );
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  try {
+    return new Intl.DateTimeFormat("id-ID", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Jakarta",
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
 }
 
 function SettingsPanel() {

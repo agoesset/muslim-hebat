@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { ValidationPipe, RequestMethod } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import { Request, Response, NextFunction } from "express";
 import { join } from "path";
 import cookieParser = require("cookie-parser");
 import { AppModule } from "./app.module";
@@ -18,7 +19,7 @@ async function bootstrap() {
 
   // Serve frontend static files in production
   const publicPath = join(__dirname, "public");
-  app.useStaticAssets(publicPath, { index: "index.html" });
+  app.useStaticAssets(publicPath, { index: false });
 
   app.setGlobalPrefix("api", {
     exclude: [{ path: "health", method: RequestMethod.GET }]
@@ -31,16 +32,15 @@ async function bootstrap() {
 
   // SPA fallback: serve index.html for non-API, non-static routes
   const indexHtml = join(publicPath, "index.html");
-  app.use((req, res, next) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     if (
-      req.method === "GET" &&
-      !req.path.startsWith("/api") &&
-      !req.path.startsWith("/health") &&
-      !req.path.includes(".")
+      req.path.startsWith("/api") ||
+      req.path.startsWith("/health") ||
+      req.path.includes(".")
     ) {
-      res.sendFile(indexHtml);
-    } else {
       next();
+    } else {
+      res.sendFile(indexHtml);
     }
   });
 

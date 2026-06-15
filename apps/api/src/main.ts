@@ -33,12 +33,13 @@ async function bootstrap() {
       sitemapPrisma.course.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } }),
       sitemapPrisma.kajianEvent.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } })
     ]);
-    const urls = [
+    const toSitemapEntry = (prefix: string) => (item: { slug: string; updatedAt: Date }) => [`${prefix}/${item.slug}`, item.updatedAt] as [string, Date];
+    const urls: [string, Date][] = [
       ["/", new Date()], ["/bacaan", new Date()], ["/produk", new Date()], ["/kelas", new Date()], ["/kajian", new Date()],
-      ...articles.map((item) => [`/bacaan/${item.slug}`, item.updatedAt]),
-      ...products.map((item) => [`/produk/${item.slug}`, item.updatedAt]),
-      ...courses.map((item) => [`/kelas/${item.slug}`, item.updatedAt]),
-      ...kajian.map((item) => [`/kajian/${item.slug}`, item.updatedAt])
+      ...articles.map(toSitemapEntry("/bacaan")),
+      ...products.map(toSitemapEntry("/produk")),
+      ...courses.map(toSitemapEntry("/kelas")),
+      ...kajian.map(toSitemapEntry("/kajian"))
     ];
     const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([path, updated]) => `  <url><loc>${siteUrl}${path}</loc><lastmod>${new Date(updated).toISOString()}</lastmod></url>`).join("\n")}\n</urlset>`;
     res.type("application/xml").send(xml);

@@ -20,20 +20,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:opsz,wght@9..40,400..700&family=Caveat:wght@500;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
 
-    <script>
-      (function() {
-        const gaId = "%VITE_GA_MEASUREMENT_ID%";
-        if (!gaId || gaId.indexOf("VITE_") === 0) return;
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){ dataLayer.push(arguments); }
-        gtag("js", new Date());
-        gtag("config", gaId, { send_page_view: true });
-        var s = document.createElement("script");
-        s.async = true;
-        s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(gaId);
-        document.head.appendChild(s);
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>

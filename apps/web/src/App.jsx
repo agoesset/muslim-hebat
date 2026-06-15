@@ -12,6 +12,7 @@ import { CERITA_DATA } from "./data/cerita.js";
 import { applyTheme, DEFAULT_THEME } from "./theme.js";
 import { Seo } from "./seo.jsx";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
+import { Analytics } from "./components/Analytics.jsx";
 
 import { CtaProvider } from "./context/cta-context.jsx";
 
@@ -51,6 +52,7 @@ function PublicApp() {
 
   return (
     <div>
+      <Analytics />
       <Nav page={page} onNav={goNav} />
       <ErrorBoundary>
         <Routes>

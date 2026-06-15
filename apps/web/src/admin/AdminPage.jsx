@@ -5,10 +5,10 @@ import "../styles.css";
 import "./admin.css";
 
 const resources = [
-  { key: "articles", label: "Bacaan", fields: ["slug", "title", "excerpt", "category", "author", "status"] },
-  { key: "products", label: "Produk", fields: ["slug", "name", "excerpt", "category", "priceCents", "status"] },
-  { key: "kajian", label: "Kajian", fields: ["slug", "title", "excerpt", "speaker", "location", "eventType", "startsAt", "status"] },
-  { key: "classes", label: "Kelas", fields: ["slug", "title", "excerpt", "category", "level", "format", "priceCents", "status"] }
+  { key: "articles", label: "Bacaan", fields: ["slug", "title", "excerpt", "body", "category", "author", "color", "emoji", "date", "time", "reads", "claps", "tag", "featured", "size", "status"] },
+  { key: "products", label: "Produk", fields: ["slug", "name", "excerpt", "description", "category", "priceCents", "originalPriceCents", "rating", "sold", "tag", "color", "emoji", "status"] },
+  { key: "kajian", label: "Kajian", fields: ["slug", "title", "excerpt", "speaker", "location", "eventType", "startsAt", "date", "month", "day", "time", "attendees", "priceCents", "free", "color", "status"] },
+  { key: "classes", label: "Kelas", fields: ["slug", "title", "excerpt", "description", "category", "level", "format", "instructor", "lessons", "duration", "students", "rating", "reviews", "priceCents", "originalPriceCents", "tag", "batch", "startDate", "startDay", "schedule", "platform", "slots", "slotsTaken", "statusDetail", "color", "emoji", "status"] }
 ];
 
 export function AdminPage() {
@@ -147,7 +147,7 @@ function ResourcePanel({ resource }) {
         <h2>{editing ? "Edit" : "Tambah"} {resource.label}</h2>
         {resource.fields.map((field) => (
           <label key={field}>{field}
-            <input value={draft[field] ?? ""} onChange={(event) => setDraft({ ...draft, [field]: event.target.value })} />
+            {renderField(field, draft[field], (value) => setDraft({ ...draft, [field]: value }))}
           </label>
         ))}
         {error && <p className="admin-error">{error}</p>}
@@ -215,8 +215,40 @@ function SettingsPanel() {
 function normalizeDraft(draft) {
   const normalized = {};
   for (const [key, value] of Object.entries(draft)) {
-    if (value === "" || key === "id" || key === "createdAt" || key === "updatedAt") continue;
-    normalized[key] = key === "priceCents" ? Number(value) : value;
+    if (value === "" || value === null || value === undefined || key === "id" || key === "createdAt" || key === "updatedAt") continue;
+    if (["priceCents", "originalPriceCents", "reads", "claps", "sold", "date", "attendees", "lessons", "students", "reviews", "slots", "slotsTaken"].includes(key)) {
+      normalized[key] = Number(value);
+    } else if (["rating"].includes(key)) {
+      normalized[key] = parseFloat(value);
+    } else if (["featured", "free"].includes(key)) {
+      normalized[key] = value === true || value === "true" || value === "on";
+    } else {
+      normalized[key] = value;
+    }
   }
   return normalized;
+}
+
+function renderField(field, value, onChange) {
+  if (field === "status") {
+    return (
+      <select value={value || "DRAFT"} onChange={(e) => onChange(e.target.value)}>
+        <option value="DRAFT">DRAFT</option>
+        <option value="PUBLISHED">PUBLISHED</option>
+        <option value="ARCHIVED">ARCHIVED</option>
+      </select>
+    );
+  }
+  if (["featured", "free"].includes(field)) {
+    return (
+      <select value={value ? "true" : "false"} onChange={(e) => onChange(e.target.value === "true")}>
+        <option value="true">true</option>
+        <option value="false">false</option>
+      </select>
+    );
+  }
+  if (["body", "description", "excerpt"].includes(field)) {
+    return <textarea value={value || ""} onChange={(e) => onChange(e.target.value)} rows={field === "excerpt" ? 2 : 5} />;
+  }
+  return <input value={value || ""} onChange={(e) => onChange(e.target.value)} />;
 }

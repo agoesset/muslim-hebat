@@ -6,11 +6,24 @@ import { Blob, SunDecor } from "./shell.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
 import { CERITA_DATA } from "./data/cerita.js";
 
+import { usePublicData } from "./hooks/usePublicData.js";
+
 const KATEGORI = ["Semua", "Self-growth", "Parenting", "Tafsir santai", "Productivity", "Hubungan", "Ibadah harian"];
+
+function normalizeArticles(api) {
+  if (!api) return [];
+  return api.map(a => ({ ...a, cat: a.category }));
+}
 
 export function CeritaPage({ onNav, onOpenCerita }) {
   const [cat, setCat] = React.useState("Semua");
-  const list = cat === "Semua" ? CERITA_DATA : CERITA_DATA.filter(c => c.cat === cat);
+  const { data: apiArticles, loading, error } = usePublicData("/public/articles");
+  const articles = React.useMemo(() => {
+    const normalized = normalizeArticles(apiArticles);
+    return normalized.length ? normalized : CERITA_DATA.map(a => ({ ...a, cat: a.cat }));
+  }, [apiArticles]);
+
+  const list = cat === "Semua" ? articles : articles.filter(c => c.cat === cat);
   const featured = list.find(c => c.featured) || list[0];
   const rest = list.filter(c => c !== featured);
 
@@ -33,6 +46,8 @@ export function CeritaPage({ onNav, onOpenCerita }) {
             </button>
           ))}
           <div style={{ flex: 1 }}/>
+          {loading && <span style={{ fontSize: 13, color: "var(--sage-deep)" }}>Memuat…</span>}
+          {error && <span style={{ fontSize: 13, color: "var(--coral-deep)" }}>Gagal memuat</span>}
           <span style={{ fontSize: 13, color: "var(--ink-soft)" }}>{list.length} bacaan</span>
         </div>
 
@@ -47,7 +62,7 @@ export function CeritaPage({ onNav, onOpenCerita }) {
 
           {/* sidebar */}
           <aside style={{ display: "flex", flexDirection: "column", gap: 16, position: "sticky", top: 100 }}>
-            <PopularCerita onOpenCerita={onOpenCerita}/>
+            <PopularCerita articles={articles} onOpenCerita={onOpenCerita}/>
             <BrowseTags/>
             <AuthorSpotlight/>
           </aside>
@@ -182,8 +197,8 @@ export function CeritaCard({ c, onOpenCerita }) {
 
 /* ─── Sidebar widgets ────────────────────────────────────────────── */
 
-function PopularCerita({ onOpenCerita }) {
-  const pop = [...CERITA_DATA].sort((a, b) => b.reads - a.reads).slice(0, 5);
+function PopularCerita({ articles, onOpenCerita }) {
+  const pop = [...articles].sort((a, b) => b.reads - a.reads).slice(0, 5);
   return (
     <div className="card" style={{ padding: 22 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>

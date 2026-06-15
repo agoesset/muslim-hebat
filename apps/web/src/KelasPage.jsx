@@ -1,12 +1,13 @@
 // KelasPage — online classes / academy with live Zoom batches + on-demand.
 
 import React from "react";
+import { usePublicData } from "./hooks/usePublicData.js";
 import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
 
-const KELAS_DATA = [
+const KELAS_FALLBACK = [
   { id: 1, slug: "tahsin-pemula", cat: "Tahsin", color: "var(--sage)", emoji: "🎙",
     title: "Tahsin Pemula: Baca Qur'an dari Nol",
     instructor: "Ust. Hasan Bashri", instructorAvatar: "var(--peach)",
@@ -133,21 +134,42 @@ const LEVELS = ["Semua level", "Pemula", "Menengah", "Lanjutan"];
 const KELAS_FORMAT = ["Semua", "Live Zoom", "Hybrid", "On-demand"];
 const KELAS_KATEGORI = ["Semua", "Tahsin", "Tahfidz", "Tafsir", "Parenting Islami", "Bahasa Arab", "Bisnis Muslim", "Ibadah Harian", "Muslimah"];
 
+function normalizeCourses(api) {
+  if (!api) return [];
+  return api.map(c => ({
+    ...c,
+    id: c.id || c.slug,
+    cat: c.category,
+    desc: c.excerpt,
+    price: c.priceCents || 0,
+    originalPrice: c.originalPriceCents || 0,
+    status: c.statusDetail || "open",
+    instructorAvatar: "var(--peach)",
+    featured: !!c.featured,
+  }));
+}
+
 export function KelasPage({ onNav }) {
   const [cat, setCat] = React.useState("Semua");
   const [level, setLevel] = React.useState("Semua level");
   const [fmt, setFmt] = React.useState("Semua");
 
-  let list = KELAS_DATA;
+  const { data: apiCourses, loading, error } = usePublicData("/public/classes");
+  const courses = React.useMemo(() => {
+    const normalized = normalizeCourses(apiCourses);
+    return normalized.length ? normalized : KELAS_FALLBACK;
+  }, [apiCourses]);
+
+  let list = courses;
   if (cat !== "Semua") list = list.filter(k => k.cat === cat);
   if (level !== "Semua level") list = list.filter(k => k.level === level);
   if (fmt !== "Semua") list = list.filter(k => k.format === fmt);
 
   return (
     <div data-screen-label="06 Kelas">
-      <KelasHero onNav={onNav}/>
+      <KelasHero onNav={onNav} featured={courses.find(k => k.featured) || null}/>
       <KelasStats/>
-      <BatchOpenSection/>
+      <BatchOpenSection courses={courses}/>
 
       <section className="shell" style={{ marginBottom: 32 }}>
         <SectionHeader
@@ -197,6 +219,8 @@ export function KelasPage({ onNav }) {
           ))}
           <div style={{ flex: 1 }}/>
           <span style={{ fontSize: 13, color: "var(--ink-soft)" }}>{list.length} kelas</span>
+          {loading && <span style={{ fontSize: 13, color: "var(--sage-deep)", marginLeft: 8 }}>Memuat…</span>}
+          {error && <span style={{ fontSize: 13, color: "var(--coral-deep)", marginLeft: 8 }}>Gagal memuat</span>}
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
@@ -212,8 +236,8 @@ export function KelasPage({ onNav }) {
   );
 }
 
-function BatchOpenSection() {
-  const open = KELAS_DATA
+function BatchOpenSection({ courses }) {
+  const open = courses
     .filter(k => k.batch && k.status !== "closed")
     .sort((a, b) => (a.startDate || "").localeCompare(b.startDate || ""));
 
@@ -297,8 +321,8 @@ function BatchOpenCard({ k }) {
   );
 }
 
-function KelasHero({ onNav }) {
-  const f = KELAS_DATA.find(k => k.featured);
+function KelasHero({ onNav, featured }) {
+  const f = featured;
   return (
     <section className="shell" style={{ paddingTop: 24, paddingBottom: 32, position: "relative" }}>
       <Blob color="var(--sage)" size={260} top={20} left={40} opacity={0.4}/>

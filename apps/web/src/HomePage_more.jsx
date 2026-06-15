@@ -5,10 +5,17 @@ import { Blob, SunDecor, WaveDivider } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
 import { CERITA_DATA } from "./data/cerita.js";
 
+import { usePublicData } from "./hooks/usePublicData.js";
+
 /* ─── Articles ──────────────────────────────────────────────────────── */
 export function ArticleSection({ onNav, onOpenCerita }) {
-  const featured = CERITA_DATA.find(c => c.featured) || CERITA_DATA[0];
-  const more = CERITA_DATA.filter(c => c !== featured).slice(0, 4);
+  const { data: articles, loading, error } = usePublicData("/public/articles");
+
+  if (loading) return <section className="shell" style={{ marginBottom: 40 }}><p>Memuat bacaan…</p></section>;
+  if (error || !articles || articles.length === 0) return null;
+
+  const featured = articles.find(c => c.featured) || articles[0];
+  const more = articles.filter(c => c !== featured).slice(0, 4);
 
   return (
     <section className="shell" style={{ marginBottom: 40 }}>
@@ -38,7 +45,7 @@ export function ArticleSection({ onNav, onOpenCerita }) {
           <div style={{ padding: 28, display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
             <div style={{ display: "flex", gap: 8 }}>
               {featured.tag && <span className="pill" style={{ background: "var(--coral)", color: "var(--ink)", border: "1px solid var(--ink)" }}>★ {featured.tag}</span>}
-              <span className="pill">{featured.cat}</span>
+              <span className="pill">{featured.category}</span>
             </div>
             <h3 style={{ fontSize: 30, lineHeight: 1.1 }}>{featured.title}</h3>
             <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: 0 }}>{featured.excerpt}</p>
@@ -72,7 +79,7 @@ export function ArticleSection({ onNav, onOpenCerita }) {
                 {a.emoji}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 11, color: "var(--coral-deep)", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.6 }}>{a.cat}</div>
+                <div style={{ fontSize: 11, color: "var(--coral-deep)", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.6 }}>{a.category}</div>
                 <h4 style={{ fontSize: 17, fontWeight: 600, lineHeight: 1.25, marginTop: 2 }}>{a.title}</h4>
                 <div style={{ fontSize: 12, color: "var(--ink-soft)", marginTop: 4, display: "flex", alignItems: "center", gap: 6 }}>
                   <Icon.Clock size={11}/> {a.time}
@@ -89,15 +96,25 @@ export function ArticleSection({ onNav, onOpenCerita }) {
   );
 }
 
-/* ─── Product highlight ─────────────────────────────────────────────── */
+/* ─── Product highlight ───────────────────────────────────────────────────────────────── */
 export function ProductHighlight({ onNav }) {
-  const products = [
-    { name: "Jurnal Ramadhan 30 Hari", price: "Rp 39.000", cat: "Printable", color: "var(--peach)", emoji: "📓", tag: "best seller" },
-    { name: "Wallpaper Pack: Quotes Ayat", price: "Gratis", cat: "Wallpaper",  color: "var(--lilac)", emoji: "📱", tag: "new" },
-    { name: "Kelas Tahsin Pemula (12 sesi)", price: "Rp 249.000", cat: "Kelas online", color: "var(--sage)", emoji: "🎙" },
-    { name: "E-book: Anak Tenang, Bunda Senang", price: "Rp 59.000", cat: "E-book", color: "var(--butter)", emoji: "📖" },
-    { name: "Template Doa Harian (Notion)", price: "Rp 19.000", cat: "Template", color: "var(--coral)", emoji: "🗒" },
-  ];
+  const { data: products, loading, error } = usePublicData("/public/products");
+
+  if (loading) return <section style={{ background: "var(--bg-soft)", padding: "56px 0 64px" }}><div className="shell"><p>Memuat produk…</p></div></section>;
+  if (error || !products || products.length === 0) return null;
+
+  const display = products.slice(0, 5).map(p => ({
+    name: p.name,
+    price: p.priceCents || 0,
+    original: p.originalPriceCents || 0,
+    cat: p.category,
+    color: p.color,
+    emoji: p.emoji,
+    rating: p.rating,
+    sold: p.sold,
+    tag: p.tag,
+    desc: p.excerpt
+  }));
 
   return (
     <section style={{ background: "var(--bg-soft)", padding: "56px 0 64px", position: "relative", marginBottom: 32 }}>
@@ -118,7 +135,7 @@ export function ProductHighlight({ onNav }) {
         />
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16 }}>
-          {products.map((p, i) => (
+          {display.map((p, i) => (
             <article key={i} className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative" }}>
               {p.tag && (
                 <span className="sticker illus-only" style={{
@@ -145,8 +162,8 @@ export function ProductHighlight({ onNav }) {
               <div style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600 }}>{p.cat}</div>
               <h4 style={{ fontSize: 16, lineHeight: 1.2, fontWeight: 600 }}>{p.name}</h4>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", gap: 6 }}>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 700, color: p.price === "Gratis" ? "var(--sage-deep)" : "var(--ink)", whiteSpace: "nowrap" }}>
-                  {p.price}
+                <span style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 700, color: p.price === 0 ? "var(--sage-deep)" : "var(--ink)", whiteSpace: "nowrap" }}>
+                  {p.price === 0 ? "Gratis" : `Rp ${p.price.toLocaleString("id")}`}
                 </span>
                 <button className="btn btn--sm" style={{ padding: "6px 10px", boxShadow: "2px 2px 0 var(--ink)", flexShrink: 0 }}>
                   <Icon.Download size={12}/>
@@ -164,13 +181,12 @@ export function ProductHighlight({ onNav }) {
   );
 }
 
-/* ─── Kajian strip ──────────────────────────────────────────────────── */
+/* ─── Kajian strip ────────────────────────────────────────────────────────────────────── */
 export function KajianStrip({ onNav }) {
-  const events = [
-    { date: "22", month: "Mei", day: "Jum'at", title: "Tafsir Surat Al-Kahfi", speaker: "Ust. Adi Hidayat", time: "Ba'da Maghrib", loc: "Masjid Istiqlal · Jakarta", type: "Offline", color: "var(--sage)" },
-    { date: "24", month: "Mei", day: "Ahad",   title: "Parenting in Islam: Ngomong sama Remaja", speaker: "dr. Aisyah Dahlan", time: "10.00 WIB",   loc: "Zoom + YouTube live",    type: "Online",  color: "var(--lilac)" },
-    { date: "27", month: "Mei", day: "Rabu",   title: "Kelas Tahsin: Makhraj huruf",     speaker: "Ust. Hasan Bashri",  time: "19.30 WIB",   loc: "Google Meet",            type: "Online",  color: "var(--peach)" },
-  ];
+  const { data: events, loading, error } = usePublicData("/public/kajian");
+
+  if (loading) return <section className="shell" style={{ marginBottom: 40 }}><p>Memuat jadwal…</p></section>;
+  if (error || !events || events.length === 0) return null;
   return (
     <section className="shell" style={{ marginBottom: 40 }}>
       <SectionHeader
@@ -195,16 +211,16 @@ export function KajianStrip({ onNav }) {
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.6, marginTop: 2 }}>{e.month}</div>
                 <div style={{ fontSize: 10, color: "var(--ink-soft)", marginTop: 2 }}>{e.day}</div>
               </div>
-              <span className={`pill ${e.type === "Online" ? "" : "pill--ink"}`} style={{ fontSize: 11 }}>
-                {e.type === "Online" ? "🟢 Online" : "📍 Offline"}
+              <span className={`pill ${e.eventType === "Online" ? "" : "pill--ink"}`} style={{ fontSize: 11 }}>
+                {e.eventType === "Online" ? "🟢 Online" : "📍 Offline"}
               </span>
             </div>
             <h4 style={{ fontSize: 20, lineHeight: 1.2 }}>{e.title}</h4>
-            <div style={{ fontSize: 13, color: "var(--ink-soft)", display: "flex", flexDirection: "column", gap: 4 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Icon.Smile size={12}/> {e.speaker}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Icon.Clock size={12}/> {e.time}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Icon.Pin size={12}/> {e.loc}</div>
-            </div>
+              <div style={{ fontSize: 13, color: "var(--ink-soft)", display: "flex", flexDirection: "column", gap: 4 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Icon.Smile size={12}/> {e.speaker}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Icon.Clock size={12}/> {e.time}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Icon.Pin size={12}/> {e.location}</div>
+              </div>
             <div style={{ display: "flex", gap: 6, marginTop: "auto" }}>
               <button className="btn btn--sm btn--primary" style={{ flex: 1 }}>Daftar gratis</button>
               <button className="btn btn--sm">

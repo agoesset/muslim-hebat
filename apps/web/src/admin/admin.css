@@ -74,12 +74,14 @@
 
 .admin-form input,
 .admin-form select,
+.admin-form textarea,
 .admin-login input {
   border: 1px solid rgba(31,58,45,0.2);
   border-radius: 10px;
   padding: 11px 12px;
   font: inherit;
   background: #fff;
+  resize: vertical;
 }
 
 .admin-list {

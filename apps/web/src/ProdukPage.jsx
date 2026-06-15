@@ -6,21 +6,24 @@ import { Blob } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
 
+import { usePublicData } from "./hooks/usePublicData.js";
+
 export function ProdukPage({ onNav }) {
   const [active, setActive] = React.useState("Semua");
   const cats = ["Semua", "E-book", "Worksheet", "Kelas", "Wallpaper", "Template"];
 
-  const products = [
-    { name: "Jurnal Ramadhan 30 Hari", price: 39000, original: 59000, cat: "Worksheet", color: "var(--peach)", emoji: "📓", rating: 4.9, sold: 1240, tag: "best seller", desc: "Tracker amal yaumiyyah 30 hari + space refleksi harian." },
-    { name: "Wallpaper Pack: Quotes Ayat", price: 0, cat: "Wallpaper",  color: "var(--lilac)", emoji: "📱", rating: 4.8, sold: 3200, tag: "free", desc: "20 wallpaper HD untuk HP & laptop, ayat-ayat pilihan." },
-    { name: "Kelas Tahsin Pemula", price: 249000, cat: "Kelas",        color: "var(--sage)", emoji: "🎙", rating: 5.0, sold: 480, desc: "12 sesi video + grup WA + sertifikat. Mulai dari nol." },
-    { name: "E-book: Anak Tenang, Bunda Senang", price: 59000, cat: "E-book", color: "var(--butter)", emoji: "📖", rating: 4.7, sold: 890, desc: "Tips parenting santun dari sudut pandang islami." },
-    { name: "Template Doa Harian (Notion)", price: 19000, cat: "Template", color: "var(--coral)", emoji: "🗒", rating: 4.8, sold: 620, desc: "Database doa lengkap, siap di-duplicate ke Notion kamu." },
-    { name: "Planner Hijriah 1447", price: 79000, cat: "Worksheet", color: "var(--sage)", emoji: "📅", rating: 4.9, sold: 740, tag: "new", desc: "PDF printable A5/A4, kalender hijriah & masehi paralel." },
-    { name: "E-book: Bismillah Berbisnis", price: 49000, cat: "E-book", color: "var(--lilac)", emoji: "💼", rating: 4.6, sold: 560, desc: "Panduan praktis muamalah & etika bisnis muslim modern." },
-    { name: "Kelas Tahfidz 1 Juz", price: 399000, cat: "Kelas", color: "var(--peach)", emoji: "🎧", rating: 5.0, sold: 220, desc: "30 hari intensif menghafal juz 30, mentor 1-on-1." },
-    { name: "Wallpaper Pack: Dzikir Pagi", price: 0, cat: "Wallpaper", color: "var(--butter)", emoji: "🌅", rating: 4.9, sold: 2100, tag: "free", desc: "12 wallpaper minimalis berisi dzikir pagi & petang." },
-  ];
+  const { data: apiProducts, loading, error } = usePublicData("/public/products");
+
+  const products = React.useMemo(() => {
+    if (!apiProducts) return [];
+    return apiProducts.map(p => ({
+      ...p,
+      price: p.priceCents || 0,
+      original: p.originalPriceCents || 0,
+      cat: p.category,
+      desc: p.excerpt
+    }));
+  }, [apiProducts]);
 
   const filtered = active === "Semua" ? products : products.filter(p => p.cat === active);
 
@@ -46,8 +49,11 @@ export function ProdukPage({ onNav }) {
           <button className="btn btn--sm btn--ghost">Urutkan: Terbaru ↓</button>
         </div>
 
+        {loading && <p>Memuat produk…</p>}
+        {error && <p className="admin-error">Gagal memuat produk: {error}</p>}
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
-          {filtered.map((p, i) => <ProdukCard key={p.name} p={p}/>)}
+          {filtered.map((p, i) => <ProdukCard key={p.id || p.slug} p={p}/>)}
         </div>
       </section>
 

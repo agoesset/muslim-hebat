@@ -37,6 +37,13 @@ model Article {
   author      String?
   color       String?
   emoji       String?
+  date        String?
+  time        String?
+  reads       Int           @default(0)
+  claps       Int           @default(0)
+  tag         String?
+  featured    Boolean       @default(false)
+  size        String?
   status      ContentStatus @default(DRAFT)
   publishedAt DateTime?
   createdAt   DateTime      @default(now())
@@ -44,18 +51,22 @@ model Article {
 }
 
 model Product {
-  id          String        @id @default(cuid())
-  slug        String        @unique
-  name        String
-  excerpt     String
-  description String        @default("")
-  category    String?
-  priceCents  Int           @default(0)
-  color       String?
-  emoji       String?
-  status      ContentStatus @default(DRAFT)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  name             String
+  excerpt          String
+  description      String        @default("")
+  category         String?
+  priceCents       Int           @default(0)
+  originalPriceCents Int         @default(0)
+  rating           Float         @default(0)
+  sold             Int           @default(0)
+  tag              String?
+  color            String?
+  emoji            String?
+  status           ContentStatus @default(DRAFT)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }
 
 model KajianEvent {
@@ -67,6 +78,13 @@ model KajianEvent {
   location    String?
   eventType   String?
   startsAt    DateTime?
+  date        Int?
+  month       String?
+  day         String?
+  time        String?
+  attendees   Int           @default(0)
+  priceCents  Int           @default(0)
+  free        Boolean       @default(true)
   color       String?
   status      ContentStatus @default(DRAFT)
   createdAt   DateTime      @default(now())
@@ -74,21 +92,37 @@ model KajianEvent {
 }
 
 model Course {
-  id          String        @id @default(cuid())
-  slug        String        @unique
-  title       String
-  excerpt     String
-  description String        @default("")
-  category    String?
-  level       String?
-  format      String?
-  priceCents  Int           @default(0)
-  color       String?
-  status      ContentStatus @default(DRAFT)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  title            String
+  excerpt          String
+  description      String        @default("")
+  category         String?
+  level            String?
+  format           String?
+  instructor       String?
+  lessons          Int           @default(0)
+  duration         String?
+  students         Int           @default(0)
+  rating           Float         @default(0)
+  reviews          Int           @default(0)
+  priceCents       Int           @default(0)
+  originalPriceCents Int         @default(0)
+  tag              String?
+  batch            String?
+  startDate        String?
+  startDay         String?
+  schedule         String?
+  platform         String?
+  slots            Int           @default(0)
+  slotsTaken       Int           @default(0)
+  statusDetail     String?
+  color            String?
+  emoji            String?
+  status           ContentStatus @default(DRAFT)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }
-
 model Subscriber {
   id        String   @id @default(cuid())
   email     String   @unique

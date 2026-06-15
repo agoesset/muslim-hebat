@@ -6,18 +6,31 @@ import { Blob, SunDecor } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
 
+import { usePublicData } from "./hooks/usePublicData.js";
+
 export function KajianPage({ onNav }) {
   const [filter, setFilter] = React.useState("Semua");
   const filters = ["Semua", "Online", "Offline", "Minggu ini", "Tahsin", "Tafsir", "Parenting"];
 
-  const events = [
-    { date: 22, month: "Mei", day: "Jum'at", title: "Tafsir Surat Al-Kahfi", speaker: "Ust. Adi Hidayat", time: "Ba'da Maghrib · 18.10 WIB", loc: "Masjid Istiqlal · Jakarta", type: "Offline", cat: "Tafsir", color: "var(--sage)", attendees: 240, free: true },
-    { date: 24, month: "Mei", day: "Ahad", title: "Parenting in Islam: Ngomong sama Remaja", speaker: "dr. Aisyah Dahlan", time: "10.00 WIB", loc: "Zoom + YouTube live", type: "Online", cat: "Parenting", color: "var(--lilac)", attendees: 1820, free: true },
-    { date: 27, month: "Mei", day: "Rabu", title: "Kelas Tahsin: Makhraj huruf hijaiyah", speaker: "Ust. Hasan Bashri", time: "19.30 WIB", loc: "Google Meet", type: "Online", cat: "Tahsin", color: "var(--peach)", attendees: 86, free: false, price: "Rp 50rb" },
-    { date: 29, month: "Mei", day: "Jum'at", title: "Khusyu' dalam sholat: tips praktis", speaker: "Ust. Hanan Attaki", time: "Ba'da Isya · 19.45 WIB", loc: "Masjid Agung Sunda Kelapa", type: "Offline", cat: "Tafsir", color: "var(--butter)", attendees: 410, free: true },
-    { date: 1,  month: "Jun", day: "Ahad", title: "Muslimah Talk: self-worth dari sudut Islam", speaker: "Ust. Oki Setiana Dewi", time: "14.00 WIB", loc: "Zoom · Khusus perempuan", type: "Online", cat: "Parenting", color: "var(--coral)", attendees: 980, free: true },
-    { date: 3,  month: "Jun", day: "Selasa", title: "Tadabbur Juz 30 — bagian 1", speaker: "Ust. Nouman Ali Khan (Sub-id)", time: "20.00 WIB", loc: "YouTube live", type: "Online", cat: "Tafsir", color: "var(--sage)", attendees: 2400, free: true },
-  ];
+  const { data: apiEvents, loading, error } = usePublicData("/public/kajian");
+
+  const events = React.useMemo(() => {
+    if (!apiEvents) return [];
+    return apiEvents.map(e => ({
+      ...e,
+      type: e.eventType,
+      loc: e.location,
+      cat: e.eventType,
+      price: e.free ? "Gratis" : (e.priceCents ? `Rp ${e.priceCents.toLocaleString("id")}` : "Gratis")
+    }));
+  }, [apiEvents]);
+
+  const filtered = React.useMemo(() => {
+    if (filter === "Semua") return events;
+    if (["Online", "Offline"].includes(filter)) return events.filter(e => e.eventType === filter);
+    if (filter === "Minggu ini") return events.slice(0, 4);
+    return events.filter(e => e.eventType === filter || e.category === filter);
+  }, [events, filter]);
 
   return (
     <div data-screen-label="03 Ngaji Bareng">
@@ -43,7 +56,9 @@ export function KajianPage({ onNav }) {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {events.map((e, i) => <KajianRow key={i} e={e}/>)}
+              {loading && <p>Memuat jadwal…</p>}
+              {error && <p className="admin-error">Gagal memuat jadwal: {error}</p>}
+              {filtered.map((e, i) => <KajianRow key={e.id || e.slug} e={e}/>)}
             </div>
           </div>
 

@@ -61,9 +61,19 @@ function PublicApp() {
   );
 }
 
+import { usePublicData } from "./hooks/usePublicData.js";
+
 function CeritaDetailRoute({ onNav, onOpenCerita }) {
   const { slug } = useParams();
-  const cerita = CERITA_DATA.find((item) => item.slug === slug) || CERITA_DATA[0];
+  const { data: apiArticle, loading, error } = usePublicData(`/public/articles/${slug}`);
+
+  const cerita = React.useMemo(() => {
+    if (apiArticle) return { ...apiArticle, cat: apiArticle.category };
+    return CERITA_DATA.find((item) => item.slug === slug) || CERITA_DATA[0];
+  }, [apiArticle, slug]);
+
+  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><p>Memuat bacaan…</p></div>;
+  if (error) return <div className="shell" style={{ padding: "60px 0" }}><p>Gagal memuat bacaan: {error}</p></div>;
 
   return (
     <>

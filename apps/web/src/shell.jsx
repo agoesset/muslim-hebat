@@ -51,7 +51,7 @@ export function Nav({ page, onNav }) {
         <button className="btn btn--sm">
           <Icon.Search size={14}/> Cari
         </button>
-        <button className="btn btn--sm btn--primary" onClick={() => openInterest({ title: "Daftar gratis di Muslim Hebat", source: "header:daftar-gratis" })}>
+        <button className="btn btn--sm btn--primary" onClick={() => openInterest({ title: "Daftar gratis di Muslim Hebat", source: "header:daftar-gratis", intent: "subscribe" })}>
           Daftar gratis <Icon.Arrow size={14}/>
         </button>
       </div>

@@ -1,6 +1,7 @@
 // ProdukPage — full digital product catalog.
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
@@ -10,6 +11,7 @@ import { usePublicData } from "./hooks/usePublicData.js";
 import { useCta } from "./context/cta-context.jsx";
 
 export function ProdukPage({ onNav }) {
+  const navigate = useNavigate();
   const [active, setActive] = React.useState("Semua");
   const cats = ["Semua", "E-book", "Worksheet", "Kelas", "Wallpaper", "Template"];
 
@@ -54,7 +56,7 @@ export function ProdukPage({ onNav }) {
         {error && <p className="admin-error">Gagal memuat produk: {error}</p>}
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
-          {filtered.map((p, i) => <ProdukCard key={p.id || p.slug} p={p}/>)}
+          {filtered.map((p, i) => <ProdukCard key={p.id || p.slug} p={p} onOpen={() => navigate(`/produk/${p.slug}`)}/>) }
         </div>
       </section>
 
@@ -108,7 +110,7 @@ function ProdukHero() {
   );
 }
 
-function ProdukCard({ p }) {
+function ProdukCard({ p, onOpen }) {
   const { openInterest } = useCta();
   return (
     <article className="card" style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14, position: "relative" }}>
@@ -151,6 +153,7 @@ function ProdukCard({ p }) {
       </div>
       <h4 style={{ fontSize: 19, lineHeight: 1.2, fontWeight: 600 }}>{p.name}</h4>
       <p style={{ fontSize: 13, color: "var(--ink-soft)", margin: 0, lineHeight: 1.45 }}>{p.desc}</p>
+      <button className="btn btn--sm btn--ghost" onClick={onOpen} style={{ alignSelf: "flex-start" }}>Lihat detail</button>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 4, gap: 8 }}>
         <div style={{ minWidth: 0 }}>
           {p.original && <div style={{ fontSize: 11, color: "var(--ink-soft)", textDecoration: "line-through" }}>Rp {p.original.toLocaleString("id")}</div>}
@@ -161,7 +164,7 @@ function ProdukCard({ p }) {
         <button
           className="btn btn--sm btn--primary"
           style={{ flexShrink: 0 }}
-          onClick={() => openInterest({ title: `${p.price === 0 ? "Unduh" : "Beli"}: ${p.name}`, source: `produk:${p.slug || p.id}` })}
+          onClick={() => openInterest({ title: `${p.price === 0 ? "Unduh" : "Beli"}: ${p.name}`, source: `produk:${p.slug || p.id}`, intent: p.price === 0 ? "download" : "buy", price: p.price === 0 ? "Gratis" : `Rp ${p.price.toLocaleString("id")}` })}
         >
           {p.price === 0 ? "Unduh" : "Beli"} <Icon.Arrow size={12}/>
         </button>
@@ -191,7 +194,7 @@ function ProdukBundle() {
           <button
             className="btn btn--primary"
             style={{ marginTop: 16 }}
-            onClick={() => openInterest({ title: "Ambil bundle Konsisten Setahun", source: "produk:bundle-konsisten-setahun" })}
+            onClick={() => openInterest({ title: "Ambil bundle Konsisten Setahun", source: "produk:bundle-konsisten-setahun", intent: "buy", price: "Rp 149.000" })}
           >
             Ambil bundle ini <Icon.Arrow size={14}/>
           </button>

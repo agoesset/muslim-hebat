@@ -1,6 +1,7 @@
 // KelasPage — online classes / academy with live Zoom batches + on-demand.
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
@@ -151,6 +152,7 @@ function normalizeCourses(api) {
 }
 
 export function KelasPage({ onNav }) {
+  const navigate = useNavigate();
   const [cat, setCat] = React.useState("Semua");
   const [level, setLevel] = React.useState("Semua level");
   const [fmt, setFmt] = React.useState("Semua");
@@ -225,7 +227,7 @@ export function KelasPage({ onNav }) {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
-          {list.map(k => <KelasCard key={k.id} k={k}/>)}
+          {list.map(k => <KelasCard key={k.id} k={k} onOpen={() => navigate(`/kelas/${k.slug}`)}/>) }
         </div>
       </section>
 
@@ -319,7 +321,7 @@ function BatchOpenCard({ k }) {
         </span>
         <button
           className="btn btn--sm btn--primary"
-          onClick={() => openInterest({ title: `Daftar batch: ${k.title}`, source: `kelas:${k.slug || k.id}` })}
+          onClick={() => openInterest({ title: `Daftar batch: ${k.title}`, source: `kelas:${k.slug || k.id}`, intent: "class", price: k.price === 0 ? "Gratis" : `Rp ${k.price.toLocaleString("id")}` })}
         >
           Daftar batch <Icon.Arrow size={12}/>
         </button>
@@ -350,7 +352,7 @@ function KelasHero({ onNav, featured }) {
           <div style={{ display: "flex", gap: 10, marginTop: 22, flexWrap: "wrap" }}>
             <button
               className="btn btn--primary"
-              onClick={() => openInterest({ title: "Mulai kelas gratis", source: "kelas:gratis" })}
+              onClick={() => openInterest({ title: "Mulai kelas gratis", source: "kelas:gratis", intent: "class", price: "Gratis" })}
             >
               Mulai kelas gratis <Icon.Arrow size={14}/>
             </button>
@@ -422,7 +424,7 @@ function KelasStats() {
   );
 }
 
-function KelasCard({ k }) {
+function KelasCard({ k, onOpen }) {
   const { openInterest } = useCta();
   const isFree = k.price === 0;
   const isLive = k.format === "Live Zoom" || k.format === "Hybrid";
@@ -495,6 +497,7 @@ function KelasCard({ k }) {
         </div>
         <h4 style={{ fontSize: 18, lineHeight: 1.2, fontWeight: 600 }}>{k.title}</h4>
         <p style={{ fontSize: 12, color: "var(--ink-soft)", margin: 0, lineHeight: 1.45 }}>{k.desc}</p>
+        <button className="btn btn--sm btn--ghost" onClick={onOpen} style={{ alignSelf: "flex-start" }}>Lihat detail</button>
 
         {/* instructor */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -558,7 +561,7 @@ function KelasCard({ k }) {
           <button
             className="btn btn--sm btn--primary"
             style={{ flexShrink: 0 }}
-            onClick={() => openInterest({ title: `${isFree ? "Mulai" : isLive ? "Daftar batch" : "Ikut kelas"}: ${k.title}`, source: `kelas:${k.slug || k.id}` })}
+            onClick={() => openInterest({ title: `${isFree ? "Mulai" : isLive ? "Daftar batch" : "Ikut kelas"}: ${k.title}`, source: `kelas:${k.slug || k.id}`, intent: "class", price: isFree ? "Gratis" : `Rp ${k.price.toLocaleString("id")}` })}
           >
             {isFree ? "Mulai" : isLive ? "Daftar batch" : "Ikut kelas"} <Icon.Arrow size={12}/>
           </button>

@@ -1,6 +1,7 @@
 // KajianPage — schedule list, calendar view, featured kajian.
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "./icons.jsx";
 import { Blob, SunDecor } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
@@ -10,6 +11,7 @@ import { usePublicData } from "./hooks/usePublicData.js";
 import { useCta } from "./context/cta-context.jsx";
 
 export function KajianPage({ onNav }) {
+  const navigate = useNavigate();
   const [filter, setFilter] = React.useState("Semua");
   const filters = ["Semua", "Online", "Offline", "Minggu ini", "Tahsin", "Tafsir", "Parenting"];
 
@@ -59,7 +61,7 @@ export function KajianPage({ onNav }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {loading && <p>Memuat jadwal…</p>}
               {error && <p className="admin-error">Gagal memuat jadwal: {error}</p>}
-              {filtered.map((e, i) => <KajianRow key={e.id || e.slug} e={e}/>)}
+              {filtered.map((e, i) => <KajianRow key={e.id || e.slug} e={e} onOpen={() => navigate(`/kajian/${e.slug}`)}/>) }
             </div>
           </div>
 
@@ -133,7 +135,7 @@ function KajianHero() {
   );
 }
 
-function KajianRow({ e }) {
+function KajianRow({ e, onOpen }) {
   const { openInterest } = useCta();
   return (
     <article className="card" style={{ padding: 22, display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 20, alignItems: "center" }}>
@@ -167,16 +169,17 @@ function KajianRow({ e }) {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <button className="btn btn--sm btn--ghost" onClick={onOpen} style={{ fontSize: 12, padding: "6px 10px" }}>Detail</button>
         <button
           className="btn btn--sm btn--primary"
-          onClick={() => openInterest({ title: `Daftar: ${e.title}`, source: `kajian:${e.slug || e.id}` })}
+          onClick={() => openInterest({ title: `Daftar: ${e.title}`, source: `kajian:${e.slug || e.id}`, intent: "event", price: e.price || (e.free ? "Gratis" : "Berbayar") })}
         >
           Daftar <Icon.Arrow size={12}/>
         </button>
         <button
           className="btn btn--sm btn--ghost"
           style={{ fontSize: 12, padding: "6px 10px" }}
-          onClick={() => openInterest({ title: `Reminder: ${e.title}`, source: `reminder:kajian:${e.slug || e.id}` })}
+          onClick={() => openInterest({ title: `Reminder: ${e.title}`, source: `kajian-reminder:${e.slug || e.id}`, intent: "reminder" })}
         >
           <Icon.Bell size={11}/> Ingetin
         </button>

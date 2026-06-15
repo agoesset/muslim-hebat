@@ -108,6 +108,8 @@ function ResourcePanel({ resource }) {
   const [draft, setDraft] = React.useState(emptyDraft);
   const [editing, setEditing] = React.useState(null);
   const [error, setError] = React.useState("");
+  const [message, setMessage] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("ALL");
 
   const load = React.useCallback(() => {
     api(`/admin/${resource.key}`).then(setItems).catch((err) => setError(err.message));
@@ -117,6 +119,8 @@ function ResourcePanel({ resource }) {
     setDraft(emptyDraft);
     setEditing(null);
     setError("");
+    setMessage("");
+    setStatusFilter("ALL");
     load();
   }, [resource.key]);
 
@@ -130,6 +134,7 @@ function ResourcePanel({ resource }) {
       await api(path, { method, body: JSON.stringify(body) });
       setDraft(emptyDraft);
       setEditing(null);
+      setMessage(`${resource.label} tersimpan.`);
       load();
     } catch (err) {
       setError(err.message);
@@ -138,8 +143,14 @@ function ResourcePanel({ resource }) {
 
   async function remove(id) {
     await api(`/admin/${resource.key}/${id}`, { method: "DELETE" });
+    setMessage(`${resource.label} dihapus.`);
     load();
   }
+
+  const visibleItems = React.useMemo(() => {
+    if (statusFilter === "ALL") return items;
+    return items.filter((item) => (item.status || "DRAFT") === statusFilter);
+  }, [items, statusFilter]);
 
   return (
     <section className="admin-grid">
@@ -151,12 +162,25 @@ function ResourcePanel({ resource }) {
           </label>
         ))}
         {error && <p className="admin-error">{error}</p>}
+        {message && <p className="admin-success">{message}</p>}
         <button className="btn btn--primary" type="submit">Simpan</button>
+        {editing && <button className="btn" type="button" onClick={() => { setEditing(null); setDraft(emptyDraft); }}>Batal edit</button>}
       </form>
       <div className="admin-card admin-list">
-        <h2>Daftar {resource.label}</h2>
-        {items.length === 0 && <p>Belum ada data.</p>}
-        {items.map((item) => (
+        <div className="admin-list-head">
+          <div>
+            <h2>Daftar {resource.label}</h2>
+            <p>{visibleItems.length} dari {items.length} item</p>
+          </div>
+          <select className="admin-search" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} style={{ maxWidth: 180 }}>
+            <option value="ALL">Semua status</option>
+            <option value="PUBLISHED">Published</option>
+            <option value="DRAFT">Draft</option>
+            <option value="ARCHIVED">Archived</option>
+          </select>
+        </div>
+        {visibleItems.length === 0 && <p>Belum ada data.</p>}
+        {visibleItems.map((item) => (
           <article key={item.id}>
             <strong>{item.title || item.name || item.email}</strong>
             <span>{item.slug || item.status}</span>

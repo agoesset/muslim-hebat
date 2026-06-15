@@ -27,14 +27,35 @@ export class ContentController {
     return this.prisma.product.findMany({ where: publishedWhere, orderBy });
   }
 
+  @Get("public/products/:slug")
+  async product(@Param("slug") slug: string) {
+    const product = await this.prisma.product.findFirst({ where: { slug, ...publishedWhere } });
+    if (!product) throw new NotFoundException("Product not found");
+    return product;
+  }
+
   @Get("public/kajian")
   kajian() {
     return this.prisma.kajianEvent.findMany({ where: publishedWhere, orderBy: { startsAt: "asc" } });
   }
 
+  @Get("public/kajian/:slug")
+  async kajianEvent(@Param("slug") slug: string) {
+    const event = await this.prisma.kajianEvent.findFirst({ where: { slug, ...publishedWhere } });
+    if (!event) throw new NotFoundException("Kajian not found");
+    return event;
+  }
+
   @Get("public/classes")
   classes() {
     return this.prisma.course.findMany({ where: publishedWhere, orderBy });
+  }
+
+  @Get("public/classes/:slug")
+  async course(@Param("slug") slug: string) {
+    const course = await this.prisma.course.findFirst({ where: { slug, ...publishedWhere } });
+    if (!course) throw new NotFoundException("Class not found");
+    return course;
   }
 
   @Get("admin/articles")

@@ -5,6 +5,7 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { Request, Response, NextFunction } from "express";
 import { join } from "path";
 import cookieParser = require("cookie-parser");
+import { PrismaClient } from "@prisma/client";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
@@ -20,6 +21,28 @@ async function bootstrap() {
   // Serve frontend static files in production
   const publicPath = join(__dirname, "public");
   app.useStaticAssets(publicPath, { index: false });
+
+  // Dynamic SEO sitemap (root path, outside /api prefix)
+  const adapter = app.getHttpAdapter();
+  const sitemapPrisma = new PrismaClient();
+  adapter.get("/sitemap.xml", async (_req: any, res: any) => {
+    const siteUrl = (process.env.SITE_URL || process.env.VITE_SITE_URL || "https://muslimhebat.com").replace(/\/$/, "");
+    const [articles, products, courses, kajian] = await Promise.all([
+      sitemapPrisma.article.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } }),
+      sitemapPrisma.product.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } }),
+      sitemapPrisma.course.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } }),
+      sitemapPrisma.kajianEvent.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } })
+    ]);
+    const urls = [
+      ["/", new Date()], ["/bacaan", new Date()], ["/produk", new Date()], ["/kelas", new Date()], ["/kajian", new Date()],
+      ...articles.map((item) => [`/bacaan/${item.slug}`, item.updatedAt]),
+      ...products.map((item) => [`/produk/${item.slug}`, item.updatedAt]),
+      ...courses.map((item) => [`/kelas/${item.slug}`, item.updatedAt]),
+      ...kajian.map((item) => [`/kajian/${item.slug}`, item.updatedAt])
+    ];
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([path, updated]) => `  <url><loc>${siteUrl}${path}</loc><lastmod>${new Date(updated).toISOString()}</lastmod></url>`).join("\n")}\n</urlset>`;
+    res.type("application/xml").send(xml);
+  });
 
   app.setGlobalPrefix("api", {
     exclude: [{ path: "health", method: RequestMethod.GET }]

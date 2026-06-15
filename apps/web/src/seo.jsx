@@ -1,6 +1,6 @@
 import React from "react";
 
-const siteUrl = import.meta.env.VITE_SITE_URL || "https://muslimhebat.local";
+const siteUrl = import.meta.env.VITE_SITE_URL || "https://muslimhebat.com";
 
 export function Seo({ title, description, jsonLd }) {
   React.useEffect(() => {

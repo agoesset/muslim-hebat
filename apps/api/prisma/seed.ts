@@ -13,6 +13,7 @@ const articles = [
   { slug: "tahajud-pemula", title: "Tahajud buat pemula: gimana mulai tanpa terasa berat", excerpt: "Mulai dari 2 rakaat di jam 4 pagi. Itu aja udah cukup.", body: "", category: "Ibadah harian", author: "Ust. Hasan", color: "var(--lilac)", emoji: "🌙", date: "12 Mei", time: "6 mnt", reads: 1340, claps: 89, size: "sm" },
   { slug: "sholat-tengah-notif", title: "Sholat khusyu' di tengah notif WhatsApp yang gak berhenti", excerpt: "Tips digital muslim biar 5 menit aja bener-bener buat Allah.", body: "", category: "Self-growth", author: "Faiz H.", color: "var(--peach)", emoji: "📵", date: "10 Mei", time: "4 mnt", reads: 1120, claps: 78, size: "sm" },
   { slug: "sedekah-5rb", title: "Sedekah 5 ribu yang ternyata ngubah pandangan hidup", excerpt: "Cerita kecil dari pengamen di stasiun Bekasi.", body: "", category: "Hubungan", author: "Bunda Aisyah", color: "var(--butter)", emoji: "💛", date: "8 Mei", time: "5 mnt", reads: 760, claps: 64, size: "sm" },
+  { slug: "dzikir-pagi-singkat", title: "Dzikir pagi singkat buat yang sering buru-buru", excerpt: "Mulai dari tiga bacaan pendek dulu. Yang penting konsisten dan ngerti maknanya.", body: "Dzikir pagi bisa dimulai pendek, asal hadir dan rutin. Pilih bacaan yang shahih, pahami maknanya, lalu tambah pelan-pelan.", category: "Ibadah harian", author: "Ust. Hasan", color: "var(--sage)", emoji: "🌅", date: "6 Mei", time: "4 mnt", reads: 680, claps: 51, size: "sm" },
 ];
 
 const products = [

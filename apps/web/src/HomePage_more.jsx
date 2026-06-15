@@ -171,7 +171,7 @@ export function ProductHighlight({ onNav }) {
                   className="btn btn--sm"
                   style={{ padding: "6px 10px", boxShadow: "2px 2px 0 var(--ink)", flexShrink: 0 }}
                   aria-label={`Minat ${p.name}`}
-                  onClick={() => openInterest({ title: `Minat: ${p.name}`, source: `produk:${p.slug || p.id}` })}
+                  onClick={() => openInterest({ title: `Minat: ${p.name}`, source: `produk:${p.slug || p.id}`, intent: p.price === 0 ? "download" : "buy", price: p.price === 0 ? "Gratis" : `Rp ${p.price.toLocaleString("id")}` })}
                 >
                   <Icon.Download size={12}/>
                 </button>
@@ -233,14 +233,14 @@ export function KajianStrip({ onNav }) {
               <button
                 className="btn btn--sm btn--primary"
                 style={{ flex: 1 }}
-                onClick={() => openInterest({ title: `Daftar: ${e.title}`, source: `kajian:${e.slug || e.id}` })}
+                onClick={() => openInterest({ title: `Daftar: ${e.title}`, source: `kajian:${e.slug || e.id}`, intent: "event", price: e.price || (e.free ? "Gratis" : "Berbayar") })}
               >
                 Daftar gratis
               </button>
               <button
                 className="btn btn--sm"
                 aria-label="Ingatkan saya"
-                onClick={() => openInterest({ title: `Reminder: ${e.title}`, source: `reminder:kajian:${e.slug || e.id}` })}
+                onClick={() => openInterest({ title: `Reminder: ${e.title}`, source: `kajian-reminder:${e.slug || e.id}`, intent: "reminder" })}
               >
                 <Icon.Bell size={12}/>
               </button>

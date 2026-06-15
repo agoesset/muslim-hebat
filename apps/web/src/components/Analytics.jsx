@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
+import { trackEvent } from "../analytics.js";
 
 const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
@@ -24,6 +25,11 @@ export function Analytics() {
   React.useEffect(() => {
     if (!GA_ID || !GA_ID.startsWith("G-") || !window.gtag) return;
     window.gtag("config", GA_ID, {
+      page_path: location.pathname + location.search,
+      page_title: document.title,
+      send_page_view: false,
+    });
+    trackEvent("page_view", {
       page_path: location.pathname + location.search,
       page_title: document.title,
     });

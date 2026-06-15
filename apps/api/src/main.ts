@@ -1,11 +1,13 @@
 import "reflect-metadata";
 import { ValidationPipe, RequestMethod } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { join } from "path";
 import cookieParser = require("cookie-parser");
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const webOrigin = process.env.WEB_ORIGIN || "http://127.0.0.1:5173";
 
   app.use(cookieParser());
@@ -13,8 +15,16 @@ async function bootstrap() {
     origin: webOrigin.split(","),
     credentials: true
   });
+
+  // Serve frontend static files in production
+  const publicPath = join(__dirname, "public");
+  app.useStaticAssets(publicPath, { index: "index.html" });
+
   app.setGlobalPrefix("api", {
-    exclude: [{ path: "health", method: RequestMethod.GET }]
+    exclude: [
+      { path: "health", method: RequestMethod.GET },
+      { path: "*", method: RequestMethod.ALL }
+    ]
   });
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,

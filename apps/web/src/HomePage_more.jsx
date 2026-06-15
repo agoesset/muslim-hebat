@@ -4,7 +4,8 @@ import { Icon } from "./icons.jsx";
 import { Blob, SunDecor, WaveDivider } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
 import { CERITA_DATA } from "./data/cerita.js";
-
+import { api } from "./api.js";
+import { useCta } from "./context/cta-context.jsx";
 import { usePublicData } from "./hooks/usePublicData.js";
 
 /* ─── Articles ──────────────────────────────────────────────────────── */
@@ -99,8 +100,9 @@ export function ArticleSection({ onNav, onOpenCerita }) {
 /* ─── Product highlight ───────────────────────────────────────────────────────────────── */
 export function ProductHighlight({ onNav }) {
   const { data: products, loading, error } = usePublicData("/public/products");
+  const { openInterest } = useCta();
 
-  if (loading) return <section style={{ background: "var(--bg-soft)", padding: "56px 0 64px" }}><div className="shell"><p>Memuat produk…</p></div></section>;
+  if (loading) return <section className="shell" style={{ marginBottom: 40 }}><p>Memuat produk…</p></section>;
   if (error || !products || products.length === 0) return null;
 
   const display = products.slice(0, 5).map(p => ({
@@ -165,7 +167,12 @@ export function ProductHighlight({ onNav }) {
                 <span style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 700, color: p.price === 0 ? "var(--sage-deep)" : "var(--ink)", whiteSpace: "nowrap" }}>
                   {p.price === 0 ? "Gratis" : `Rp ${p.price.toLocaleString("id")}`}
                 </span>
-                <button className="btn btn--sm" style={{ padding: "6px 10px", boxShadow: "2px 2px 0 var(--ink)", flexShrink: 0 }}>
+                <button
+                  className="btn btn--sm"
+                  style={{ padding: "6px 10px", boxShadow: "2px 2px 0 var(--ink)", flexShrink: 0 }}
+                  aria-label={`Minat ${p.name}`}
+                  onClick={() => openInterest({ title: `Minat: ${p.name}`, source: `produk:${p.slug || p.id}` })}
+                >
                   <Icon.Download size={12}/>
                 </button>
               </div>
@@ -184,6 +191,7 @@ export function ProductHighlight({ onNav }) {
 /* ─── Kajian strip ────────────────────────────────────────────────────────────────────── */
 export function KajianStrip({ onNav }) {
   const { data: events, loading, error } = usePublicData("/public/kajian");
+  const { openInterest } = useCta();
 
   if (loading) return <section className="shell" style={{ marginBottom: 40 }}><p>Memuat jadwal…</p></section>;
   if (error || !events || events.length === 0) return null;
@@ -222,8 +230,18 @@ export function KajianStrip({ onNav }) {
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Icon.Pin size={12}/> {e.location}</div>
               </div>
             <div style={{ display: "flex", gap: 6, marginTop: "auto" }}>
-              <button className="btn btn--sm btn--primary" style={{ flex: 1 }}>Daftar gratis</button>
-              <button className="btn btn--sm">
+              <button
+                className="btn btn--sm btn--primary"
+                style={{ flex: 1 }}
+                onClick={() => openInterest({ title: `Daftar: ${e.title}`, source: `kajian:${e.slug || e.id}` })}
+              >
+                Daftar gratis
+              </button>
+              <button
+                className="btn btn--sm"
+                aria-label="Ingatkan saya"
+                onClick={() => openInterest({ title: `Reminder: ${e.title}`, source: `reminder:kajian:${e.slug || e.id}` })}
+              >
                 <Icon.Bell size={12}/>
               </button>
             </div>
@@ -234,8 +252,31 @@ export function KajianStrip({ onNav }) {
   );
 }
 
-/* ─── Newsletter ────────────────────────────────────────────────────── */
+/* ─── Newsletter ──────────────────────────────────────────────────────────────────────────────────────────────── */
 export function NewsletterBlock() {
+  const [email, setEmail] = React.useState("");
+  const [status, setStatus] = React.useState("idle"); // idle | loading | success | error
+  const [msg, setMsg] = React.useState("");
+
+  async function submit(e) {
+    e.preventDefault();
+    if (!email || status === "loading") return;
+    setStatus("loading");
+    setMsg("");
+    try {
+      await api("/public/subscribers", {
+        method: "POST",
+        body: JSON.stringify({ email, source: "newsletter" })
+      });
+      setStatus("success");
+      setMsg("Berhasil subscribe! Cek inbox kamu ✌️");
+      setEmail("");
+    } catch (err) {
+      setStatus("error");
+      setMsg(err.message || "Gagal subscribe. Coba lagi ya.");
+    }
+  }
+
   return (
     <section className="shell" style={{ marginBottom: 40 }}>
       <div className="card card--ink" style={{ padding: "56px 56px", display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 40, alignItems: "center", position: "relative", overflow: "hidden" }}>
@@ -254,12 +295,16 @@ export function NewsletterBlock() {
             1 artikel pilihan, 1 doa, dan 1 reminder kecil. Tanpa spam, tanpa promosi gak penting — janji.
           </p>
 
-          <form style={{ display: "flex", gap: 8, marginTop: 24, maxWidth: 460 }} onSubmit={(e) => e.preventDefault()}>
+          <form style={{ display: "flex", gap: 8, marginTop: 24, maxWidth: 460 }} onSubmit={submit}>
             <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8, background: "var(--paper)", borderRadius: 999, padding: "0 8px 0 20px", border: "1.5px solid var(--bg)" }}>
               <Icon.Mail size={16}/>
               <input
                 type="email"
+                required
                 placeholder="kamu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={status === "loading"}
                 style={{
                   flex: 1, border: 0, padding: "16px 0",
                   background: "transparent", outline: "none",
@@ -267,10 +312,25 @@ export function NewsletterBlock() {
                 }}
               />
             </div>
-            <button type="submit" className="btn btn--coral">
-              Subscribe <Icon.Arrow size={14}/>
+            <button type="submit" className="btn btn--coral" disabled={status === "loading" || !email}>
+              {status === "loading" ? "Mengirim..." : "Subscribe"} <Icon.Arrow size={14}/>
             </button>
           </form>
+
+          {msg && (
+            <div
+              role="status"
+              aria-live="polite"
+              style={{
+                marginTop: 12,
+                fontSize: 14,
+                color: status === "error" ? "var(--coral)" : "var(--peach)",
+                fontWeight: 600,
+              }}
+            >
+              {msg}
+            </div>
+          )}
 
           <div style={{ marginTop: 18, display: "flex", gap: 16, color: "var(--bg)", opacity: 0.65, fontSize: 12 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Icon.Check size={12}/> Gratis selamanya</span>

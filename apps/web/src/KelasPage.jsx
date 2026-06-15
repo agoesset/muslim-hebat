@@ -1,11 +1,12 @@
 // KelasPage — online classes / academy with live Zoom batches + on-demand.
 
 import React from "react";
-import { usePublicData } from "./hooks/usePublicData.js";
 import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
+import { usePublicData } from "./hooks/usePublicData.js";
+import { useCta } from "./context/cta-context.jsx";
 
 const KELAS_FALLBACK = [
   { id: 1, slug: "tahsin-pemula", cat: "Tahsin", color: "var(--sage)", emoji: "🎙",
@@ -257,6 +258,7 @@ function BatchOpenSection({ courses }) {
 }
 
 function BatchOpenCard({ k }) {
+  const { openInterest } = useCta();
   const pct = Math.round((k.slotsTaken / k.slots) * 100);
   const sisa = k.slots - k.slotsTaken;
   const urgent = pct >= 80;
@@ -315,13 +317,19 @@ function BatchOpenCard({ k }) {
         <span style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 700, whiteSpace: "nowrap" }}>
           {k.price === 0 ? "Gratis" : `Rp ${(k.price/1000).toFixed(0)}rb`}
         </span>
-        <button className="btn btn--sm btn--primary">Daftar batch <Icon.Arrow size={12}/></button>
+        <button
+          className="btn btn--sm btn--primary"
+          onClick={() => openInterest({ title: `Daftar batch: ${k.title}`, source: `kelas:${k.slug || k.id}` })}
+        >
+          Daftar batch <Icon.Arrow size={12}/>
+        </button>
       </div>
     </article>
   );
 }
 
 function KelasHero({ onNav, featured }) {
+  const { openInterest } = useCta();
   const f = featured;
   return (
     <section className="shell" style={{ paddingTop: 24, paddingBottom: 32, position: "relative" }}>
@@ -340,7 +348,12 @@ function KelasHero({ onNav, featured }) {
             Kelas online dengan ustadz pilihan. Sertifikat di akhir, akses seumur hidup, dan grup WhatsApp buat tanya kapan aja.
           </p>
           <div style={{ display: "flex", gap: 10, marginTop: 22, flexWrap: "wrap" }}>
-            <button className="btn btn--primary">Mulai kelas gratis <Icon.Arrow size={14}/></button>
+            <button
+              className="btn btn--primary"
+              onClick={() => openInterest({ title: "Mulai kelas gratis", source: "kelas:gratis" })}
+            >
+              Mulai kelas gratis <Icon.Arrow size={14}/>
+            </button>
             <button className="btn">Lihat best seller</button>
           </div>
         </div>
@@ -410,6 +423,7 @@ function KelasStats() {
 }
 
 function KelasCard({ k }) {
+  const { openInterest } = useCta();
   const isFree = k.price === 0;
   const isLive = k.format === "Live Zoom" || k.format === "Hybrid";
   const pct = k.slots ? Math.round((k.slotsTaken / k.slots) * 100) : 0;
@@ -541,7 +555,11 @@ function KelasCard({ k }) {
               {isFree ? "Gratis" : `Rp ${k.price.toLocaleString("id")}`}
             </div>
           </div>
-          <button className="btn btn--sm btn--primary" style={{ flexShrink: 0 }}>
+          <button
+            className="btn btn--sm btn--primary"
+            style={{ flexShrink: 0 }}
+            onClick={() => openInterest({ title: `${isFree ? "Mulai" : isLive ? "Daftar batch" : "Ikut kelas"}: ${k.title}`, source: `kelas:${k.slug || k.id}` })}
+          >
             {isFree ? "Mulai" : isLive ? "Daftar batch" : "Ikut kelas"} <Icon.Arrow size={12}/>
           </button>
         </div>

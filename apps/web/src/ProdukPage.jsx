@@ -7,6 +7,7 @@ import { SectionHeader } from "./SectionHeader.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
 
 import { usePublicData } from "./hooks/usePublicData.js";
+import { useCta } from "./context/cta-context.jsx";
 
 export function ProdukPage({ onNav }) {
   const [active, setActive] = React.useState("Semua");
@@ -108,6 +109,7 @@ function ProdukHero() {
 }
 
 function ProdukCard({ p }) {
+  const { openInterest } = useCta();
   return (
     <article className="card" style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14, position: "relative" }}>
       {p.tag && (
@@ -156,7 +158,11 @@ function ProdukCard({ p }) {
             {p.price === 0 ? "Gratis" : `Rp ${p.price.toLocaleString("id")}`}
           </div>
         </div>
-        <button className="btn btn--sm btn--primary" style={{ flexShrink: 0 }}>
+        <button
+          className="btn btn--sm btn--primary"
+          style={{ flexShrink: 0 }}
+          onClick={() => openInterest({ title: `${p.price === 0 ? "Unduh" : "Beli"}: ${p.name}`, source: `produk:${p.slug || p.id}` })}
+        >
           {p.price === 0 ? "Unduh" : "Beli"} <Icon.Arrow size={12}/>
         </button>
       </div>
@@ -165,6 +171,7 @@ function ProdukCard({ p }) {
 }
 
 function ProdukBundle() {
+  const { openInterest } = useCta();
   return (
     <section className="shell" style={{ marginBottom: 40 }}>
       <div className="card card--coral" style={{ padding: "40px 48px", display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 32, alignItems: "center", position: "relative", overflow: "hidden" }}>
@@ -181,7 +188,13 @@ function ProdukBundle() {
             <div style={{ fontFamily: "var(--font-display)", fontSize: 56, fontWeight: 700, lineHeight: 1 }}>Rp 149rb</div>
             <div style={{ fontSize: 18, color: "var(--ink-soft)", textDecoration: "line-through" }}>Rp 249rb</div>
           </div>
-          <button className="btn btn--primary" style={{ marginTop: 16 }}>Ambil bundle ini <Icon.Arrow size={14}/></button>
+          <button
+            className="btn btn--primary"
+            style={{ marginTop: 16 }}
+            onClick={() => openInterest({ title: "Ambil bundle Konsisten Setahun", source: "produk:bundle-konsisten-setahun" })}
+          >
+            Ambil bundle ini <Icon.Arrow size={14}/>
+          </button>
         </div>
 
         <div style={{ position: "relative" }}>

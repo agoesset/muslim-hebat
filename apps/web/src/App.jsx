@@ -11,6 +11,9 @@ import { AdminPage } from "./admin/AdminPage.jsx";
 import { CERITA_DATA } from "./data/cerita.js";
 import { applyTheme, DEFAULT_THEME } from "./theme.js";
 import { Seo } from "./seo.jsx";
+import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
+
+import { CtaProvider } from "./context/cta-context.jsx";
 
 const pageIds = {
   "/": "home",
@@ -25,10 +28,12 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/admin/*" element={<AdminPage />} />
-        <Route path="*" element={<PublicApp />} />
-      </Routes>
+      <CtaProvider>
+        <Routes>
+          <Route path="/admin/*" element={<AdminPage />} />
+          <Route path="*" element={<PublicApp />} />
+        </Routes>
+      </CtaProvider>
     </BrowserRouter>
   );
 }
@@ -47,15 +52,17 @@ function PublicApp() {
   return (
     <div>
       <Nav page={page} onNav={goNav} />
-      <Routes>
-        <Route path="/" element={<><Seo title="Muslim Hebat" description="Belajar Islam dengan bacaan ringan, produk bermanfaat, kelas, dan jadwal ngaji bareng." /><HomePage onNav={goNav} onOpenCerita={openCerita} /></>} />
-        <Route path="/bacaan" element={<><Seo title="Bacaan | Muslim Hebat" description="Bacaan ringan tentang Islam, self-growth, parenting, dan ibadah harian." /><CeritaPage onNav={goNav} onOpenCerita={openCerita} /></>} />
-        <Route path="/bacaan/:slug" element={<CeritaDetailRoute onNav={goNav} onOpenCerita={openCerita} />} />
-        <Route path="/kelas" element={<><Seo title="Kelas | Muslim Hebat" description="Kelas online dan program belajar Islam untuk pemula sampai lanjutan." /><KelasPage onNav={goNav} /></>} />
-        <Route path="/produk" element={<><Seo title="Produk | Muslim Hebat" description="Produk digital, worksheet, template, dan materi belajar untuk bantu konsisten." /><ProdukPage onNav={goNav} /></>} />
-        <Route path="/kajian" element={<><Seo title="Ngaji Bareng | Muslim Hebat" description="Jadwal kajian online dan offline terdekat dari Muslim Hebat." /><KajianPage onNav={goNav} /></>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/" element={<><Seo title="Muslim Hebat" description="Belajar Islam dengan bacaan ringan, produk bermanfaat, kelas, dan jadwal ngaji bareng." /><HomePage onNav={goNav} onOpenCerita={openCerita} /></>} />
+          <Route path="/bacaan" element={<><Seo title="Bacaan | Muslim Hebat" description="Bacaan ringan tentang Islam, self-growth, parenting, dan ibadah harian." /><CeritaPage onNav={goNav} onOpenCerita={openCerita} /></>} />
+          <Route path="/bacaan/:slug" element={<CeritaDetailRoute onNav={goNav} onOpenCerita={openCerita} />} />
+          <Route path="/kelas" element={<><Seo title="Kelas | Muslim Hebat" description="Kelas online dan program belajar Islam untuk pemula sampai lanjutan." /><KelasPage onNav={goNav} /></>} />
+          <Route path="/produk" element={<><Seo title="Produk | Muslim Hebat" description="Produk digital, worksheet, template, dan materi belajar untuk bantu konsisten." /><ProdukPage onNav={goNav} /></>} />
+          <Route path="/kajian" element={<><Seo title="Ngaji Bareng | Muslim Hebat" description="Jadwal kajian online dan offline terdekat dari Muslim Hebat." /><KajianPage onNav={goNav} /></>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ErrorBoundary>
       <Footer />
     </div>
   );

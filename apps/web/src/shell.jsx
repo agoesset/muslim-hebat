@@ -1,6 +1,7 @@
 // Shared components: Nav, Footer, WaveDivider, sticker decorations.
 
 import { Icon } from "./icons.jsx";
+import { useCta } from "./context/cta-context.jsx";
 
 export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 }) {
   // scalloped wave — bumps that read as friendly, organic
@@ -21,6 +22,7 @@ export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 })
 }
 
 export function Nav({ page, onNav }) {
+  const { openInterest } = useCta();
   const links = [
     { id: "home",   label: "Beranda" },
     { id: "bacaan", label: "Bacaan" },
@@ -49,7 +51,7 @@ export function Nav({ page, onNav }) {
         <button className="btn btn--sm">
           <Icon.Search size={14}/> Cari
         </button>
-        <button className="btn btn--sm btn--primary">
+        <button className="btn btn--sm btn--primary" onClick={() => openInterest({ title: "Daftar gratis di Muslim Hebat", source: "header:daftar-gratis" })}>
           Daftar gratis <Icon.Arrow size={14}/>
         </button>
       </div>

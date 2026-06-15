@@ -7,6 +7,7 @@ import { SectionHeader } from "./SectionHeader.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
 
 import { usePublicData } from "./hooks/usePublicData.js";
+import { useCta } from "./context/cta-context.jsx";
 
 export function KajianPage({ onNav }) {
   const [filter, setFilter] = React.useState("Semua");
@@ -133,6 +134,7 @@ function KajianHero() {
 }
 
 function KajianRow({ e }) {
+  const { openInterest } = useCta();
   return (
     <article className="card" style={{ padding: 22, display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 20, alignItems: "center" }}>
       <div style={{
@@ -165,8 +167,17 @@ function KajianRow({ e }) {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <button className="btn btn--sm btn--primary">Daftar <Icon.Arrow size={12}/></button>
-        <button className="btn btn--sm btn--ghost" style={{ fontSize: 12, padding: "6px 10px" }}>
+        <button
+          className="btn btn--sm btn--primary"
+          onClick={() => openInterest({ title: `Daftar: ${e.title}`, source: `kajian:${e.slug || e.id}` })}
+        >
+          Daftar <Icon.Arrow size={12}/>
+        </button>
+        <button
+          className="btn btn--sm btn--ghost"
+          style={{ fontSize: 12, padding: "6px 10px" }}
+          onClick={() => openInterest({ title: `Reminder: ${e.title}`, source: `reminder:kajian:${e.slug || e.id}` })}
+        >
           <Icon.Bell size={11}/> Ingetin
         </button>
       </div>

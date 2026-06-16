@@ -69,7 +69,7 @@ export function Logo() {
     <img
       src="/logo.avif"
       alt="Logo Muslim Hebat"
-      style={{ width: "44px", height: "44px", borderRadius: "10px", objectFit: "cover", display: "block" }}
+      style={{ height: "44px", width: "auto", borderRadius: "10px", objectFit: "contain", display: "block" }}
     />
   );
 }
@@ -151,7 +151,7 @@ export function Footer() {
             <img
               src="/logo.avif"
               alt="Logo Muslim Hebat"
-              style={{ width: "64px", height: "64px", borderRadius: "12px", objectFit: "cover" }}
+              style={{ height: "64px", width: "auto", borderRadius: "12px", objectFit: "contain" }}
             />
           </div>
           <FooterCol title="Jelajahi" items={explore} />

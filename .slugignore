@@ -1,0 +1,28 @@
+# Exclude files from the Heroku slug to keep it small
+# Docs
+/docs
+*.md
+!apps/api/README.md
+!apps/web/README.md
+!README.md
+# Docker artifacts (we deploy via buildpack, not container)
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+# Monorepo metadata
+.husky
+.github
+# Editor/OS
+.DS_Store
+.vscode
+.idea
+# Tests in production slug
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/__tests__
+/coverage
+# Build output we re-generate on Heroku
+apps/api/dist
+apps/web/dist
+packages/shared/dist

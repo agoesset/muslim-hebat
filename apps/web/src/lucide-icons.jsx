@@ -10,6 +10,7 @@ import {
   FileText,
   Flower2,
   GraduationCap,
+  Image,
   Inbox,
   LayoutGrid,
   Leaf,
@@ -62,9 +63,10 @@ export const AdminIcon = {
   lock: Lock,
   arrow: ArrowRight,
   externalLink: ArrowUpRight,
+  image: Image,
+  logOut: LogOut,
   search: Search,
   download: Download,
-  logOut: LogOut,
 };
 
 export function renderAdminIcon(name, { size = 18, className, style } = {}) {

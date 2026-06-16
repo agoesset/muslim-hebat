@@ -66,11 +66,18 @@ export function Nav({ page }) {
 
 export function Logo() {
   return (
-    <div style={{ display: "flex", flexDirection: "column", lineHeight: 0.95 }}>
-      <span style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, letterSpacing: "-0.025em" }}>
-        Muslim Hebat<span style={{ color: "var(--coral-deep)" }}>.</span>
-      </span>
-      <span style={{ fontFamily: "var(--font-hand)", fontSize: 16, color: "var(--coral-deep)", marginTop: 2 }}>tumbuh bareng, yuk!</span>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <img
+        src="/logo.avif"
+        alt="Logo Muslim Hebat"
+        style={{ width: "36px", height: "36px", borderRadius: "8px", objectFit: "cover" }}
+      />
+      <div style={{ display: "flex", flexDirection: "column", lineHeight: 0.95 }}>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, letterSpacing: "-0.025em" }}>
+          Muslim Hebat<span style={{ color: "var(--coral-deep)" }}>.</span>
+        </span>
+        <span style={{ fontFamily: "var(--font-hand)", fontSize: 14, color: "var(--coral-deep)", marginTop: 2 }}>tumbuh bareng, yuk!</span>
+      </div>
     </div>
   );
 }

@@ -188,7 +188,11 @@ function AdminLayout({ user, onLogout }) {
       {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-sidebar-brand">
-          <span className="admin-logo">{renderAdminIcon("logo", { size: 20 })}</span>
+          <img
+            src="/logo.avif"
+            alt="Logo"
+            style={{ width: "24px", height: "24px", borderRadius: "6px", objectFit: "cover" }}
+          />
           <span className="admin-brand-text">Muslim Hebat</span>
           <span className="admin-badge">Admin</span>
         </div>

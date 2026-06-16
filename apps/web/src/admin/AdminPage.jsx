@@ -2,20 +2,20 @@ import React from "react";
 import { api } from "../api.js";
 import { applyTheme } from "../theme.js";
 import { Icon } from "../icons.jsx";
+import { Blob, SunDecor } from "../shell.jsx";
 import "../styles.css";
-import "./admin.css";
 
 const resources = [
-  { key: "articles", label: "Bacaan", icon: "Book", fields: ["slug", "title", "excerpt", "body", "category", "author", "color", "emoji", "date", "time", "reads", "claps", "tag", "featured", "size", "status"] },
-  { key: "products", label: "Produk", icon: "Package", fields: ["slug", "name", "excerpt", "description", "category", "priceCents", "originalPriceCents", "rating", "sold", "tag", "color", "emoji", "status"] },
-  { key: "kajian", label: "Kajian", icon: "Mic", fields: ["slug", "title", "excerpt", "speaker", "location", "eventType", "startsAt", "date", "month", "day", "time", "attendees", "priceCents", "free", "color", "status"] },
-  { key: "classes", label: "Kelas", icon: "GraduationCap", fields: ["slug", "title", "excerpt", "description", "category", "level", "format", "instructor", "lessons", "duration", "students", "rating", "reviews", "priceCents", "originalPriceCents", "tag", "batch", "startDate", "startDay", "schedule", "platform", "slots", "slotsTaken", "statusDetail", "color", "emoji", "status"] }
+  { key: "articles", label: "Bacaan", emoji: "📖", color: "var(--sage)", count: 0 },
+  { key: "products", label: "Produk", emoji: "📦", color: "var(--peach)", count: 0 },
+  { key: "kajian", label: "Kajian", emoji: "🎤", color: "var(--coral)", count: 0 },
+  { key: "classes", label: "Kelas", emoji: "🎓", color: "var(--lilac)", count: 0 },
 ];
 
-const statusBadge = {
-  PUBLISHED: { color: "#10b981", bg: "rgba(16,185,129,0.1)", label: "Published" },
-  DRAFT: { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", label: "Draft" },
-  ARCHIVED: { color: "#6b7280", bg: "rgba(107,114,128,0.1)", label: "Archived" }
+const statusConfig = {
+  PUBLISHED: { color: "#10b981", bg: "rgba(16,185,129,0.12)", label: "Published", dot: "🟢" },
+  DRAFT: { color: "#f59e0b", bg: "rgba(245,158,11,0.12)", label: "Draft", dot: "🟡" },
+  ARCHIVED: { color: "#6b7280", bg: "rgba(107,114,128,0.12)", label: "Archived", dot: "⚪" },
 };
 
 export function AdminPage() {
@@ -30,31 +30,18 @@ export function AdminPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <AdminShell><LoadingState/></AdminShell>;
+  if (loading) return <LoadingScreen />;
   if (!user) return <Login onLogin={setUser} />;
   return <Dashboard user={user} onLogout={() => setUser(null)} />;
 }
 
-function LoadingState() {
+function LoadingScreen() {
   return (
-    <div className="admin-loading">
-      <div className="admin-spinner"/>
-      <p>Memuat sesi admin...</p>
-    </div>
-  );
-}
-
-function AdminShell({ children, sidebar }) {
-  return (
-    <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <span className="admin-logo">✦</span>
-          <span>Muslim Hebat</span>
-        </div>
-        {sidebar}
-      </aside>
-      <main className="admin-main">{children}</main>
+    <div className="admin-loading-screen">
+      <div className="admin-loading-card">
+        <div className="admin-spinner-large" />
+        <p>Memuat dashboard...</p>
+      </div>
     </div>
   );
 }
@@ -65,14 +52,14 @@ function Login({ onLogin }) {
   const [error, setError] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
 
-  async function submit(event) {
-    event.preventDefault();
+  async function submit(e) {
+    e.preventDefault();
     setError("");
     setIsLoading(true);
     try {
       const data = await api("/auth/login", {
         method: "POST",
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
       onLogin(data.user);
     } catch (err) {
@@ -83,44 +70,51 @@ function Login({ onLogin }) {
   }
 
   return (
-    <div className="admin-login-page">
+    <div className="admin-login-wrapper">
+      <div className="admin-login-blob" style={{ top: "10%", left: "5%", background: "var(--peach)" }} />
+      <div className="admin-login-blob" style={{ bottom: "10%", right: "5%", background: "var(--sage)", width: 300, height: 300 }} />
+      
       <form className="admin-login-card" onSubmit={submit}>
         <div className="admin-login-header">
-          <span className="admin-logo-large">✦</span>
+          <span className="admin-login-emoji">✨</span>
           <h1>Masuk Admin</h1>
-          <p>Kelola konten Muslim Hebat</p>
+          <p>Kelola konten Muslim Hebat dengan mudah</p>
+        </div>
+        
+        {error && (
+          <div className="admin-toast admin-toast-error">
+            <span>⚠️</span> {error}
+          </div>
+        )}
+        
+        <div className="admin-form-group">
+          <label>Email</label>
+          <div className="admin-input-wrapper">
+            <Icon.Mail size={16} />
+            <input 
+              type="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@muslimhebat.local"
+            />
+          </div>
         </div>
         
         <div className="admin-form-group">
-          <label htmlFor="email">Email</label>
-          <input 
-            id="email"
-            type="email" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="admin@muslimhebat.local"
-          />
+          <label>Password</label>
+          <div className="admin-input-wrapper">
+            <Icon.Lock size={16} />
+            <input 
+              type="password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </div>
         </div>
         
-        <div className="admin-form-group">
-          <label htmlFor="password">Password</label>
-          <input 
-            id="password"
-            type="password" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
-        </div>
-        
-        {error && <div className="admin-alert admin-alert-error">{error}</div>}
-        
-        <button 
-          className="admin-btn admin-btn-primary admin-btn-full" 
-          type="submit"
-          disabled={isLoading}
-        >
-          {isLoading ? "Memuat..." : "Masuk"}
+        <button className="admin-btn admin-btn-primary admin-btn-lg" disabled={isLoading}>
+          {isLoading ? "Memuat..." : "Masuk Dashboard"} <Icon.Arrow size={14} />
         </button>
       </form>
     </div>
@@ -128,293 +122,383 @@ function Login({ onLogin }) {
 }
 
 function Dashboard({ user, onLogout }) {
-  const [active, setActive] = React.useState(resources[0].key);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState("dashboard");
+  const [counts, setCounts] = React.useState({ articles: 0, products: 0, kajian: 0, classes: 0 });
+  const [subscribers, setSubscribers] = React.useState(0);
 
-  async function logout() {
-    await api("/auth/logout", { method: "POST" }).catch(() => {});
-    onLogout();
-  }
+  React.useEffect(() => {
+    Promise.all([
+      api("/admin/articles").then(d => setCounts(c => ({ ...c, articles: d.length }))),
+      api("/admin/products").then(d => setCounts(c => ({ ...c, products: d.length }))),
+      api("/admin/kajian").then(d => setCounts(c => ({ ...c, kajian: d.length }))),
+      api("/admin/classes").then(d => setCounts(c => ({ ...c, classes: d.length }))),
+      api("/admin/subscribers").then(d => setSubscribers(d.length)),
+    ]);
+  }, []);
 
-  const sidebar = (
-    <>
-      <nav className="admin-nav">
-        <div className="admin-nav-section">
-          <span className="admin-nav-label">Konten</span>
-          {resources.map((resource) => (
-            <button
-              key={resource.key}
-              className={`admin-nav-item ${active === resource.key ? "active" : ""}`}
-              onClick={() => { setActive(resource.key); setIsMobileMenuOpen(false); }}
-            >
-              <span className="admin-nav-icon">{getIcon(resource.icon)}</span>
-              <span>{resource.label}</span>
-            </button>
-          ))}
-        </div>
-        
-        <div className="admin-nav-section">
-          <span className="admin-nav-label">Data</span>
-          <button
-            className={`admin-nav-item ${active === "subscribers" ? "active" : ""}`}
-            onClick={() => { setActive("subscribers"); setIsMobileMenuOpen(false); }}
-          >
-            <span className="admin-nav-icon">{getIcon("Users")}</span>
-            <span>Subscribers</span>
-          </button>
-        </div>
-        
-        <div className="admin-nav-section">
-          <span className="admin-nav-label">Sistem</span>
-          <button
-            className={`admin-nav-item ${active === "settings" ? "active" : ""}`}
-            onClick={() => { setActive("settings"); setIsMobileMenuOpen(false); }}
-          >
-            <span className="admin-nav-icon">{getIcon("Settings")}</span>
-            <span>Settings</span>
-          </button>
-        </div>
-      </nav>
-      
-      <div className="admin-sidebar-footer">
-        <div className="admin-user">
-          <div className="admin-user-avatar">{user.name.charAt(0).toUpperCase()}</div>
-          <div className="admin-user-info">
-            <div className="admin-user-name">{user.name}</div>
-            <div className="admin-user-email">{user.email}</div>
-          </div>
-        </div>
-        <button className="admin-btn admin-btn-ghost admin-btn-sm" onClick={logout}>
-          {getIcon("LogOut")} Keluar
-        </button>
-      </div>
-    </>
-  );
+  const sidebarItems = [
+    { id: "dashboard", label: "Dashboard", icon: "Grid", color: "var(--sage)" },
+    { id: "content", label: "Konten", icon: "FileText", color: "var(--peach)" },
+    { id: "subscribers", label: "Subscribers", icon: "Users", color: "var(--coral)" },
+    { id: "settings", label: "Settings", icon: "Settings", color: "var(--lilac)" },
+  ];
 
   return (
-    <AdminShell sidebar={sidebar}>
-      <header className="admin-header">
-        <button 
-          className="admin-mobile-toggle"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {getIcon("Menu")}
-        </button>
-        <h1 className="admin-page-title">
-          {resources.find(r => r.key === active)?.label || 
-           (active === "subscribers" ? "Subscribers" : "Settings")}
-        </h1>
-        <div className="admin-header-actions">
-          <a href="/" className="admin-btn admin-btn-ghost admin-btn-sm" target="_blank" rel="noopener">
-            {getIcon("ExternalLink")} Lihat Site
-          </a>
+    <div className="admin-app">
+      {/* Sidebar */}
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-brand">
+          <span className="admin-logo">✦</span>
+          <span className="admin-brand-text">Muslim Hebat</span>
+          <span className="admin-badge">Admin</span>
         </div>
-      </header>
-      
-      {isMobileMenuOpen && (
-        <div className="admin-mobile-nav" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="admin-mobile-nav-content" onClick={e => e.stopPropagation()}>
-            <div className="admin-brand">
-              <span className="admin-logo">✦</span>
-              <span>Muslim Hebat</span>
+
+        <nav className="admin-sidebar-nav">
+          {sidebarItems.map((item) => (
+            <button
+              key={item.id}
+              className={`admin-nav-item ${activeTab === item.id ? "active" : ""}`}
+              onClick={() => setActiveTab(item.id)}
+              style={{ "--nav-accent": item.color }}
+            >
+              <span className="admin-nav-icon" style={{ background: item.color }}>
+                {getIcon(item.icon)}
+              </span>
+              <span className="admin-nav-label">{item.label}</span>
+              {item.id === "subscribers" && subscribers > 0 && (
+                <span className="admin-nav-badge">{subscribers}</span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        <div className="admin-sidebar-footer">
+          <div className="admin-user-card">
+            <div className="admin-user-avatar">
+              {user.name.charAt(0).toUpperCase()}
             </div>
-            {sidebar}
+            <div className="admin-user-info">
+              <div className="admin-user-name">{user.name}</div>
+              <div className="admin-user-role">Administrator</div>
+            </div>
           </div>
+          <button className="admin-btn admin-btn-ghost" onClick={onLogout}>
+            <Icon.LogOut size={16} /> Keluar
+          </button>
         </div>
-      )}
-      
-      <div className="admin-content">
-        {resources.map((resource) => active === resource.key && (
-          <ResourcePanel key={resource.key} resource={resource} />
-        ))}
-        {active === "subscribers" && <SubscribersPanel />}
-        {active === "settings" && <SettingsPanel />}
-      </div>
-    </AdminShell>
+      </aside>
+
+      {/* Main Content */}
+      <main className="admin-main">
+        {activeTab === "dashboard" && <DashboardPanel counts={counts} subscribers={subscribers} onNavigate={setActiveTab} />}
+        {activeTab === "content" && <ContentPanel counts={counts} />}
+        {activeTab === "subscribers" && <SubscribersPanel />}
+        {activeTab === "settings" && <SettingsPanel />}
+      </main>
+    </div>
   );
 }
 
-function ResourcePanel({ resource }) {
-  const emptyDraft = Object.fromEntries(resource.fields.map((field) => [field, field === "status" ? "DRAFT" : ""]));
-  const [items, setItems] = React.useState([]);
-  const [draft, setDraft] = React.useState(emptyDraft);
-  const [editing, setEditing] = React.useState(null);
-  const [error, setError] = React.useState("");
-  const [message, setMessage] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState("ALL");
-  const [isSaving, setIsSaving] = React.useState(false);
+function DashboardPanel({ counts, subscribers, onNavigate }) {
+  const totalContent = Object.values(counts).reduce((a, b) => a + b, 0);
 
-  const load = React.useCallback(() => {
-    api(`/admin/${resource.key}`).then(setItems).catch((err) => setError(err.message));
-  }, [resource.key]);
+  const quickStats = [
+    { label: "Total Konten", value: totalContent, emoji: "📚", color: "var(--sage)", trend: "+12%" },
+    { label: "Bacaan", value: counts.articles, emoji: "📖", color: "var(--sage)", trend: "" },
+    { label: "Produk", value: counts.products, emoji: "📦", color: "var(--peach)", trend: "" },
+    { label: "Kajian", value: counts.kajian, emoji: "🎤", color: "var(--coral)", trend: "" },
+    { label: "Kelas", value: counts.classes, emoji: "🎓", color: "var(--lilac)", trend: "" },
+    { label: "Subscribers", value: subscribers, emoji: "👥", color: "var(--butter)", trend: "+5" },
+  ];
+
+  return (
+    <div className="admin-panel">
+      {/* Header */}
+      <header className="admin-panel-header">
+        <div>
+          <h1 className="admin-panel-title">Dashboard</h1>
+          <p className="admin-panel-subtitle">Ringkasan performa konten Muslim Hebat</p>
+        </div>
+        <div className="admin-header-actions">
+          <a href="/" target="_blank" className="admin-btn admin-btn-secondary">
+            <Icon.ExternalLink size={14} /> Lihat Website
+          </a>
+        </div>
+      </header>
+
+      {/* Quick Stats Bento Grid */}
+      <div className="admin-bento-grid">
+        {quickStats.map((stat, i) => (
+          <div 
+            key={stat.label}
+            className={`admin-stat-card ${i === 0 ? "admin-stat-card-large" : ""}`}
+            style={{ background: stat.color }}
+          >
+            <div className="admin-stat-emoji">{stat.emoji}</div>
+            <div className="admin-stat-content">
+              <div className="admin-stat-value">{stat.value.toLocaleString()}</div>
+              <div className="admin-stat-label">{stat.label}</div>
+              {stat.trend && <div className="admin-stat-trend">📈 {stat.trend} bulan ini</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="admin-section">
+        <h2 className="admin-section-title">Aksi Cepat</h2>
+        <div className="admin-actions-row">
+          {resources.map((r) => (
+            <button 
+              key={r.key} 
+              className="admin-action-card"
+              onClick={() => onNavigate("content")}
+              style={{ "--action-color": r.color }}
+            >
+              <span className="admin-action-emoji">{r.emoji}</span>
+              <span className="admin-action-label">Tambah {r.label}</span>
+              <Icon.Arrow size={14} />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Welcome Card */}
+      <div className="admin-welcome-card">
+        <Blob color="var(--peach)" size={180} top={-60} right={-40} />
+        <SunDecor size={100} color="var(--butter)" style={{ position: "absolute", bottom: -20, left: 40 }} />
+        <div className="admin-welcome-content">
+          <span className="admin-sticker">Tips harian 💡</span>
+          <h3>Kelola konten dengan konsisten!</h3>
+          <p>Tambah bacaan baru minimal 2x seminggu untuk menjaga engagement pembaca.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ContentPanel({ counts }) {
+  const [activeResource, setActiveResource] = React.useState("articles");
+  const [items, setItems] = React.useState([]);
+  const [draft, setDraft] = React.useState({});
+  const [editing, setEditing] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [filter, setFilter] = React.useState("ALL");
+  const [message, setMessage] = React.useState("");
+
+  const resource = resources.find((r) => r.key === activeResource);
 
   React.useEffect(() => {
-    setDraft(emptyDraft);
-    setEditing(null);
-    setError("");
-    setMessage("");
-    setStatusFilter("ALL");
-    load();
-  }, [resource.key]);
+    setLoading(true);
+    api(`/admin/${activeResource}`)
+      .then((data) => {
+        setItems(data);
+        setDraft({ status: "DRAFT" });
+        setEditing(null);
+      })
+      .finally(() => setLoading(false));
+  }, [activeResource]);
 
-  async function save(event) {
-    event.preventDefault();
-    setError("");
-    setIsSaving(true);
-    const body = normalizeDraft(draft);
-    const path = editing ? `/admin/${resource.key}/${editing}` : `/admin/${resource.key}`;
+  const filteredItems = React.useMemo(() => {
+    if (filter === "ALL") return items;
+    return items.filter((i) => (i.status || "DRAFT") === filter);
+  }, [items, filter]);
+
+  async function save(e) {
+    e.preventDefault();
+    const path = editing ? `/admin/${activeResource}/${editing}` : `/admin/${activeResource}`;
     const method = editing ? "PATCH" : "POST";
     try {
-      await api(path, { method, body: JSON.stringify(body) });
-      setDraft(emptyDraft);
+      await api(path, { method, body: JSON.stringify(draft) });
+      setMessage(`${resource.label} tersimpan!`);
       setEditing(null);
-      setMessage(`${resource.label} tersimpan.`);
-      load();
+      setDraft({ status: "DRAFT" });
+      api(`/admin/${activeResource}`).then(setItems);
+      setTimeout(() => setMessage(""), 3000);
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsSaving(false);
+      setMessage(`Error: ${err.message}`);
     }
   }
 
   async function remove(id) {
-    if (!confirm("Yakin ingin menghapus item ini?")) return;
-    await api(`/admin/${resource.key}/${id}`, { method: "DELETE" });
-    setMessage(`${resource.label} dihapus.`);
-    load();
+    if (!confirm("Hapus item ini?")) return;
+    await api(`/admin/${activeResource}/${id}`, { method: "DELETE" });
+    setItems(items.filter((i) => i.id !== id));
+    setMessage("Item dihapus");
+    setTimeout(() => setMessage(""), 3000);
   }
-
-  const visibleItems = React.useMemo(() => {
-    if (statusFilter === "ALL") return items;
-    return items.filter((item) => (item.status || "DRAFT") === statusFilter);
-  }, [items, statusFilter]);
-
-  const stats = React.useMemo(() => {
-    const published = items.filter(i => i.status === "PUBLISHED").length;
-    const draft = items.filter(i => i.status === "DRAFT").length;
-    const archived = items.filter(i => i.status === "ARCHIVED").length;
-    return { total: items.length, published, draft, archived };
-  }, [items]);
 
   return (
     <div className="admin-panel">
-      <div className="admin-stats">
-        <div className="admin-stat-card">
-          <span className="admin-stat-value">{stats.total}</span>
-          <span className="admin-stat-label">Total</span>
+      <header className="admin-panel-header">
+        <div>
+          <h1 className="admin-panel-title">Kelola Konten</h1>
+          <p className="admin-panel-subtitle">Tambah, edit, dan hapus konten website</p>
         </div>
-        <div className="admin-stat-card admin-stat-published">
-          <span className="admin-stat-value">{stats.published}</span>
-          <span className="admin-stat-label">Published</span>
-        </div>
-        <div className="admin-stat-card admin-stat-draft">
-          <span className="admin-stat-value">{stats.draft}</span>
-          <span className="admin-stat-label">Draft</span>
-        </div>
-        <div className="admin-stat-card admin-stat-archived">
-          <span className="admin-stat-value">{stats.archived}</span>
-          <span className="admin-stat-label">Archived</span>
-        </div>
+      </header>
+
+      {/* Resource Tabs */}
+      <div className="admin-resource-tabs">
+        {resources.map((r) => (
+          <button
+            key={r.key}
+            className={`admin-resource-tab ${activeResource === r.key ? "active" : ""}`}
+            onClick={() => setActiveResource(r.key)}
+          >
+            <span>{r.emoji}</span>
+            <span>{r.label}</span>
+            <span className="admin-tab-count">{counts[r.key] || 0}</span>
+          </button>
+        ))}
       </div>
 
-      <div className="admin-grid">
+      {/* Content Grid */}
+      <div className="admin-content-grid">
+        {/* Form Panel */}
         <aside className="admin-form-panel">
           <div className="admin-card">
             <div className="admin-card-header">
-              <h2>{editing ? "Edit" : "Tambah"} {resource.label}</h2>
-              {editing && <span className="admin-badge admin-badge-ghost">Editing</span>}
-            </div>
-            
-            <form onSubmit={save} className="admin-form">
-              {resource.fields.map((field) => (
-                <div key={field} className="admin-field">
-                  <label htmlFor={field}>{field}</label>
-                  {renderField(field, draft[field], (value) => setDraft({ ...draft, [field]: value }))}
-                </div>
-              ))}
-              
-              {error && <div className="admin-alert admin-alert-error">{error}</div>}
-              {message && <div className="admin-alert admin-alert-success">{message}</div>}
-              
-              <div className="admin-form-actions">
+              <h3>{editing ? "✏️ Edit" : "➕ Tambah"} {resource.label}</h3>
+              {editing && (
                 <button 
-                  className="admin-btn admin-btn-primary" 
-                  type="submit"
-                  disabled={isSaving}
+                  className="admin-btn admin-btn-ghost admin-btn-sm"
+                  onClick={() => { setEditing(null); setDraft({ status: "DRAFT" }); }}
                 >
-                  {isSaving ? "Menyimpan..." : "Simpan"}
+                  Batal
                 </button>
-                {editing && (
-                  <button 
-                    className="admin-btn admin-btn-ghost" 
-                    type="button" 
-                    onClick={() => { setEditing(null); setDraft(emptyDraft); setMessage(""); }}
+              )}
+            </div>
+
+            {message && (
+              <div className={`admin-toast ${message.includes("Error") ? "admin-toast-error" : "admin-toast-success"}`}>
+                {message}
+              </div>
+            )}
+
+            <form onSubmit={save} className="admin-compact-form">
+              <div className="admin-form-row">
+                <div className="admin-form-field">
+                  <label>Judul / Nama</label>
+                  <input 
+                    value={draft.title || draft.name || ""} 
+                    onChange={(e) => setDraft({ ...draft, title: e.target.value, name: e.target.value })}
+                    placeholder={`Nama ${resource.label.toLowerCase()}...`}
+                    required
+                  />
+                </div>
+                <div className="admin-form-field">
+                  <label>Slug</label>
+                  <input 
+                    value={draft.slug || ""} 
+                    onChange={(e) => setDraft({ ...draft, slug: e.target.value })}
+                    placeholder="url-friendly-slug"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-field">
+                <label>Excerpt / Deskripsi Singkat</label>
+                <textarea 
+                  value={draft.excerpt || ""} 
+                  onChange={(e) => setDraft({ ...draft, excerpt: e.target.value })}
+                  rows={3}
+                  placeholder="Deskripsi singkat..."
+                />
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-form-field">
+                  <label>Kategori</label>
+                  <input 
+                    value={draft.category || ""} 
+                    onChange={(e) => setDraft({ ...draft, category: e.target.value })}
+                    placeholder="Kategori..."
+                  />
+                </div>
+                <div className="admin-form-field">
+                  <label>Status</label>
+                  <select 
+                    value={draft.status || "DRAFT"} 
+                    onChange={(e) => setDraft({ ...draft, status: e.target.value })}
                   >
-                    Batal
-                  </button>
-                )}
+                    <option value="DRAFT">🟡 Draft</option>
+                    <option value="PUBLISHED">🟢 Published</option>
+                    <option value="ARCHIVED">⚪ Archived</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="admin-form-actions">
+                <button type="submit" className="admin-btn admin-btn-primary">
+                  {editing ? "💾 Simpan Perubahan" : "➕ Buat Baru"}
+                </button>
               </div>
             </form>
           </div>
         </aside>
 
+        {/* List Panel */}
         <section className="admin-list-panel">
           <div className="admin-card">
             <div className="admin-card-header">
-              <div>
-                <h2>Daftar {resource.label}</h2>
-                <p className="admin-text-muted">{visibleItems.length} dari {items.length} item</p>
-              </div>
-              <div className="admin-filter">
-                <select 
-                  className="admin-select" 
-                  value={statusFilter} 
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="ALL">Semua status</option>
-                  <option value="PUBLISHED">Published</option>
-                  <option value="DRAFT">Draft</option>
-                  <option value="ARCHIVED">Archived</option>
-                </select>
-              </div>
+              <h3>📋 Daftar {resource.label}</h3>
+              <select 
+                className="admin-filter-select"
+                value={filter} 
+                onChange={(e) => setFilter(e.target.value)}
+              >
+                <option value="ALL">Semua Status</option>
+                <option value="PUBLISHED">🟢 Published</option>
+                <option value="DRAFT">🟡 Draft</option>
+                <option value="ARCHIVED">⚪ Archived</option>
+              </select>
             </div>
 
-            {visibleItems.length === 0 ? (
-              <div className="admin-empty">
-                <div className="admin-empty-icon">📭</div>
-                <p>Belum ada data</p>
-                <span>Tambah {resource.label} pertama menggunakan form di samping</span>
+            {loading ? (
+              <div className="admin-loading-inline">
+                <div className="admin-spinner" />
+                <p>Memuat data...</p>
+              </div>
+            ) : filteredItems.length === 0 ? (
+              <div className="admin-empty-state">
+                <div className="admin-empty-emoji">📭</div>
+                <p>Belum ada {resource.label.toLowerCase()}</p>
+                <span>Tambahkan yang pertama menggunakan form di samping</span>
               </div>
             ) : (
-              <div className="admin-table">
-                {visibleItems.map((item) => {
-                  const status = statusBadge[item.status] || statusBadge.DRAFT;
+              <div className="admin-items-list">
+                {filteredItems.map((item) => {
+                  const status = statusConfig[item.status || "DRAFT"];
                   return (
-                    <div key={item.id} className="admin-table-row">
-                      <div className="admin-table-cell admin-table-main">
+                    <div key={item.id} className="admin-item-card">
+                      <div className="admin-item-main">
                         <div className="admin-item-title">{item.title || item.name || "Untitled"}</div>
                         <div className="admin-item-meta">
-                          <span className="admin-item-slug">/{item.slug}</span>
+                          <code className="admin-item-slug">/{item.slug}</code>
                           <span 
-                            className="admin-status-badge"
+                            className="admin-status-pill"
                             style={{ color: status.color, background: status.bg }}
                           >
-                            {status.label}
+                            {status.dot} {status.label}
                           </span>
+                          {item.category && (
+                            <span className="admin-item-category">{item.category}</span>
+                          )}
                         </div>
                       </div>
-                      <div className="admin-table-cell admin-table-actions">
+                      <div className="admin-item-actions">
                         <button 
                           className="admin-btn admin-btn-ghost admin-btn-sm"
-                          onClick={() => { setEditing(item.id); setDraft({ ...emptyDraft, ...item }); setMessage(""); }}
+                          onClick={() => { setEditing(item.id); setDraft(item); }}
                         >
-                          Edit
+                          ✏️ Edit
                         </button>
                         <button 
                           className="admin-btn admin-btn-danger admin-btn-sm"
                           onClick={() => remove(item.id)}
                         >
-                          Hapus
+                          🗑️
                         </button>
                       </div>
                     </div>
@@ -432,105 +516,102 @@ function ResourcePanel({ resource }) {
 function SubscribersPanel() {
   const [items, setItems] = React.useState([]);
   const [query, setQuery] = React.useState("");
-  const [error, setError] = React.useState("");
-  const [isExporting, setIsExporting] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
+    setLoading(true);
     api("/admin/subscribers")
       .then(setItems)
-      .catch((err) => setError(err.message));
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = React.useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.toLowerCase();
     if (!q) return items;
-    return items.filter((item) => [item.email, item.name, item.source]
-      .filter(Boolean)
-      .some((value) => value.toLowerCase().includes(q)));
+    return items.filter((i) => 
+      [i.email, i.name, i.source].filter(Boolean).some((v) => v.toLowerCase().includes(q))
+    );
   }, [items, query]);
 
-  const sourceCounts = React.useMemo(() => {
-    return filtered.reduce((acc, item) => {
-      const key = item.source || "unknown";
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {});
+  const bySource = React.useMemo(() => {
+    const groups = {};
+    filtered.forEach((i) => {
+      const s = i.source || "unknown";
+      groups[s] = (groups[s] || 0) + 1;
+    });
+    return Object.entries(groups).sort((a, b) => b[1] - a[1]);
   }, [filtered]);
 
-  async function exportCsv() {
-    setIsExporting(true);
-    const rows = [["email", "name", "source", "createdAt"], ...filtered.map((item) => [item.email, item.name || "", item.source || "", item.createdAt || ""] )];
-    const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  function exportCsv() {
+    const rows = [["Email", "Nama", "Source", "Tanggal"], ...filtered.map((i) => [
+      i.email, i.name || "", i.source || "", formatDate(i.createdAt)
+    ])];
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `muslim-hebat-leads-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
+    a.download = `subscribers-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    setIsExporting(false);
   }
 
   return (
     <div className="admin-panel">
-      <div className="admin-card">
-        <div className="admin-card-header">
-          <div>
-            <h2>Leads / Subscribers</h2>
-            <p className="admin-text-muted">{filtered.length} dari {items.length} kontak</p>
-          </div>
-          <button 
-            className="admin-btn admin-btn-primary admin-btn-sm" 
-            onClick={exportCsv}
-            disabled={filtered.length === 0 || isExporting}
-          >
-            {isExporting ? "Mengekspor..." : "Export CSV"}
-          </button>
+      <header className="admin-panel-header">
+        <div>
+          <h1 className="admin-panel-title">👥 Subscribers</h1>
+          <p className="admin-panel-subtitle">{filtered.length} dari {items.length} email terdaftar</p>
         </div>
+        <button className="admin-btn admin-btn-primary" onClick={exportCsv}>
+          <Icon.Download size={14} /> Export CSV
+        </button>
+      </header>
 
-        <div className="admin-search-bar">
-          <span className="admin-search-icon">{getIcon("Search")}</span>
-          <input
-            className="admin-search-input"
-            placeholder="Cari email, nama, source..."
+      <div className="admin-card">
+        <div className="admin-search-box">
+          <Icon.Search size={16} />
+          <input 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            placeholder="Cari email atau nama..."
           />
         </div>
 
-        {Object.keys(sourceCounts).length > 0 && (
-          <div className="admin-source-chips">
-            {Object.entries(sourceCounts).slice(0, 12).map(([source, count]) => (
+        {bySource.length > 0 && (
+          <div className="admin-source-tags">
+            {bySource.slice(0, 8).map(([source, count]) => (
               <button 
-                key={source} 
-                className={`admin-chip ${query === source ? "active" : ""}`}
+                key={source}
+                className={`admin-source-tag ${query === source ? "active" : ""}`}
                 onClick={() => setQuery(query === source ? "" : source)}
               >
-                <span>{source}</span>
-                <span className="admin-chip-count">{count}</span>
+                {source} <span>{count}</span>
               </button>
             ))}
           </div>
         )}
 
-        {error && <div className="admin-alert admin-alert-error">{error}</div>}
-
-        {filtered.length === 0 ? (
-          <div className="admin-empty">
-            <div className="admin-empty-icon">📭</div>
+        {loading ? (
+          <div className="admin-loading-inline">
+            <div className="admin-spinner" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="admin-empty-state">
+            <div className="admin-empty-emoji">📭</div>
             <p>Tidak ada subscriber</p>
           </div>
         ) : (
-          <div className="admin-table">
+          <div className="admin-subscriber-list">
             {filtered.map((item) => (
-              <div key={item.id} className="admin-table-row admin-table-row-subscriber">
-                <div className="admin-table-cell">
+              <div key={item.id} className="admin-subscriber-item">
+                <div className="admin-subscriber-avatar">
+                  {(item.name || item.email).charAt(0).toUpperCase()}
+                </div>
+                <div className="admin-subscriber-info">
                   <div className="admin-subscriber-email">{item.email}</div>
                   <div className="admin-subscriber-meta">
                     {item.name && <span>{item.name}</span>}
-                    <span>{item.source || "unknown"}</span>
+                    <span className="admin-subscriber-source">{item.source || "unknown"}</span>
                     <span>{formatDate(item.createdAt)}</span>
                   </div>
                 </div>
@@ -544,130 +625,69 @@ function SubscribersPanel() {
 }
 
 function SettingsPanel() {
-  const [activeTab, setActiveTab] = React.useState("theme");
   const [theme, setTheme] = React.useState("cool");
-  const [message, setMessage] = React.useState("");
-  const [isSaving, setIsSaving] = React.useState(false);
+  const [saved, setSaved] = React.useState(false);
 
-  async function saveTheme() {
-    setIsSaving(true);
+  async function save() {
     await api("/admin/settings/theme", {
       method: "PUT",
-      body: JSON.stringify({ key: "theme", value: { palette: theme, density: "cozy", font: "grotesk", illustrations: true } })
+      body: JSON.stringify({ key: "theme", value: { palette: theme, density: "cozy", font: "grotesk" } }),
     });
-    setMessage("Settings tersimpan.");
-    setIsSaving(false);
-    setTimeout(() => setMessage(""), 3000);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
   }
 
-  const themeOptions = [
-    { value: "cool", label: "Cool", desc: "Biru lembut, modern", color: "#F0F4FF" },
-    { value: "warm", label: "Warm", desc: "Krem hangat, klasik", color: "#FBF3E2" },
-    { value: "sage", label: "Sage", desc: "Hijau alami", color: "#F5F1E8" },
-    { value: "blossom", label: "Blossom", desc: "Pink lembut", color: "#FFFAF0" }
+  const themes = [
+    { id: "warm", label: "Warm", emoji: "🌅", desc: "Krem hangat", bg: "#FBF3E2" },
+    { id: "cool", label: "Cool", emoji: "❄️", desc: "Biru fresh", bg: "#F0F4FF" },
+    { id: "sage", label: "Sage", emoji: "🌿", desc: "Hijau natural", bg: "#F5F1E8" },
+    { id: "blossom", label: "Blossom", emoji: "🌸", desc: "Pink lembut", bg: "#FFFAF0" },
   ];
 
   return (
     <div className="admin-panel">
-      <div className="admin-settings-tabs">
-        <button 
-          className={`admin-settings-tab ${activeTab === "theme" ? "active" : ""}`}
-          onClick={() => setActiveTab("theme")}
-        >
-          {getIcon("Palette")} Tema
-        </button>
-      </div>
-
-      {activeTab === "theme" && (
-        <div className="admin-card">
-          <div className="admin-card-header">
-            <h2>Site Theme</h2>
-          </div>
-          
-          <div className="admin-theme-grid">
-            {themeOptions.map((opt) => (
-              <button
-                key={opt.value}
-                className={`admin-theme-option ${theme === opt.value ? "active" : ""}`}
-                onClick={() => setTheme(opt.value)}
-              >
-                <div 
-                  className="admin-theme-preview" 
-                  style={{ background: opt.color }}
-                />
-                <div className="admin-theme-info">
-                  <div className="admin-theme-label">{opt.label}</div>
-                  <div className="admin-theme-desc">{opt.desc}</div>
-                </div>
-                {theme === opt.value && (
-                  <div className="admin-theme-check">{getIcon("Check")}</div>
-                )}
-              </button>
-            ))}
-          </div>
-
-          {message && <div className="admin-alert admin-alert-success">{message}</div>}
-          
-          <div className="admin-form-actions">
-            <button 
-              className="admin-btn admin-btn-primary" 
-              onClick={saveTheme}
-              disabled={isSaving}
-            >
-              {isSaving ? "Menyimpan..." : "Simpan Tema"}
-            </button>
-          </div>
+      <header className="admin-panel-header">
+        <div>
+          <h1 className="admin-panel-title">⚙️ Settings</h1>
+          <p className="admin-panel-subtitle">Konfigurasi website</p>
         </div>
-      )}
+      </header>
+
+      <div className="admin-card">
+        <h3 className="admin-settings-title">Pilih Tema Website</h3>
+        <div className="admin-theme-grid">
+          {themes.map((t) => (
+            <button
+              key={t.id}
+              className={`admin-theme-card ${theme === t.id ? "active" : ""}`}
+              onClick={() => setTheme(t.id)}
+              style={{ "--theme-bg": t.bg }}
+            >
+              <span className="admin-theme-preview" style={{ background: t.bg }} />
+              <div className="admin-theme-info">
+                <span className="admin-theme-emoji">{t.emoji}</span>
+                <span className="admin-theme-label">{t.label}</span>
+                <span className="admin-theme-desc">{t.desc}</span>
+              </div>
+              {theme === t.id && <span className="admin-theme-check">✓</span>}
+            </button>
+          ))}
+        </div>
+
+        {saved && (
+          <div className="admin-toast admin-toast-success">
+            ✅ Tema tersimpan!
+          </div>
+        )}
+
+        <div className="admin-form-actions" style={{ marginTop: 24 }}>
+          <button className="admin-btn admin-btn-primary" onClick={save}>
+            💾 Simpan Tema
+          </button>
+        </div>
+      </div>
     </div>
   );
-}
-
-function normalizeDraft(draft) {
-  const normalized = {};
-  for (const [key, value] of Object.entries(draft)) {
-    if (value === "" || value === null || value === undefined || key === "id" || key === "createdAt" || key === "updatedAt") continue;
-    if (["priceCents", "originalPriceCents", "reads", "claps", "sold", "date", "attendees", "lessons", "students", "reviews", "slots", "slotsTaken"].includes(key)) {
-      normalized[key] = Number(value);
-    } else if (["rating"].includes(key)) {
-      normalized[key] = parseFloat(value);
-    } else if (["featured", "free"].includes(key)) {
-      normalized[key] = value === true || value === "true" || value === "on";
-    } else {
-      normalized[key] = value;
-    }
-  }
-  return normalized;
-}
-
-function renderField(field, value, onChange) {
-  const baseProps = {
-    id: field,
-    value: value || "",
-    onChange: (e) => onChange(e.target.type === "checkbox" ? e.target.checked : e.target.value)
-  };
-
-  if (field === "status") {
-    return (
-      <select {...baseProps} className="admin-select">
-        <option value="DRAFT">DRAFT</option>
-        <option value="PUBLISHED">PUBLISHED</option>
-        <option value="ARCHIVED">ARCHIVED</option>
-      </select>
-    );
-  }
-  if (["featured", "free"].includes(field)) {
-    return (
-      <select {...baseProps} value={value ? "true" : "false"} className="admin-select">
-        <option value="true">true</option>
-        <option value="false">false</option>
-      </select>
-    );
-  }
-  if (["body", "description", "excerpt"].includes(field)) {
-    return <textarea {...baseProps} rows={field === "excerpt" ? 2 : 5} className="admin-textarea" />;
-  }
-  return <input {...baseProps} type="text" className="admin-input" />;
 }
 
 function formatDate(value) {
@@ -675,7 +695,6 @@ function formatDate(value) {
   try {
     return new Intl.DateTimeFormat("id-ID", {
       dateStyle: "medium",
-      timeStyle: "short",
       timeZone: "Asia/Jakarta",
     }).format(new Date(value));
   } catch {
@@ -685,18 +704,17 @@ function formatDate(value) {
 
 function getIcon(name) {
   const icons = {
-    Book: "📖",
-    Package: "📦", 
-    Mic: "🎤",
-    GraduationCap: "🎓",
+    Grid: "⊞",
+    FileText: "📝",
     Users: "👥",
     Settings: "⚙️",
-    LogOut: "→",
+    Mail: "✉️",
+    Lock: "🔒",
+    Arrow: "→",
     ExternalLink: "↗",
-    Menu: "☰",
     Search: "🔍",
-    Palette: "🎨",
-    Check: "✓"
+    Download: "⬇",
+    LogOut: "→",
   };
   return icons[name] || "•";
 }

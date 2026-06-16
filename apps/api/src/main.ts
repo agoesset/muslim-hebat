@@ -6,6 +6,7 @@ import { Request, Response, NextFunction } from "express";
 import { readdirSync, statSync, readFileSync } from "fs";
 import { join } from "path";
 import * as cookieParser from "cookie-parser";
+import * as compression from "compression";
 import * as express from "express";
 import helmet from "helmet";
 import { PrismaClient } from "@prisma/client";
@@ -27,6 +28,29 @@ async function bootstrap() {
     res.locals.nonce = generateNonce();
     next();
   });
+
+  // Compress all HTTP responses (HTML, JSON, JS, CSS) — saves ~70% bandwidth,
+  // important for users on mobile or far regions. Skip for already-compressed
+  // image/font formats handled automatically by compression@1.8+.
+  app.use(
+    compression({
+      // Compress responses >= 1 KB. Smaller payloads have negligible size gain
+      // and CPU cost outweighs the benefit.
+      threshold: 1024,
+      // Use fastest compression level. 6 (default) wastes CPU for marginal
+      // size gain on dynamic JSON.
+      level: 1,
+      // Don't compress responses with no-cache / no-store (already handled
+      // for HTML fallback and entry chunks below).
+      filter: (req, res) => {
+        const ce = (res.getHeader("Content-Encoding") || "") as string;
+        if (ce && ce !== "identity") return false;
+        const cacheControl = (res.getHeader("Cache-Control") || "") as string;
+        if (/no-store|no-cache/i.test(cacheControl)) return false;
+        return compression.filter(req, res);
+      },
+    })
+  );
 
   app.use(
     helmet({

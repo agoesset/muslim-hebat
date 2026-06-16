@@ -1,9 +1,11 @@
 import React from "react";
 import { api } from "../../api.js";
 import { renderAdminIcon } from "../../lucide-icons.jsx";
+import { applyTheme } from "../../theme.js";
 
 export function SettingsPanel() {
   const [theme, setTheme] = React.useState("cool");
+  const savedThemeRef = React.useRef("cool");
   const [siteMetadata, setSiteMetadata] = React.useState({
     title: "",
     description: "",
@@ -27,6 +29,8 @@ export function SettingsPanel() {
           const themeSetting = settings.find((s) => s.key === "theme");
           if (themeSetting && themeSetting.value && themeSetting.value.palette) {
             setTheme(themeSetting.value.palette);
+            savedThemeRef.current = themeSetting.value.palette;
+            applyTheme({ palette: themeSetting.value.palette, density: "cozy", font: "grotesk" });
           }
 
           const siteSetting = settings.find((s) => s.key === "site");
@@ -51,21 +55,40 @@ export function SettingsPanel() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Preview the theme changes instantly
+  React.useEffect(() => {
+    if (!loading) {
+      applyTheme({ palette: theme, density: "cozy", font: "grotesk" });
+    }
+  }, [theme, loading]);
+
+  // Restore the saved theme if the user leaves the panel without saving
+  React.useEffect(() => {
+    return () => {
+      applyTheme({ palette: savedThemeRef.current, density: "cozy", font: "grotesk" });
+    };
+  }, []);
+
   async function save(e) {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
     try {
+      const themeVal = { palette: theme, density: "cozy", font: "grotesk" };
       await Promise.all([
         api("/admin/settings/theme", {
           method: "PUT",
-          body: JSON.stringify({ key: "theme", value: { palette: theme, density: "cozy", font: "grotesk" } }),
+          body: JSON.stringify({ key: "theme", value: themeVal }),
         }),
         api("/admin/settings/site", {
           method: "PUT",
           body: JSON.stringify({ key: "site", value: siteMetadata }),
         }),
       ]);
+      savedThemeRef.current = theme;
+      try {
+        localStorage.setItem("muslim-hebat-theme", JSON.stringify(themeVal));
+      } catch (err) {}
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {

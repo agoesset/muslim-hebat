@@ -15,6 +15,7 @@ import { applyTheme, DEFAULT_THEME } from "./theme.js";
 import { Seo } from "./seo.jsx";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import { Analytics } from "./components/Analytics.jsx";
+import { usePublicData } from "./hooks/usePublicData.js";
 
 import { CtaProvider } from "./context/cta-context.jsx";
 
@@ -27,7 +28,36 @@ const pageIds = {
 };
 
 export default function App() {
-  React.useEffect(() => applyTheme(DEFAULT_THEME), []);
+  const { data: settings } = usePublicData("/public/settings");
+
+  React.useEffect(() => {
+    // 1. Try to restore from localStorage first for instant layout/color styling
+    try {
+      const savedTheme = localStorage.getItem("muslim-hebat-theme");
+      if (savedTheme) {
+        applyTheme(JSON.parse(savedTheme));
+      } else {
+        applyTheme(DEFAULT_THEME);
+      }
+    } catch (e) {
+      applyTheme(DEFAULT_THEME);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (settings && Array.isArray(settings)) {
+      const themeSetting = settings.find((s) => s.key === "theme");
+      if (themeSetting && themeSetting.value) {
+        const themeVal = typeof themeSetting.value === "string"
+          ? JSON.parse(themeSetting.value)
+          : themeSetting.value;
+        applyTheme(themeVal);
+        try {
+          localStorage.setItem("muslim-hebat-theme", JSON.stringify(themeVal));
+        } catch (e) {}
+      }
+    }
+  }, [settings]);
 
   return (
     <BrowserRouter>
@@ -78,9 +108,6 @@ function PublicApp() {
     </div>
   );
 }
-
-import { usePublicData } from "./hooks/usePublicData.js";
-
 function CeritaDetailRoute({ onNav, onOpenCerita }) {
   const { slug } = useParams();
   const { data: apiArticle, loading, error } = usePublicData(`/public/articles/${slug}`);

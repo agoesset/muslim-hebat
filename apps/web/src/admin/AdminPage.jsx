@@ -18,7 +18,35 @@ export function AdminPage() {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    applyTheme();
+    // 1. Try to restore from localStorage first for instant visual styling
+    try {
+      const savedTheme = localStorage.getItem("muslim-hebat-theme");
+      if (savedTheme) {
+        applyTheme(JSON.parse(savedTheme));
+      } else {
+        applyTheme();
+      }
+    } catch (e) {
+      applyTheme();
+    }
+
+    // 2. Fetch admin settings (which contains the theme) and update/apply
+    api("/admin/settings")
+      .then((settings) => {
+        if (Array.isArray(settings)) {
+          const themeSetting = settings.find((s) => s.key === "theme");
+          if (themeSetting && themeSetting.value) {
+            applyTheme(themeSetting.value);
+            try {
+              localStorage.setItem("muslim-hebat-theme", JSON.stringify(themeSetting.value));
+            } catch (e) {}
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("Gagal memuat theme settings di admin:", err);
+      });
+
     api("/auth/me")
       .then((data) => setUser(data.user))
       .catch(() => setUser(null))

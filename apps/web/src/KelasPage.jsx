@@ -73,7 +73,7 @@ const KELAS_FALLBACK = [
   },
   { id: 5, slug: "bahasa-arab-pemula", cat: "Bahasa Arab", color: "var(--coral)", emoji: "🔤",
     title: "Bahasa Arab buat yang Gak Punya Background",
-    instructor: "Ustdzh. Mariam Salim", instructorAvatar: "var(--peach)",
+    instructor: "Ustadzah Mariam Salim", instructorAvatar: "var(--peach)",
     lessons: 20, duration: "8 minggu", level: "Pemula",
     students: 620, rating: 4.8, reviews: 156,
     price: 349000, originalPrice: 449000,
@@ -102,7 +102,7 @@ const KELAS_FALLBACK = [
     platform: "Zoom + studi kasus real",
     slots: 60, slotsTaken: 8,
     status: "early-bird",
-    desc: "Bangun bisnis tanpa riba, tanpa ghoror. Studi kasus real dari pengusaha muslim Indonesia.",
+    desc: "Bangun bisnis tanpa riba, tanpa gharar. Studi kasus real dari pengusaha muslim Indonesia.",
   },
   { id: 7, slug: "sholat-khusyu", cat: "Ibadah Harian", color: "var(--lilac)", emoji: "🕌",
     title: "Sholat Khusyu' untuk yang Sibuk",
@@ -160,7 +160,7 @@ export function KelasPage({ onNav }) {
   const { data: apiCourses, loading, error } = usePublicData("/public/classes");
   const courses = React.useMemo(() => {
     const normalized = normalizeCourses(apiCourses);
-    return normalized.length ? normalized : KELAS_FALLBACK;
+    return normalized;
   }, [apiCourses]);
 
   let list = courses;

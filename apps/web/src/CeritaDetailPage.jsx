@@ -3,13 +3,10 @@
 import React from "react";
 import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
-import { SectionHeader } from "./SectionHeader.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
-import { CERITA_DATA } from "./data/cerita.js";
-import { CeritaCard } from "./CeritaPage.jsx";
 
-export function CeritaDetailPage({ onNav, cerita, onOpenCerita }) {
-  const c = cerita || CERITA_DATA[0];
+export function CeritaDetailPage({ onNav, cerita }) {
+  const c = cerita;
   const [progress, setProgress] = React.useState(0);
   const [clapped, setClapped] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
@@ -24,9 +21,6 @@ export function CeritaDetailPage({ onNav, cerita, onOpenCerita }) {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const related = CERITA_DATA.filter(x => x.id !== c.id && x.cat === c.cat).slice(0, 3);
-  const relatedFill = related.length < 3 ? [...related, ...CERITA_DATA.filter(x => x.id !== c.id && !related.includes(x)).slice(0, 3 - related.length)] : related;
 
   return (
     <div data-screen-label="05 Bacaan Detail">
@@ -48,7 +42,6 @@ export function CeritaDetailPage({ onNav, cerita, onOpenCerita }) {
       <CeritaBody c={c} clapped={clapped} setClapped={setClapped} saved={saved} setSaved={setSaved}/>
       <AuthorCard c={c}/>
       <CommentsSection/>
-      <RelatedCerita list={relatedFill} onOpenCerita={onOpenCerita}/>
       <NewsletterBlock/>
     </div>
   );
@@ -118,116 +111,14 @@ function CeritaBody({ c, clapped, setClapped, saved, setSaved }) {
 
         {/* article body */}
         <article style={{ fontSize: 18, lineHeight: 1.75, color: "var(--ink)" }}>
-          <p style={{ marginTop: 0 }}>
-            <span style={{
-              float: "left", fontFamily: "var(--font-display)", fontSize: 72,
-              fontWeight: 700, lineHeight: 0.85, padding: "4px 12px 0 0",
-              color: "var(--coral-deep)"
-            }}>K</span>
-            ita semua pernah ada di titik itu — bangun pagi, lihat list to-do yang panjangnya
-            kayak ekor naga, dan tiba-tiba kepingin balik tidur lagi. Mau sholat, mau ngerjain kerjaan,
-            mau ngobrol sama anak, mau olahraga — semua kepingin dilakuin bareng-bareng.
-          </p>
+          <ArticleBodyText c={c}/>
 
-          <p>
-            Tapi kalau dipikir-pikir, perasaan overwhelmed itu bukan musuh. Dia cuma sinyal kalau
-            kita lagi nyoba ngangkat lebih dari kapasitas kita saat itu. Dan kabar baiknya: ada hal-hal
-            kecil yang bisa dilakuin — bahkan dalam 30 detik — buat nge-reset hati.
-          </p>
-
-          <h2 style={{ fontSize: 32, marginTop: 40, marginBottom: 16, lineHeight: 1.1 }}>
-            1. Mulai dengan istighfar. Beneran.
-          </h2>
-          <p>
-            Ini bukan klise. Rasulullah ﷺ istighfar 100 kali sehari, padahal dosa-dosa beliau sudah
-            diampuni. Istighfar bukan cuma soal minta ampun — dia juga ngingetin kita kalau urusan
-            ini gak semuanya di pundak kita.
-          </p>
-
-          {/* pull quote */}
-          <aside className="card card--peach" style={{ margin: "32px 0", padding: 28, position: "relative" }}>
-            <span style={{ fontFamily: "var(--font-hand)", fontSize: 80, color: "var(--coral-deep)", lineHeight: 0.7, position: "absolute", top: 14, left: 20 }}>“</span>
-            <p style={{ fontFamily: "var(--font-display)", fontSize: 24, lineHeight: 1.3, margin: 0, fontWeight: 500, paddingLeft: 36 }}>
-              Yang berat itu bukan hidupnya. Yang berat itu kita lupa kalau ada Yang Maha Mengatur.
-            </p>
-          </aside>
-
-          <h2 style={{ fontSize: 32, marginTop: 40, marginBottom: 16, lineHeight: 1.1 }}>
-            2. Wudhu, walaupun gak mau sholat.
-          </h2>
-          <p>
-            Coba deh. Pas pikiran udah ke mana-mana dan badan kerasa berat — bangun, ke kamar mandi,
-            wudhu. Itu aja. Gak harus langsung sholat, gak harus baca Qur'an dulu. Cukup wudhu, lap muka pelan-pelan.
-            Ada sesuatu di dinginnya air yang nge-anchor kamu balik ke sekarang.
-          </p>
-
-          <p>
-            Sebuah hadits bilang: <em>"Wudhu adalah cahaya."</em> Dan beneran. Setelah wudhu,
-            biasanya kita jadi lebih jernih ngeliat — oh, gak semua hal harus dikerjain hari ini.
-          </p>
-
-          {/* ayat card */}
-          <div className="card card--sage" style={{ margin: "32px 0", padding: 28, textAlign: "center" }}>
-            <div className="arabic" style={{ fontSize: 32, marginBottom: 14, color: "var(--ink)" }}>
-              أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ
-            </div>
-            <p style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 500, margin: 0, lineHeight: 1.3 }}>
-              "Ingatlah, hanya dengan mengingat Allah hati menjadi tenteram."
-            </p>
-            <div style={{ fontSize: 13, marginTop: 8, color: "var(--ink-soft)" }}>— QS. Ar-Ra'd: 28</div>
-          </div>
-
-          <h2 style={{ fontSize: 32, marginTop: 40, marginBottom: 16, lineHeight: 1.1 }}>
-            3. Tulis 3 hal kecil yang harus dikerjain hari ini. Bukan 10.
-          </h2>
-          <p>
-            Otak kita tuh suka aneh. Kalau list-nya 20 item, dia gak akan mulai kerjain satupun.
-            Tapi kalau 3? Dia bakal kerjain. Pilih 3 yang paling penting — kalau perlu, tulis di
-            kertas, bukan di notes. Ada efek psikologis dari nyoret manual yang gak bisa ditiru tap layar.
-          </p>
-
-          <ul style={{ paddingLeft: 24 }}>
-            <li style={{ marginBottom: 8 }}>1 hal yang harus selesai hari ini</li>
-            <li style={{ marginBottom: 8 }}>1 hal kecil buat ibadah (baca 1 lembar Qur'an, telpon ortu, sedekah 5rb)</li>
-            <li style={{ marginBottom: 8 }}>1 hal buat diri sendiri (jalan kaki 10 menit, ngopi dengan tenang)</li>
-          </ul>
-
-          <h2 style={{ fontSize: 32, marginTop: 40, marginBottom: 16, lineHeight: 1.1 }}>
-            4. Jalan kaki 10 menit, tanpa HP.
-          </h2>
-          <p>
-            Klise, tapi works. Yang baru: jangan bawa HP. Atau kalau bawa, mode pesawat. Tujuannya
-            bukan olahraga — tujuannya keluar dari kotak yang isinya 100 tab Chrome dan notif yang
-            gak penting. Selama jalan, perhatiin pohon, awan, suara burung. Kecil banget, tapi bantu.
-          </p>
-
-          <h2 style={{ fontSize: 32, marginTop: 40, marginBottom: 16, lineHeight: 1.1 }}>
-            5. Ngomong sama Allah. Pake bahasa kamu sendiri.
-          </h2>
-          <p>
-            Doa itu gak harus pake bahasa Arab. Boleh banget pake bahasa Indonesia, bahkan bahasa
-            sehari-hari kamu. "Ya Allah, hari ini berat. Bantu aku jalan dulu satu jam ke depan."
-            Itu doa. Itu dialog. Dan dialog yang jujur — itu yang Allah sayangi.
-          </p>
-
-          <p>
-            Lima hal kecil. Gak ada yang revolusioner. Tapi kalau dipraktekin pelan-pelan,
-            bisa ngubah hari yang berantakan jadi lumayan. Dan kalau hari kamu udah lumayan,
-            mungkin minggu depan kamu udah bisa mulai naik level. Pelan-pelan aja.
-          </p>
-
-          <p style={{ fontFamily: "var(--font-hand)", fontSize: 26, color: "var(--coral-deep)", marginTop: 32 }}>
-            Semoga bermanfaat. Sayang kalian semua! ♡
-          </p>
-
-          {/* tags */}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 40, paddingTop: 24, borderTop: "1px solid rgba(31,58,45,0.12)" }}>
-            {["self-care", "muhasabah", "anxiety", "ibadah harian", "mental health"].map(t => (
-              <span key={t} className="pill" style={{ fontSize: 12 }}>#{t}</span>
+            {[c.cat, c.tag].filter(Boolean).map(t => (
+              <span key={t} className="pill" style={{ fontSize: 12 }}>#{String(t).toLowerCase().replaceAll(" ", "-")}</span>
             ))}
           </div>
 
-          {/* big clap CTA */}
           <div style={{ marginTop: 32, padding: 28, background: "var(--bg-soft)", borderRadius: 24, textAlign: "center" }}>
             <p style={{ margin: 0, fontFamily: "var(--font-hand)", fontSize: 24, color: "var(--coral-deep)" }}>kalau bacaan ini ngena</p>
             <button onClick={() => setClapped(!clapped)} className="btn" style={{
@@ -240,6 +131,37 @@ function CeritaBody({ c, clapped, setClapped, saved, setSaved }) {
         </article>
       </div>
     </section>
+  );
+}
+
+function ArticleBodyText({ c }) {
+  const text = (c.body && c.body.trim()) || c.excerpt || "Konten bacaan sedang disiapkan.";
+  const paragraphs = text.split(/\n{2,}|\r?\n/).map((p) => p.trim()).filter(Boolean);
+  const first = paragraphs[0] || text;
+  const initial = first.charAt(0);
+  const rest = first.slice(1);
+
+  return (
+    <>
+      <p style={{ marginTop: 0 }}>
+        {initial && <span style={{
+          float: "left", fontFamily: "var(--font-display)", fontSize: 72,
+          fontWeight: 700, lineHeight: 0.85, padding: "4px 12px 0 0",
+          color: "var(--coral-deep)"
+        }}>{initial}</span>}
+        {rest}
+      </p>
+      {paragraphs.slice(1).map((paragraph, index) => (
+        <p key={index}>{paragraph}</p>
+      ))}
+      {!c.body && (
+        <aside className="card card--sage" style={{ margin: "32px 0", padding: 24 }}>
+          <p style={{ margin: 0, fontSize: 16, color: "var(--ink-soft)" }}>
+            Ringkasan sudah tersedia. Artikel lengkap sedang disiapkan tim Muslim Hebat.
+          </p>
+        </aside>
+      )}
+    </>
   );
 }
 
@@ -334,21 +256,6 @@ function CommentsSection() {
             </div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-function RelatedCerita({ list, onOpenCerita }) {
-  return (
-    <section className="shell" style={{ marginBottom: 40 }}>
-      <SectionHeader
-        kicker="lanjut baca"
-        title="Bacaan serupa"
-        sub="Mungkin nyambung sama yang barusan kamu baca."
-      />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
-        {list.map(c => <CeritaCard key={c.id} c={c} onOpenCerita={onOpenCerita}/>)}
       </div>
     </section>
   );

@@ -11,7 +11,6 @@ import { ProdukDetailPage } from "./ProdukDetailPage.jsx";
 import { KelasDetailPage } from "./KelasDetailPage.jsx";
 import { KajianDetailPage } from "./KajianDetailPage.jsx";
 import { AdminPage } from "./admin/AdminPage.jsx";
-import { CERITA_DATA } from "./data/cerita.js";
 import { applyTheme, DEFAULT_THEME } from "./theme.js";
 import { Seo } from "./seo.jsx";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
@@ -88,11 +87,11 @@ function CeritaDetailRoute({ onNav, onOpenCerita }) {
 
   const cerita = React.useMemo(() => {
     if (apiArticle) return { ...apiArticle, cat: apiArticle.category };
-    return CERITA_DATA.find((item) => item.slug === slug) || CERITA_DATA[0];
-  }, [apiArticle, slug]);
+    return null;
+  }, [apiArticle]);
 
   if (loading) return <div className="shell" style={{ padding: "60px 0" }}><p>Memuat bacaan…</p></div>;
-  if (error) return <div className="shell" style={{ padding: "60px 0" }}><p>Gagal memuat bacaan: {error}</p></div>;
+  if (error || !cerita) return <div className="shell" style={{ padding: "60px 0" }}><p>Bacaan tidak ditemukan.</p></div>;
 
   return (
     <>

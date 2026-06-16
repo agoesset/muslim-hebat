@@ -4,7 +4,6 @@ import React from "react";
 import { Icon } from "./icons.jsx";
 import { Blob, SunDecor } from "./shell.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
-import { CERITA_DATA } from "./data/cerita.js";
 
 import { usePublicData } from "./hooks/usePublicData.js";
 
@@ -20,7 +19,7 @@ export function CeritaPage({ onNav, onOpenCerita }) {
   const { data: apiArticles, loading, error } = usePublicData("/public/articles");
   const articles = React.useMemo(() => {
     const normalized = normalizeArticles(apiArticles);
-    return normalized.length ? normalized : CERITA_DATA.map(a => ({ ...a, cat: a.cat }));
+    return normalized;
   }, [apiArticles]);
 
   const list = cat === "Semua" ? articles : articles.filter(c => c.cat === cat);

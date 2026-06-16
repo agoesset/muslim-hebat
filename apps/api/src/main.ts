@@ -3,7 +3,7 @@ import { ValidationPipe, RequestMethod } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Request, Response, NextFunction } from "express";
-import { existsSync, readdirSync } from "fs";
+import { readdirSync, statSync } from "fs";
 import { join } from "path";
 import cookieParser = require("cookie-parser");
 import { PrismaClient } from "@prisma/client";
@@ -21,30 +21,28 @@ async function bootstrap() {
 
   // Serve frontend static files in production
   const publicPath = join(__dirname, "public");
-  app.useStaticAssets(publicPath, { index: false });
 
-  // If a browser/Cloudflare has stale HTML that points to an older hashed Vite chunk,
-  // serve the latest entry chunk instead of returning 404. This avoids a white screen
-  // during rolling deploy/cache windows.
+  // If a browser/Cloudflare has stale HTML that points to an older hashed Vite entry
+  // chunk, serve the newest entry chunk even if the stale file still exists in the
+  // build output. This prevents old cached HTML from loading a broken stale bundle.
   app.use((req: Request, res: Response, next: NextFunction) => {
     const fileName = req.path.split("/").pop() || "";
     const isEntryChunk = req.path.startsWith("/assets/") && /^index-[A-Za-z0-9_-]+\.(js|css)$/.test(fileName);
     if (!isEntryChunk) return next();
 
     const assetsPath = join(publicPath, "assets");
-    const requestedPath = join(assetsPath, fileName);
-    if (existsSync(requestedPath)) return next();
-
     const extension = fileName.endsWith(".css") ? ".css" : ".js";
     const latestEntry = readdirSync(assetsPath)
       .filter((name) => /^index-[A-Za-z0-9_-]+\.(js|css)$/.test(name) && name.endsWith(extension))
-      .sort()
-      .at(-1);
+      .map((name) => ({ name, mtimeMs: statSync(join(assetsPath, name)).mtimeMs }))
+      .sort((a, b) => b.mtimeMs - a.mtimeMs)[0]?.name;
 
     if (!latestEntry) return next();
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
     res.sendFile(join(assetsPath, latestEntry));
   });
+
+  app.useStaticAssets(publicPath, { index: false });
 
   // Dynamic SEO sitemap (root path, outside /api prefix)
   const adapter = app.getHttpAdapter();

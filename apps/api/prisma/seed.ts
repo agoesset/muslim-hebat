@@ -37,6 +37,83 @@ const kajian = [
   { slug: "tadabbur-juz-30", title: "Tadabbur Juz 30 — bagian 1", excerpt: "Tadabbur bersama Juz 30 dengan terjemahan.", speaker: "Ust. Nouman Ali Khan (Sub-id)", location: "YouTube live", eventType: "Online", startsAt: "2026-06-03T13:00:00.000Z", date: 3, month: "Jun", day: "Selasa", time: "20.00 WIB", attendees: 2400, priceCents: 0, free: true, color: "var(--sage)" },
 ];
 
+const homePageValue = {
+  hero: {
+    pill: "komunitas hangat sejak 2024",
+    stat: "+ 12,400 muslim",
+    headline: ["Belajar Islam", "tanpa drama", "santai & konsisten."],
+    sub: "Bacaan ringan, produk bermanfaat, dan jadwal ngaji bareng yang bikin kamu makin semangat — semua di satu tempat.",
+    ctaPrimary: "Lihat produk",
+    ctaSecondary: "Baca bacaan terbaru"
+  },
+  prayer: {
+    nextName: "Ashar",
+    nextTime: "15:24",
+    nextLabel: "· 1 jam 12 menit lagi",
+    schedule: [
+      { name: "Subuh", time: "04:38", done: true },
+      { name: "Dzuhur", time: "11:52", done: true },
+      { name: "Ashar", time: "15:24", active: true },
+      { name: "Maghrib", time: "17:58" },
+      { name: "Isya", time: "19:08" }
+    ]
+  },
+  daily: {
+    label: "hari ini",
+    date: "Rabu, 20 Mei",
+    stats: [
+      { big: "14", sub: "hijriah", tag: "11 Dzul-Q" },
+      { big: "3/5", sub: "sholat selesai" },
+      { big: "2", sub: "ngaji besok" }
+    ]
+  },
+  quote: {
+    label: "quote of the day",
+    arabic: "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا",
+    translation: "“Siapa pun yang bertakwa kepada Allah, niscaya Dia akan mengadakan baginya jalan keluar.”",
+    source: "QS. Ath-Thalaq: 2"
+  },
+  bentoHeader: {
+    kicker: "ngalir santai",
+    title: "Bekal harian buat hati",
+    sub: "Beberapa hal kecil yang bisa kamu lakuin hari ini biar makin dekat sama Allah."
+  },
+  dzikir: {
+    label: "Dzikir pagi",
+    title: "Mulai pagi dengan dzikir ✿",
+    items: [
+      { txt: "Astaghfirullāh", n: "100×", done: true },
+      { txt: "Subhānallāh wa bihamdihi", n: "33×", done: true },
+      { txt: "Lā ilāha illallāh wahdahu lā syarīka lah…", n: "10×", done: false },
+      { txt: "Allāhumma anta rabbī lā ilāha illā anta…", n: "1×", done: false }
+    ]
+  },
+  community: {
+    label: "komunitas",
+    title: "12,400+ teman seperjalanan",
+    sub: "Diskusi santai, sharing pengalaman, saling ingetin di Telegram & Discord.",
+    colors: ["#FFD6A5", "#A8D8B9", "#FFADAD", "#D8CCEF", "#F7E4A0"],
+    cta: "Gabung sekarang"
+  },
+  reminder: {
+    sticker: "jangan lupa!",
+    label: "reminder",
+    title: "Sudah baca Al-Mulk hari ini?",
+    sub: "30 ayat, ± 8 menit. Sunnah sebelum tidur biar dijauhkan dari azab kubur.",
+    ctaPrimary: "Baca sekarang",
+    ctaSecondary: "Ingetin nanti"
+  },
+  miniQuote: {
+    text: "Yang penting jalan terus, gak perlu sempurna — cukup konsisten satu langkah tiap hari.",
+    author: "Ustadz Hanan Attaki"
+  },
+  intention: {
+    label: "niat hari ini",
+    placeholder: "Hari ini aku mau…",
+    suggestions: ["sholat tepat waktu", "baca 1 lembar Qur'an", "senyum ke ortu", "sedekah 5rb"]
+  }
+};
+
 const courses = [
   { slug: "tahsin-pemula", title: "Tahsin Pemula: Baca Qur'an dari Nol", excerpt: "Belajar makhraj huruf, tajwid dasar, sampai bisa baca 1 ayat dengan benar — pelan-pelan dari nol.", description: "", category: "Tahsin", level: "Pemula", format: "Live Zoom", instructor: "Ust. Hasan Bashri", lessons: 12, duration: "4 minggu", students: 480, rating: 5.0, reviews: 124, priceCents: 249000, originalPriceCents: 399000, tag: "best seller", batch: "Batch #7", startDate: "5 Juni 2026", startDay: "Senin", schedule: "Senin & Rabu, 19:30–21:00 WIB", platform: "Zoom + grup WA", slots: 50, slotsTaken: 32, statusDetail: "open", color: "var(--sage)", emoji: "🎙" },
   { slug: "tahfidz-juz-30", title: "Tahfidz 30 Hari: Juz 30", excerpt: "Daily check-in + mentor 1-on-1. Selesaikan hafalan juz 30 dalam sebulan, target 1 halaman per hari.", description: "", category: "Tahfidz", level: "Menengah", format: "Live Zoom", instructor: "Ust. Ahmad Faiz", lessons: 30, duration: "30 hari", students: 220, rating: 5.0, reviews: 68, priceCents: 399000, originalPriceCents: 0, tag: "almost full", batch: "Batch #3", startDate: "10 Juni 2026", startDay: "Sabtu", schedule: "Setiap hari, 05:00–06:00 WIB", platform: "Zoom + mentor 1-on-1", slots: 25, slotsTaken: 22, statusDetail: "almost-full", color: "var(--peach)", emoji: "🎧" },
@@ -64,6 +141,13 @@ async function main() {
     update: { value: { palette: "cool", density: "cozy", font: "grotesk", illustrations: true } },
     create: { key: "theme", value: { palette: "cool", density: "cozy", font: "grotesk", illustrations: true } }
   });
+
+  await prisma.siteSetting.upsert({
+    where: { key: "home" },
+    update: { value: homePageValue },
+    create: { key: "home", value: homePageValue }
+  });
+
 
   for (const a of articles) {
     await prisma.article.upsert({

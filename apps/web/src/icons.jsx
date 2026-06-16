@@ -1,3 +1,4 @@
+import React from "react";
 // Minimal stroke icons used across the site. Single line, friendly weight.
 export const Icon = {
   Arrow: ({ size = 18 }) => (

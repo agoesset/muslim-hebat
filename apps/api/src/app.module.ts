@@ -6,6 +6,7 @@ import { HealthController } from "./health.controller";
 import { ContentController } from "./content/content.controller";
 import { SubscribersController } from "./subscribers/subscribers.controller";
 import { SettingsController } from "./settings/settings.controller";
+import { HomeController } from "./home/home.controller";
 
 @Module({
   imports: [],
@@ -14,7 +15,8 @@ import { SettingsController } from "./settings/settings.controller";
     AuthController,
     ContentController,
     SubscribersController,
-    SettingsController
+    SettingsController,
+    HomeController
   ],
   providers: [PrismaService, AuthService]
 })

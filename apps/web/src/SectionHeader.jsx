@@ -1,3 +1,4 @@
+import React from "react";
 export function SectionHeader({ kicker, title, sub, right }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, gap: 24, flexWrap: "wrap" }}>

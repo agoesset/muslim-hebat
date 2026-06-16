@@ -42,7 +42,15 @@ async function bootstrap() {
     res.sendFile(join(assetsPath, latestEntry));
   });
 
-  app.useStaticAssets(publicPath, { index: false });
+  app.useStaticAssets(publicPath, {
+    index: false,
+    setHeaders: (res: Response, assetPath: string) => {
+      const fileName = assetPath.split(/[\\/]/).pop() || "";
+      if (/^index-[A-Za-z0-9_-]+\.(js|css)$/.test(fileName)) {
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      }
+    }
+  });
 
   // Dynamic SEO sitemap (root path, outside /api prefix)
   const adapter = app.getHttpAdapter();

@@ -1,3 +1,4 @@
+import React from "react";
 // Shared components: Nav, Footer, WaveDivider, sticker decorations.
 
 import { Icon } from "./icons.jsx";

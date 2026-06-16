@@ -90,7 +90,7 @@ function CeritaDetailHero({ c }) {
         <span style={{ fontSize: 200, position: "relative", zIndex: 1 }}>{c.emoji}</span>
         <span style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 30% 35%, rgba(255,252,245,0.4), transparent 65%)" }}/>
         <span className="sticker illus-only" style={{ position: "absolute", bottom: 20, right: 24, background: "var(--paper)", fontSize: 18 }}>
-          cover · photo by Unsplash
+          ilustrasi bacaan
         </span>
       </div>
     </section>

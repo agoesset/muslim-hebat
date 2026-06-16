@@ -1,7 +1,8 @@
 import { Controller, Get, Header } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
+import { env } from "../config/env";
 
-const SITE_URL = "https://muslimhebat.com";
+const SITE_URL = env.SITE_URL || env.WEB_ORIGIN || "https://muslimhebat.com";
 
 @Controller()
 export class SitemapController {

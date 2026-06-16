@@ -10,6 +10,7 @@ export const env = cleanEnv(process.env, {
     : url(),
   JWT_SECRET: str({ default: isTest ? "test-secret-at-least-32-characters-long-for-jwt" : undefined }),
   WEB_ORIGIN: str({ default: isTest ? "http://localhost" : undefined }),
+  SITE_URL: str({ default: "" }),
   SMTP_HOST: str({ default: "" }),
   SMTP_PORT: str({ default: "" }),
   SMTP_USER: str({ default: "" }),

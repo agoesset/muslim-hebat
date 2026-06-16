@@ -4,6 +4,7 @@ import React from "react";
 import { Icon } from "./icons.jsx";
 import { useCta } from "./context/cta-context.jsx";
 import { SOCIAL_LINKS, SITE_LINKS } from "./site-links.ts";
+import { usePublicData } from "./hooks/usePublicData.js";
 
 export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 }) {
   // scalloped wave — bumps that read as friendly, organic
@@ -110,6 +111,15 @@ export function Blob({ color = "var(--peach)", size = 200, top, left, right, bot
 }
 
 export function Footer() {
+  const { data: settingsArr } = usePublicData("/public/settings");
+
+  const siteSetting = React.useMemo(() => {
+    if (!settingsArr) return null;
+    const site = settingsArr.find(s => s.key === "site");
+    if (!site) return null;
+    return typeof site.value === "string" ? JSON.parse(site.value) : site.value;
+  }, [settingsArr]);
+
   const explore = [
     { label: "Bacaan", href: SITE_LINKS.bacaan },
     { label: "Kelas", href: SITE_LINKS.kelas },
@@ -118,17 +128,17 @@ export function Footer() {
   ];
   const help = [
     { label: "FAQ", href: SITE_LINKS.faq },
-    { label: "Kontak", href: SITE_LINKS.kontak },
+    { label: "Kontak", href: siteSetting?.contactEmail ? `mailto:${siteSetting.contactEmail}` : SITE_LINKS.kontak },
     { label: "Refund", href: SITE_LINKS.refund },
     { label: "Syarat", href: SITE_LINKS.syarat },
     { label: "Privasi", href: SITE_LINKS.privasi },
   ];
   const social = [
-    { label: "Instagram", href: SOCIAL_LINKS.instagram, icon: Icon.Instagram },
-    { label: "TikTok", href: SOCIAL_LINKS.tiktok, icon: Icon.TikTok },
-    { label: "YouTube", href: SOCIAL_LINKS.youtube, icon: Icon.Youtube },
-    { label: "Spotify", href: SOCIAL_LINKS.spotify, icon: Icon.Spotify },
-    { label: "Telegram", href: SOCIAL_LINKS.telegram, icon: Icon.Telegram },
+    { label: "Instagram", href: siteSetting?.instagramUrl || SOCIAL_LINKS.instagram, icon: Icon.Instagram },
+    { label: "TikTok", href: siteSetting?.tiktokUrl || SOCIAL_LINKS.tiktok, icon: Icon.TikTok },
+    { label: "YouTube", href: siteSetting?.youtubeUrl || SOCIAL_LINKS.youtube, icon: Icon.Youtube },
+    { label: "Spotify", href: siteSetting?.spotifyUrl || SOCIAL_LINKS.spotify, icon: Icon.Spotify },
+    { label: "Telegram", href: siteSetting?.telegramUrl || SOCIAL_LINKS.telegram, icon: Icon.Telegram },
   ];
 
   return (

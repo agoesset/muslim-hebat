@@ -228,6 +228,14 @@ export class ContentController {
     return this.prisma.article.findMany({ orderBy: orderByUpdated });
   }
 
+  @Get("admin/articles/:id")
+  @UseGuards(AdminAuthGuard)
+  async getArticle(@Param("id") id: string) {
+    const article = await this.prisma.article.findUnique({ where: { id } });
+    if (!article) throw new NotFoundException("Article not found");
+    return article;
+  }
+
   @Post("admin/articles")
   @UseGuards(AdminAuthGuard)
   createArticle(@Body() dto: ContentDto) {
@@ -252,6 +260,14 @@ export class ContentController {
   @UseGuards(AdminAuthGuard)
   adminProducts() {
     return this.prisma.product.findMany({ orderBy: orderByUpdated });
+  }
+
+  @Get("admin/products/:id")
+  @UseGuards(AdminAuthGuard)
+  async getProduct(@Param("id") id: string) {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product) throw new NotFoundException("Product not found");
+    return product;
   }
 
   @Post("admin/products")
@@ -280,6 +296,14 @@ export class ContentController {
     return this.prisma.kajianEvent.findMany({ orderBy: orderByUpdated });
   }
 
+  @Get("admin/kajian/:id")
+  @UseGuards(AdminAuthGuard)
+  async getKajian(@Param("id") id: string) {
+    const event = await this.prisma.kajianEvent.findUnique({ where: { id } });
+    if (!event) throw new NotFoundException("Kajian not found");
+    return event;
+  }
+
   @Post("admin/kajian")
   @UseGuards(AdminAuthGuard)
   createKajian(@Body() dto: KajianEventDto) {
@@ -304,6 +328,14 @@ export class ContentController {
   @UseGuards(AdminAuthGuard)
   adminClasses() {
     return this.prisma.course.findMany({ orderBy: orderByUpdated });
+  }
+
+  @Get("admin/classes/:id")
+  @UseGuards(AdminAuthGuard)
+  async getClass(@Param("id") id: string) {
+    const course = await this.prisma.course.findUnique({ where: { id } });
+    if (!course) throw new NotFoundException("Class not found");
+    return course;
   }
 
   @Post("admin/classes")

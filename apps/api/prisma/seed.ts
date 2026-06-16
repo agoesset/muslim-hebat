@@ -181,7 +181,36 @@ async function main() {
     });
   }
 
-  console.log(`Seeded admin: ${email}, ${articles.length} articles, ${products.length} products, ${kajian.length} kajian, ${courses.length} courses`);
+  // Seed Testimonials
+  const testimonials = [
+    { name: "Rina, 27", role: "Mahasiswa S2", text: "Awalnya cuma bisa baca alif-ba-ta. Sekarang udah hampir hatam juz 30. Pak Ustadnya sabar banget.", color: "var(--peach)", targetType: "class" },
+    { name: "Faiz, 34", role: "Bapak 2 anak", text: "Workshop parentingnya bener-bener bantu pas anak pertama mulai sholat. Gak melulu teori, banyak studi kasus real.", color: "var(--sage)", targetType: "class" },
+    { name: "Bunda Sari", role: "IRT", text: "Suka bgt kelas khusyu' sholatnya — singkat tapi praktis. Bisa diulang-ulang kapan aja. Worth it!", color: "var(--lilac)", targetType: "class" },
+    { name: "Sarah, 24", role: "Mahasiswi", text: "Jurnal Ramadhannya bener-bener nempel banget sama anak muda. Gak menggurui, dan layoutnya cantik!", color: "var(--peach)", targetType: "product" },
+    { name: "Faiz, 31", role: "Karyawan", text: "Beli template Notion-nya, sekarang doa harian gampang dibuka pas jeda kerja. Worth it banget.", color: "var(--sage)", targetType: "product" },
+    { name: "Bunda Lia", role: "Ibu rumah tangga", text: "E-book parentingnya santai, gak bikin guilty. Suka banget gaya bahasa muslim hebat.", color: "var(--lilac)", targetType: "product" },
+  ];
+
+  await prisma.testimonial.deleteMany(); // Clear first
+  for (const t of testimonials) {
+    await prisma.testimonial.create({ data: t });
+  }
+
+  // Seed Comments
+  const mainArticle = await prisma.article.findUnique({ where: { slug: "hal-kecil-bikin-tenang" } });
+  if (mainArticle) {
+    await prisma.comment.deleteMany({ where: { articleId: mainArticle.id } }); // Clear comments on this article
+    const comments = [
+      { name: "Rina", text: "Yang nomor 2 ngena banget. Sering banget ngerasa berat sholat, padahal pas wudhu aja, mood udah lumayan.", articleId: mainArticle.id },
+      { name: "Faiz", text: "Suka banget gaya nulisnya — santai tapi nendang. Lanjut bikin yang serupa dong!", articleId: mainArticle.id },
+      { name: "Bunda Lia", text: "Aku praktekin yang nomor 3 minggu lalu — beneran works. Kerjaan rumah jadi gak overwhelming.", articleId: mainArticle.id },
+    ];
+    for (const cm of comments) {
+      await prisma.comment.create({ data: cm });
+    }
+  }
+
+  console.log(`Seeded admin: ${email}, ${articles.length} articles, ${products.length} products, ${kajian.length} kajian, ${courses.length} courses, ${testimonials.length} testimonials`);
 }
 
 main()

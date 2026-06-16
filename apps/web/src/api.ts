@@ -11,10 +11,11 @@ export async function api<T = unknown>(path: string, options: ApiOptions = {}): 
       ? `${path}${path.includes("?") ? "&" : "?"}_=${Date.now()}`
       : path;
 
-  const requestHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-  };
+  const requestHeaders: Record<string, string> = {};
+  if (!(options.body instanceof FormData)) {
+    requestHeaders["Content-Type"] = "application/json";
+  }
+  Object.assign(requestHeaders, options.headers || {});
 
   const { headers: _omit, ...restOptions } = options;
 

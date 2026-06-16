@@ -13,7 +13,6 @@ import { useCta } from "./context/cta-context.jsx";
 export function ProdukPage({ onNav }) {
   const navigate = useNavigate();
   const [active, setActive] = React.useState("Semua");
-  const cats = ["Semua", "E-book", "Worksheet", "Kelas", "Wallpaper", "Template"];
 
   const { data: apiProducts, loading, error } = usePublicData("/public/products");
 
@@ -27,6 +26,11 @@ export function ProdukPage({ onNav }) {
       desc: p.excerpt
     }));
   }, [apiProducts]);
+
+  const cats = React.useMemo(() => {
+    const categories = new Set(products.map(p => p.cat).filter(Boolean));
+    return ["Semua", ...Array.from(categories)];
+  }, [products]);
 
   const filtered = active === "Semua" ? products : products.filter(p => p.cat === active);
 
@@ -226,11 +230,16 @@ function ProdukBundle() {
 }
 
 function ProdukTestimonials() {
-  const t = [
+  const { data: apiTestimonials } = usePublicData("/public/testimonials?targetType=product");
+
+  const fallbackTestimonials = [
     { name: "Sarah, 24", role: "Mahasiswi", text: "Jurnal Ramadhannya bener-bener nempel banget sama anak muda. Gak menggurui, dan layoutnya cantik!", color: "var(--peach)" },
     { name: "Faiz, 31", role: "Karyawan", text: "Beli template Notion-nya, sekarang doa harian gampang dibuka pas jeda kerja. Worth it banget.", color: "var(--sage)" },
     { name: "Bunda Lia", role: "Ibu rumah tangga", text: "E-book parentingnya santai, gak bikin guilty. Suka banget gaya bahasa muslim hebat.", color: "var(--lilac)" },
   ];
+
+  const list = apiTestimonials && apiTestimonials.length > 0 ? apiTestimonials : fallbackTestimonials;
+
   return (
     <section className="shell" style={{ marginBottom: 40 }}>
       <SectionHeader
@@ -239,7 +248,7 @@ function ProdukTestimonials() {
         sub="Sedikit dari ribuan testimoni teman seperjalanan."
       />
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-        {t.map((x, i) => (
+        {list.map((x, i) => (
           <article key={i} className="card" style={{ padding: 22, display: "flex", flexDirection: "column", gap: 14, position: "relative" }}>
             <div style={{ display: "flex", gap: 4, color: "var(--coral)" }}>
               {[1,2,3,4,5].map(s => <Icon.Star key={s} size={14}/>)}

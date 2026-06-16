@@ -3,8 +3,21 @@ import { PrismaService } from "../prisma.service";
 
 const publishedWhere = { status: "PUBLISHED" as const };
 
+interface CacheData {
+  timings: Record<string, string>;
+  hijri: {
+    day: string;
+    month: string;
+    year: string;
+  };
+  fetchedAt: number;
+}
+
 @Controller()
 export class HomeController {
+  private prayerCache: CacheData | null = null;
+  private readonly cacheTTL = 12 * 60 * 60 * 1000; // 12 hours
+
   constructor(private readonly prisma: PrismaService) {}
 
   @Get("public/home")
@@ -29,8 +42,34 @@ export class HomeController {
       return obj;
     };
 
+    const settingsObj = toObject(settings);
+    const dbHome = settingsObj.home || {};
+
+    // Get live prayer and Hijri data
+    const prayerData = await this.getLivePrayerData();
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const { nextName, nextTime, nextLabel } = this.calculateNextPrayer(prayerData.timings, currentMinutes);
+
+    const prayerNames = ["Subuh", "Dzuhur", "Ashar", "Maghrib", "Isya"];
+    const apiNames = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+
+    const schedule = prayerNames.map((name, i) => {
+      const time = prayerData.timings[apiNames[i]] || "00:00";
+      const [h, m] = time.split(":").map(Number);
+      const prayMin = h * 60 + m;
+      const done = currentMinutes > prayMin;
+      const active = name === nextName;
+      return { name, time, done, active };
+    });
+
+    const formattedGregorianDate = this.getIndonesianDate();
+    const hijriDay = prayerData.hijri.day;
+    const hijriMonth = this.mapHijriMonth(prayerData.hijri.month);
+
     return {
-      hero: {
+      hero: dbHome.hero || {
         pill: "komunitas hangat sejak 2024",
         stat: "+ 12,400 muslim",
         headline: ["Belajar Islam", "tanpa drama", "santai & konsisten."],
@@ -39,38 +78,32 @@ export class HomeController {
         ctaSecondary: "Baca bacaan terbaru"
       },
       prayer: {
-        nextName: "Ashar",
-        nextTime: "15:24",
-        nextLabel: "· 1 jam 12 menit lagi",
-        schedule: [
-          { name: "Subuh", time: "04:38", done: true },
-          { name: "Dzuhur", time: "11:52", done: true },
-          { name: "Ashar", time: "15:24", active: true },
-          { name: "Maghrib", time: "17:58" },
-          { name: "Isya", time: "19:08" }
-        ]
+        nextName,
+        nextTime,
+        nextLabel,
+        schedule
       },
       daily: {
-        label: "hari ini",
-        date: "Rabu, 20 Mei",
+        label: dbHome.daily?.label || "hari ini",
+        date: formattedGregorianDate,
         stats: [
-          { big: "14", sub: "hijriah", tag: "11 Dzul-Q" },
-          { big: "3/5", sub: "sholat selesai" },
-          { big: "2", sub: "ngaji besok" }
+          { big: hijriDay, sub: "hijriah", tag: `${hijriDay} ${hijriMonth}` },
+          { big: `${schedule.filter(s => s.done).length}/5`, sub: "sholat selesai" },
+          { big: String(events.length), sub: "ngaji terdekat" }
         ]
       },
-      quote: {
+      quote: dbHome.quote || {
         label: "quote of the day",
-        arabic: "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا",
+        arabic: "وَمَن يَتَّقِ اللَّهَ يَجْعَل Lَّهُ مَخْرَجًا",
         translation: "“Siapa pun yang bertakwa kepada Allah, niscaya Dia akan mengadakan baginya jalan keluar.”",
         source: "QS. Ath-Thalaq: 2"
       },
-      bentoHeader: {
+      bentoHeader: dbHome.bentoHeader || {
         kicker: "ngalir santai",
         title: "Bekal harian buat hati",
         sub: "Beberapa hal kecil yang bisa kamu lakuin hari ini biar makin dekat sama Allah."
       },
-      dzikir: {
+      dzikir: dbHome.dzikir || {
         label: "Dzikir pagi",
         title: "Mulai pagi dengan dzikir ✿",
         items: [
@@ -80,14 +113,14 @@ export class HomeController {
           { txt: "Allāhumma anta rabbī lā ilāha illā anta…", n: "1×", done: false }
         ]
       },
-      community: {
+      community: dbHome.community || {
         label: "komunitas",
         title: "12,400+ teman seperjalanan",
         sub: "Diskusi santai, sharing pengalaman, saling ingetin di Telegram & Discord.",
         colors: ["#FFD6A5", "#A8D8B9", "#FFADAD", "#D8CCEF", "#F7E4A0"],
         cta: "Gabung sekarang"
       },
-      reminder: {
+      reminder: dbHome.reminder || {
         sticker: "jangan lupa!",
         label: "reminder",
         title: "Sudah baca Al-Mulk hari ini?",
@@ -95,11 +128,11 @@ export class HomeController {
         ctaPrimary: "Baca sekarang",
         ctaSecondary: "Ingetin nanti"
       },
-      miniQuote: {
+      miniQuote: dbHome.miniQuote || {
         text: "Yang penting jalan terus, gak perlu sempurna — cukup konsisten satu langkah tiap hari.",
         author: "Ustadz Hanan Attaki"
       },
-      intention: {
+      intention: dbHome.intention || {
         label: "niat hari ini",
         placeholder: "Hari ini aku mau…",
         suggestions: ["sholat tepat waktu", "baca 1 lembar Qur'an", "senyum ke ortu", "sedekah 5rb"]
@@ -108,7 +141,132 @@ export class HomeController {
       products,
       events,
       classes,
-      settings: toObject(settings)
+      settings: settingsObj
     };
+  }
+
+  private async getLivePrayerData(): Promise<{ timings: Record<string, string>; hijri: { day: string; month: string; year: string } }> {
+    const now = Date.now();
+    if (this.prayerCache && now - this.prayerCache.fetchedAt < this.cacheTTL) {
+      return this.prayerCache;
+    }
+
+    try {
+      const response = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Jakarta&country=Indonesia&method=2", {
+        signal: AbortSignal.timeout(3000) // 3 seconds timeout
+      });
+
+      if (!response.ok) throw new Error(`API returned status ${response.status}`);
+      const json = await response.json();
+
+      if (json && json.code === 200 && json.data) {
+        const timings = json.data.timings;
+        const hijri = {
+          day: json.data.date.hijri.day,
+          month: json.data.date.hijri.month.en,
+          year: json.data.date.hijri.year
+        };
+
+        this.prayerCache = { timings, hijri, fetchedAt: now };
+        return { timings, hijri };
+      }
+      throw new Error("Invalid response format");
+    } catch (err) {
+      console.warn("Failed to fetch live prayer/Hijri data, using fallback", err);
+      if (this.prayerCache) {
+        return this.prayerCache;
+      }
+      // Return hardcoded seeded defaults as absolute fallback
+      return {
+        timings: {
+          Fajr: "04:38",
+          Dhuhr: "11:52",
+          Asr: "15:24",
+          Maghrib: "17:58",
+          Isha: "19:08"
+        },
+        hijri: {
+          day: "11",
+          month: "Dhu al-Qi'dah",
+          year: "1447"
+        }
+      };
+    }
+  }
+
+  private calculateNextPrayer(timings: Record<string, string>, currentMinutes: number) {
+    const prayerNames = ["Subuh", "Dzuhur", "Ashar", "Maghrib", "Isya"];
+    const apiNames = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+
+    let nextIndex = -1;
+    let nextMinutes = 1440;
+
+    for (let i = 0; i < apiNames.length; i++) {
+      const timeStr = timings[apiNames[i]];
+      if (!timeStr) continue;
+      const [h, m] = timeStr.split(":").map(Number);
+      const prayMin = h * 60 + m;
+      if (prayMin > currentMinutes && prayMin < nextMinutes) {
+        nextMinutes = prayMin;
+        nextIndex = i;
+      }
+    }
+
+    let nextName = "Subuh";
+    let nextTime = timings["Fajr"] || "04:38";
+    let diffLabel = "";
+
+    if (nextIndex !== -1) {
+      nextName = prayerNames[nextIndex];
+      nextTime = timings[apiNames[nextIndex]];
+      const diff = nextMinutes - currentMinutes;
+      const hours = Math.floor(diff / 60);
+      const mins = diff % 60;
+      diffLabel = `· ${hours > 0 ? `${hours} jam ` : ""}${mins} menit lagi`;
+    } else {
+      nextName = "Subuh";
+      nextTime = timings["Fajr"] || "04:38";
+      const [h, m] = nextTime.split(":").map(Number);
+      const subuhMin = h * 60 + m;
+      const diff = (1440 - currentMinutes) + subuhMin;
+      const hours = Math.floor(diff / 60);
+      const mins = diff % 60;
+      diffLabel = `· ${hours > 0 ? `${hours} jam ` : ""}${mins} menit lagi`;
+    }
+
+    return { nextName, nextTime, nextLabel: diffLabel };
+  }
+
+  private getIndonesianDate(): string {
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu"];
+    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+    const now = new Date();
+    const dayName = days[now.getDay()];
+    const dateNum = now.getDate();
+    const monthName = months[now.getMonth()];
+
+    return `${dayName}, ${dateNum} ${monthName}`;
+  }
+
+  private mapHijriMonth(monthEn: string): string {
+    const mapping: Record<string, string> = {
+      "Muharram": "Muharram",
+      "Safar": "Safar",
+      "Rabi' al-awwal": "Rabi'ul Awwal",
+      "Rabi' al-thani": "Rabi'ul Akhir",
+      "Jumada al-ula": "Jumadil Awwal",
+      "Jumada al-akhirah": "Jumadil Akhir",
+      "Rajab": "Rajab",
+      "Sha'ban": "Sya'ban",
+      "Ramadan": "Ramadhan",
+      "Shawwal": "Syawwal",
+      "Dhu al-Qi'dah": "Dzul-Q",
+      "Dhu al-Hijjah": "Dzul-H",
+      "Dhul-Hijjah": "Dzul-H",
+      "Dhul-Qa'dah": "Dzul-Q",
+      "Dhu al-Qa'dah": "Dzul-Q"
+    };
+    return mapping[monthEn] || monthEn;
   }
 }

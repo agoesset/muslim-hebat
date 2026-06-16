@@ -163,6 +163,11 @@ export function KelasPage({ onNav }) {
     return normalized;
   }, [apiCourses]);
 
+  const KELAS_KATEGORI = React.useMemo(() => {
+    const categories = new Set(courses.map(c => c.cat).filter(Boolean));
+    return ["Semua", ...Array.from(categories)];
+  }, [courses]);
+
   let list = courses;
   if (cat !== "Semua") list = list.filter(k => k.cat === cat);
   if (level !== "Semua level") list = list.filter(k => k.level === level);
@@ -650,16 +655,21 @@ function InstructorRow() {
 }
 
 function KelasTestimoni() {
-  const t = [
-    { name: "Rina, 27", role: "Mahasiswa S2", text: "Awalnya cuma bisa baca alif-ba-ta. Sekarang udah hampir hatam juz 30. Pak Ustadnya sabar banget.", avatar: "var(--peach)", kelas: "Tahsin Pemula" },
-    { name: "Faiz, 34", role: "Bapak 2 anak", text: "Workshop parentingnya bener-bener bantu pas anak pertama mulai sholat. Gak melulu teori, banyak studi kasus real.", avatar: "var(--sage)", kelas: "Mendidik Anak Cara Nabi" },
-    { name: "Bunda Sari", role: "IRT", text: "Suka bgt kelas khusyu' sholatnya — singkat tapi praktis. Bisa diulang-ulang kapan aja. Worth it!", avatar: "var(--lilac)", kelas: "Sholat Khusyu'" },
+  const { data: apiTestimonials } = usePublicData("/public/testimonials?targetType=class");
+
+  const fallbackTestimonials = [
+    { name: "Rina, 27", role: "Mahasiswa S2", text: "Awalnya cuma bisa baca alif-ba-ta. Sekarang udah hampir hatam juz 30. Pak Ustadnya sabar banget.", color: "var(--peach)", kelas: "Tahsin Pemula" },
+    { name: "Faiz, 34", role: "Bapak 2 anak", text: "Workshop parentingnya bener-bener bantu pas anak pertama mulai sholat. Gak melulu teori, banyak studi kasus real.", color: "var(--sage)", kelas: "Mendidik Anak Cara Nabi" },
+    { name: "Bunda Sari", role: "IRT", text: "Suka bgt kelas khusyu' sholatnya — singkat tapi praktis. Bisa diulang-ulang kapan aja. Worth it!", color: "var(--lilac)", kelas: "Sholat Khusyu'" },
   ];
+
+  const list = apiTestimonials && apiTestimonials.length > 0 ? apiTestimonials : fallbackTestimonials;
+
   return (
     <section className="shell" style={{ marginBottom: 40 }}>
       <SectionHeader kicker="cerita santri" title="Yang udah belajar bareng" sub="Sedikit dari ribuan testimoni alumni kelas Muslim Hebat."/>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-        {t.map((x, i) => (
+        {list.map((x, i) => (
           <article key={i} className="card" style={{ padding: 22, display: "flex", flexDirection: "column", gap: 14 }}>
             <div style={{ display: "flex", gap: 4, color: "var(--coral)" }}>
               {[1,2,3,4,5].map(s => <Icon.Star key={s} size={14}/>)}
@@ -669,15 +679,17 @@ function KelasTestimoni() {
             </p>
             <div style={{ marginTop: "auto", paddingTop: 8 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 40, height: 40, borderRadius: "50%", background: x.avatar, border: "1.5px solid var(--ink)" }}/>
+                <div style={{ width: 40, height: 40, borderRadius: "50%", background: x.color || x.avatar, border: "1.5px solid var(--ink)" }}/>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600 }}>{x.name}</div>
                   <div style={{ fontSize: 11, color: "var(--ink-soft)" }}>{x.role}</div>
                 </div>
               </div>
-              <div style={{ fontSize: 11, color: "var(--coral-deep)", marginTop: 8, fontStyle: "italic" }}>
-                — alumni {x.kelas}
-              </div>
+              {x.kelas && (
+                <div style={{ fontSize: 11, color: "var(--coral-deep)", marginTop: 8, fontStyle: "italic" }}>
+                  — alumni {x.kelas}
+                </div>
+              )}
             </div>
           </article>
         ))}

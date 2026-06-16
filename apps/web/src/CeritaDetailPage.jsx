@@ -4,6 +4,9 @@ import React from "react";
 import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
+import { api } from "./api.js";
+import { usePublicData } from "./hooks/usePublicData.js";
+import { toast } from "./Toast.jsx";
 
 export function CeritaDetailPage({ onNav, cerita }) {
   const c = cerita;
@@ -41,7 +44,7 @@ export function CeritaDetailPage({ onNav, cerita }) {
       <CeritaDetailHero c={c}/>
       <CeritaBody c={c} clapped={clapped} setClapped={setClapped} saved={saved} setSaved={setSaved}/>
       <AuthorCard c={c}/>
-      <CommentsSection/>
+      <CommentsSection slug={c.slug} />
       <NewsletterBlock/>
     </div>
   );
@@ -206,12 +209,40 @@ function AuthorCard({ c }) {
   );
 }
 
-function CommentsSection() {
-  const comments = [
+function CommentsSection({ slug }) {
+  const { data: apiComments, setData: setCommentsData } = usePublicData(`/public/articles/${slug}/comments`, []);
+  const [name, setName] = React.useState("");
+  const [text, setText] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+
+  const fallbackComments = [
     { name: "Rina", avatar: "var(--peach)", date: "1 jam lalu", text: "Yang nomor 2 ngena banget. Sering banget ngerasa berat sholat, padahal pas wudhu aja, mood udah lumayan." },
     { name: "Faiz", avatar: "var(--sage)", date: "3 jam lalu", text: "Suka banget gaya nulisnya — santai tapi nendang. Lanjut bikin yang serupa dong!" },
     { name: "Bunda Lia", avatar: "var(--lilac)", date: "kemarin", text: "Aku praktekin yang nomor 3 minggu lalu — beneran works. Kerjaan rumah jadi gak overwhelming." },
   ];
+
+  const comments = apiComments && apiComments.length > 0 ? apiComments : fallbackComments;
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!name.trim() || !text.trim() || submitting) return;
+    setSubmitting(true);
+    try {
+      const newComment = await api(`/public/articles/${slug}/comments`, {
+        method: "POST",
+        body: JSON.stringify({ name, text })
+      });
+      setCommentsData(prev => [newComment, ...(prev || [])]);
+      setName("");
+      setText("");
+      toast("Komentar berhasil dikirim! 🤍", "success");
+    } catch (err) {
+      toast(err.message || "Gagal mengirim komentar. Coba lagi ya.", "error");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <section className="shell" style={{ marginBottom: 40 }}>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
@@ -220,41 +251,78 @@ function CommentsSection() {
           <button className="btn btn--sm">Urutkan: Terbaru ↓</button>
         </div>
 
-        <div className="card" style={{ padding: 22, marginBottom: 20 }}>
+        <form onSubmit={handleSubmit} className="card" style={{ padding: 22, marginBottom: 20, display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 12 }}>
+            <input
+              type="text"
+              placeholder="Nama kamu"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              style={{
+                border: "1.5px solid rgba(31,58,45,0.12)",
+                padding: "8px 12px",
+                borderRadius: 12,
+                fontFamily: "var(--font-body)",
+                fontSize: 14,
+                background: "var(--paper)",
+                color: "var(--ink)",
+                outline: "none"
+              }}
+            />
+            <span style={{ display: "flex", alignItems: "center", fontSize: 12, color: "var(--ink-soft)" }}>Tulis nama kamu biar kami kenal ya ☕</span>
+          </div>
           <textarea
             placeholder="Tulis pendapat kamu pelan-pelan…"
             rows={3}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            required
             style={{
-              width: "100%", border: 0, padding: 0,
-              background: "transparent", outline: "none", resize: "none",
+              width: "100%", border: "1.5px solid rgba(31,58,45,0.12)", padding: "10px 12px",
+              background: "var(--paper)", outline: "none", resize: "none",
+              borderRadius: 12,
               fontFamily: "var(--font-body)", fontSize: 15, color: "var(--ink)"
             }}
           />
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(31,58,45,0.08)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4, paddingTop: 12, borderTop: "1px solid rgba(31,58,45,0.08)" }}>
             <span style={{ fontSize: 12, color: "var(--ink-soft)" }}>Tolong baik-baik aja ya. Kita semua lagi belajar 🤍</span>
-            <button className="btn btn--sm btn--primary">Kirim <Icon.Arrow size={12}/></button>
+            <button type="submit" className="btn btn--sm btn--primary" disabled={submitting}>
+              {submitting ? "Mengirim..." : "Kirim"} <Icon.Arrow size={12}/>
+            </button>
           </div>
-        </div>
+        </form>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {comments.map((cm, i) => (
-            <div key={i} className="card" style={{ padding: 20, display: "flex", gap: 14 }}>
-              <div style={{ width: 40, height: 40, borderRadius: "50%", background: cm.avatar, border: "1.5px solid var(--ink)", flexShrink: 0 }}/>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <strong style={{ fontSize: 14 }}>{cm.name}</strong>
-                  <span style={{ fontSize: 11, color: "var(--ink-soft)" }}>{cm.date}</span>
+          {comments.map((cm, i) => {
+            const dateStr = cm.createdAt ? new Date(cm.createdAt).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit"
+            }) : cm.date;
+
+            return (
+              <div key={cm.id || i} className="card" style={{ padding: 20, display: "flex", gap: 14 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: "50%",
+                  background: cm.avatar || "var(--peach)",
+                  border: "1.5px solid var(--ink)", flexShrink: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18, fontWeight: 700
+                }}>
+                  {cm.name ? cm.name.charAt(0).toUpperCase() : "?"}
                 </div>
-                <p style={{ fontSize: 14, marginTop: 6, margin: 0, lineHeight: 1.5 }}>{cm.text}</p>
-                <div style={{ display: "flex", gap: 14, marginTop: 8, fontSize: 12, color: "var(--ink-soft)" }}>
-                  <button style={{ background: "none", border: 0, color: "inherit", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 4 }}>
-                    <Icon.Heart size={11}/> 12
-                  </button>
-                  <button style={{ background: "none", border: 0, color: "inherit", cursor: "pointer", padding: 0 }}>Balas</button>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                    <strong style={{ fontSize: 14 }}>{cm.name}</strong>
+                    <span style={{ fontSize: 11, color: "var(--ink-soft)" }}>{dateStr}</span>
+                  </div>
+                  <p style={{ fontSize: 14, marginTop: 6, margin: 0, lineHeight: 1.5 }}>{cm.text}</p>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

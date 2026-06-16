@@ -421,7 +421,7 @@
 /* ========== CONTENT GRID ========== */
 .admin-content-grid {
   display: grid;
-  grid-template-columns: 380px 1fr;
+  grid-template-columns: 460px 1fr;
   gap: var(--admin-gap);
   align-items: start;
 }
@@ -1030,6 +1030,10 @@
   border-radius: var(--radius-sm);
   border: 1.5px solid rgba(31, 58, 45, 0.15);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
 }
 
 .admin-theme-info {
@@ -1138,3 +1142,159 @@
     opacity: 1;
   }
 }
+
+/* ========== RICH TEXT EDITOR (TIPTAP) ========== */
+.rte-wrap {
+  border: 1.5px solid rgba(31, 58, 45, 0.1);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.rte-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(31, 58, 45, 0.03);
+  border-bottom: 1.5px solid rgba(31, 58, 45, 0.08);
+}
+
+.rte-btn {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--ink);
+  transition: all 0.1s ease;
+}
+
+.rte-btn:hover {
+  background: rgba(31, 58, 45, 0.08);
+}
+
+.rte-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(31, 58, 45, 0.15);
+  margin: 0 4px;
+}
+
+.rte-content {
+  padding: 12px;
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ProseMirror {
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ProseMirror p {
+  margin: 0 0 10px;
+}
+
+.ProseMirror h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 16px 0 8px;
+}
+
+.ProseMirror h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 14px 0 6px;
+}
+
+.ProseMirror ul, .ProseMirror ol {
+  padding-left: 20px;
+  margin: 0 0 10px;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid var(--ink-soft);
+  padding-left: 12px;
+  color: var(--ink-soft);
+  margin: 0 0 10px;
+}
+
+/* ========== PREMIUM FULL PAGE FORM & FILE UPLOAD STYLES ========== */
+.admin-form-page .admin-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  border: 1.5px solid rgba(31, 58, 45, 0.08);
+}
+
+.admin-file-upload-wrapper {
+  transition: all 0.2s ease-in-out;
+}
+
+.admin-file-upload-wrapper:hover {
+  background: rgba(31, 58, 45, 0.05) !important;
+  border-color: var(--ink) !important;
+}
+
+.admin-image-preview-container {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.admin-image-preview-container:hover {
+  transform: scale(1.02);
+}
+
+.admin-table-row {
+  transition: background 0.15s ease;
+}
+
+.admin-table-row:hover {
+  background: rgba(31, 58, 45, 0.02) !important;
+}
+
+.admin-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ========== SKELETON LOADER ANIMATIONS & COMPONENTS ========== */
+@keyframes admin-skeleton-pulse {
+  0% { background-color: rgba(31, 58, 45, 0.05); }
+  50% { background-color: rgba(31, 58, 45, 0.15); }
+  100% { background-color: rgba(31, 58, 45, 0.05); }
+}
+
+.admin-skeleton {
+  animation: admin-skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: 6px;
+  display: inline-block;
+  background-color: rgba(31, 58, 45, 0.05);
+}
+
+.admin-skeleton-line {
+  height: 14px;
+  width: 100%;
+}
+
+.admin-skeleton-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.admin-skeleton-rect {
+  height: 40px;
+  width: 100%;
+}
+
+

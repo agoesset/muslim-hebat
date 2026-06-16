@@ -24,7 +24,7 @@
     "db:generate": "npm run prisma:generate -w @muslim-hebat/api",
     "db:migrate": "npm run prisma:migrate -w @muslim-hebat/api",
     "db:seed": "npm run seed -w @muslim-hebat/api",
-    "heroku-postbuild": "npm run build -w @muslim-hebat/web && npm run build -w @muslim-hebat/api && npm run db:generate && rm -rf apps/api/dist/src/public && cp -r apps/web/dist apps/api/dist/src/public",
+    "heroku-postbuild": "npm run db:generate && npm run build -w @muslim-hebat/web && npm run build -w @muslim-hebat/api && rm -rf apps/api/dist/src/public && cp -r apps/web/dist apps/api/dist/src/public",
     "start": "npm run start -w @muslim-hebat/api"
   },
   "engines": {

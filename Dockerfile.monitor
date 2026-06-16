@@ -1,0 +1,13 @@
+FROM alpine:3.20
+
+RUN apk add --no-cache bash curl
+
+WORKDIR /app
+COPY scripts/monitor.sh /app/monitor.sh
+RUN chmod +x /app/monitor.sh
+
+ENV URL=http://localhost
+ENV TIMEOUT=10
+ENV LABEL=muslim-hebat
+
+CMD ["sh", "-c", "while true; do /app/monitor.sh; sleep 60; done"]

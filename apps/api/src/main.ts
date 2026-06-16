@@ -3,22 +3,74 @@ import { ValidationPipe, RequestMethod } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Request, Response, NextFunction } from "express";
-import { readdirSync, statSync } from "fs";
+import { readdirSync, statSync, readFileSync } from "fs";
 import { join } from "path";
 import * as cookieParser from "cookie-parser";
 import * as express from "express";
+import helmet from "helmet";
 import { PrismaClient } from "@prisma/client";
 import { AppModule } from "./app.module";
+import { env } from "./config/env";
+import { initSentry } from "./config/sentry";
+import { MetricsMiddleware } from "./metrics/metrics.service";
+import { generateNonce } from "./config/nonce";
+
+initSentry();
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const webOrigin = process.env.WEB_ORIGIN || "http://127.0.0.1:5173";
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: env.isProduction ? ["error", "warn", "log"] : undefined,
+  });
+
+  // Attach a per-request CSP nonce
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.locals.nonce = generateNonce();
+    next();
+  });
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: [
+            "'self'",
+            // Allow Vite dev HMR in development only
+            ...(env.isDevelopment ? ["'unsafe-eval'", "'unsafe-inline'"] : []),
+            (_req: any, res: any) => `'nonce-${res.locals.nonce as string}'`,
+          ],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "https://fonts.googleapis.com",
+            (_req: any, res: any) => `'nonce-${res.locals.nonce as string}'`,
+          ],
+          fontSrc: ["'self'", "https://fonts.gstatic.com"],
+          imgSrc: ["'self'", "data:", "blob:"],
+          connectSrc: ["'self'", "https://*.sentry.io"],
+          frameAncestors: ["'none'"],
+          formAction: ["'self'"],
+          baseUri: ["'self'"],
+          objectSrc: ["'none'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+    })
+  );
+
+  // Structured request logging + metrics
+  const metricsService = await app.resolve(MetricsMiddleware);
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    metricsService.use(req, res, next);
+  });
+
+  app.enableCors({
+    origin: env.WEB_ORIGIN.split(","),
+    credentials: true,
+    methods: "GET,POST,PUT,PATCH,DELETE"
+  });
 
   app.use(cookieParser());
-  app.enableCors({
-    origin: webOrigin.split(","),
-    credentials: true
-  });
 
   // Serve frontend static files in production
   const publicPath = join(__dirname, "public");
@@ -93,8 +145,9 @@ async function bootstrap() {
     transform: true
   }));
 
-  // SPA fallback: serve index.html for non-API, non-static routes
-  const indexHtml = join(publicPath, "index.html");
+  // SPA fallback: serve index.html for non-API, non-static routes with CSP nonce
+  const indexHtmlPath = join(publicPath, "index.html");
+  const indexHtmlTemplate = readFileSync(indexHtmlPath, "utf-8");
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (
       req.path.startsWith("/api") ||
@@ -103,12 +156,17 @@ async function bootstrap() {
     ) {
       next();
     } else {
+      const nonce = res.locals.nonce as string;
+      const html = indexHtmlTemplate
+        .replace(/__CSP_NONCE__/g, nonce)
+        .replace(/<script /g, `<script nonce="${nonce}" `)
+        .replace(/<link rel="stylesheet" /g, `<link rel="stylesheet" nonce="${nonce}" `);
       res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-      res.sendFile(indexHtml);
+      res.type("html").send(html);
     }
   });
 
-  await app.listen(Number(process.env.PORT || 3000), "0.0.0.0");
+  await app.listen(env.PORT, "0.0.0.0");
 }
 
 bootstrap();

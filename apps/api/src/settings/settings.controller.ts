@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Param, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Put, UseGuards, UseInterceptors } from "@nestjs/common";
 import { AdminAuthGuard } from "../auth/auth.guard";
+import { AuditInterceptor } from "../audit/audit.interceptor";
 import { PrismaService } from "../prisma.service";
 import { SiteSettingDto } from "./settings.dto";
 
 @Controller()
+@UseInterceptors(AuditInterceptor)
 export class SettingsController {
   constructor(private readonly prisma: PrismaService) {}
 

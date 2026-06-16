@@ -70,6 +70,19 @@ export class ContentDto {
   size?: string;
 
   @IsOptional()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  readingTime?: number;
+
+  @IsOptional()
+  @IsString()
+  coverImage?: string;
+
+  @IsOptional()
   @IsEnum(ContentStatusDto)
   status?: ContentStatusDto;
 
@@ -124,6 +137,18 @@ export class ProductDto {
   tag?: string;
 
   @IsOptional()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  featured?: boolean;
+
+  @IsOptional()
+  @IsString()
+  image?: string;
+
+  @IsOptional()
   @IsString()
   color?: string;
 
@@ -148,6 +173,10 @@ export class KajianEventDto {
   @IsString()
   @MinLength(2)
   excerpt!: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 
   @IsOptional()
   @IsString()
@@ -195,6 +224,18 @@ export class KajianEventDto {
   @IsOptional()
   @IsBoolean()
   free?: boolean;
+
+  @IsOptional()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  featured?: boolean;
+
+  @IsOptional()
+  @IsString()
+  coverImage?: string;
 
   @IsOptional()
   @IsString()
@@ -277,6 +318,18 @@ export class CourseDto {
   tag?: string;
 
   @IsOptional()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  featured?: boolean;
+
+  @IsOptional()
+  @IsString()
+  image?: string;
+
+  @IsOptional()
   @IsString()
   batch?: string;
 
@@ -321,4 +374,43 @@ export class CourseDto {
   @IsOptional()
   @IsEnum(ContentStatusDto)
   status?: ContentStatusDto;
+}
+
+export class CommentDto {
+  @IsString()
+  @MinLength(2)
+  name!: string;
+
+  @IsString()
+  @MinLength(2)
+  text!: string;
+
+  @IsOptional()
+  @IsString()
+  parentId?: string;
+}
+
+export class TestimonialDto {
+  @IsString()
+  @MinLength(2)
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  role?: string;
+
+  @IsString()
+  @MinLength(2)
+  text!: string;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
+
+  @IsString()
+  targetType!: string;
+
+  @IsOptional()
+  @IsString()
+  targetId?: string;
 }

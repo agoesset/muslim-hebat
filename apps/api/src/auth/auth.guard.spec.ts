@@ -1,5 +1,6 @@
 import { UnauthorizedException } from "@nestjs/common";
 import { AdminAuthGuard } from "./auth.guard";
+import { env } from "../config/env";
 import * as jwt from "jsonwebtoken";
 
 describe("AdminAuthGuard", () => {
@@ -22,7 +23,7 @@ describe("AdminAuthGuard", () => {
     it("should return true and attach user for valid ADMIN token", () => {
       const token = jwt.sign(
         { sub: "user-1", email: "a@b.com", role: "ADMIN" },
-        "change-me-in-production",
+        env.JWT_SECRET,
         { expiresIn: "1h" }
       );
       const req = { cookies: { mh_admin_session: token } };
@@ -51,7 +52,7 @@ describe("AdminAuthGuard", () => {
     it("should throw UnauthorizedException when role is not ADMIN", () => {
       const token = jwt.sign(
         { sub: "user-1", email: "a@b.com", role: "USER" },
-        "change-me-in-production",
+        env.JWT_SECRET,
         { expiresIn: "1h" }
       );
       const req = { cookies: { mh_admin_session: token } };

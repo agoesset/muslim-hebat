@@ -12,3 +12,8 @@ export class SubscriberDto {
   @IsString()
   source?: string;
 }
+
+export class UnsubscribeDto {
+  @IsEmail()
+  email!: string;
+}

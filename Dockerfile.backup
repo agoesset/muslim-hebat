@@ -1,0 +1,14 @@
+FROM postgres:16-alpine
+
+RUN apk add --no-cache bash curl tzdata
+
+WORKDIR /app
+COPY scripts/backup.sh /app/backup.sh
+COPY scripts/restore.sh /app/restore.sh
+RUN chmod +x /app/backup.sh /app/restore.sh
+
+ENV BACKUP_DIR=/backups
+ENV BACKUP_SCHEDULE="0 2 * * *"
+ENV TZ=Asia/Jakarta
+
+CMD ["sh", "-c", "echo \"$BACKUP_SCHEDULE /app/backup.sh >> /var/log/cron.log 2>&1\" | crontab - && crond -f -L /var/log/cron.log"]

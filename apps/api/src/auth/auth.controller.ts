@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import type { Request, Response } from "express";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./auth.dto";
@@ -11,6 +12,7 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post("login")
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const user = await this.auth.validateUser(dto.email, dto.password);
     const token = this.auth.signSession(user);

@@ -3,6 +3,7 @@ import React from "react";
 
 import { Icon } from "./icons.jsx";
 import { useCta } from "./context/cta-context.jsx";
+import { SOCIAL_LINKS, SITE_LINKS } from "./site-links.ts";
 
 export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 }) {
   // scalloped wave — bumps that read as friendly, organic
@@ -22,37 +23,39 @@ export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 })
   );
 }
 
-export function Nav({ page, onNav }) {
+import { Link } from "react-router-dom";
+
+export function Nav({ page }) {
   const { openInterest } = useCta();
   const links = [
-    { id: "home",   label: "Beranda" },
-    { id: "bacaan", label: "Bacaan" },
-    { id: "kelas",  label: "Kelas" },
-    { id: "produk", label: "Produk" },
-    { id: "kajian", label: "Ngaji Bareng" },
+    { id: "home",   label: "Beranda", path: "/" },
+    { id: "bacaan", label: "Bacaan", path: "/bacaan" },
+    { id: "kelas",  label: "Kelas", path: "/kelas" },
+    { id: "produk", label: "Produk", path: "/produk" },
+    { id: "kajian", label: "Ngaji Bareng", path: "/kajian" },
   ];
   return (
     <header style={{ paddingTop: 24, paddingBottom: 8, position: "sticky", top: 0, zIndex: 50, background: "var(--bg)" }}>
       <div className="shell row" style={{ gap: 18 }}>
-        <button onClick={() => onNav("home")} style={{ background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", gap: 10 }}>
+        <Link to="/" style={{ background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
           <Logo />
-        </button>
+        </Link>
         <div className="grow"/>
         <nav className="row illus-only" style={{ gap: 4, background: "var(--paper)", padding: 6, borderRadius: 999, border: "1.5px solid rgba(31,58,45,0.1)" }}>
           {links.map(l => (
-            <button key={l.id}
-                    className="nav-link"
-                    aria-current={page === l.id ? "page" : undefined}
-                    onClick={() => onNav(l.id)}
-                    style={{ border: 0, background: page === l.id ? "var(--ink)" : "transparent", color: page === l.id ? "var(--bg)" : "var(--ink)" }}>
+            <Link key={l.id}
+                  to={l.path}
+                  className="nav-link"
+                  aria-current={page === l.id ? "page" : undefined}
+                  style={{ border: 0, background: page === l.id ? "var(--ink)" : "transparent", color: page === l.id ? "var(--bg)" : "var(--ink)", textDecoration: "none" }}>
               {l.label}
-            </button>
+            </Link>
           ))}
         </nav>
-        <button className="btn btn--sm">
+        <button type="button" className="btn btn--sm">
           <Icon.Search size={14}/> Cari
         </button>
-        <button className="btn btn--sm btn--primary" onClick={() => openInterest({ title: "Daftar gratis di Muslim Hebat", source: "header:daftar-gratis", intent: "subscribe" })}>
+        <button type="button" className="btn btn--sm btn--primary" onClick={() => openInterest({ title: "Daftar gratis di Muslim Hebat", source: "header:daftar-gratis", intent: "subscribe" })}>
           Daftar gratis <Icon.Arrow size={14}/>
         </button>
       </div>
@@ -107,6 +110,27 @@ export function Blob({ color = "var(--peach)", size = 200, top, left, right, bot
 }
 
 export function Footer() {
+  const explore = [
+    { label: "Bacaan", href: SITE_LINKS.bacaan },
+    { label: "Kelas", href: SITE_LINKS.kelas },
+    { label: "Produk", href: SITE_LINKS.produk },
+    { label: "Ngaji Bareng", href: SITE_LINKS.kajian },
+  ];
+  const help = [
+    { label: "FAQ", href: SITE_LINKS.faq },
+    { label: "Kontak", href: SITE_LINKS.kontak },
+    { label: "Refund", href: SITE_LINKS.refund },
+    { label: "Syarat", href: SITE_LINKS.syarat },
+    { label: "Privasi", href: SITE_LINKS.privasi },
+  ];
+  const social = [
+    { label: "Instagram", href: SOCIAL_LINKS.instagram, icon: Icon.Instagram },
+    { label: "TikTok", href: SOCIAL_LINKS.tiktok, icon: Icon.TikTok },
+    { label: "YouTube", href: SOCIAL_LINKS.youtube, icon: Icon.Youtube },
+    { label: "Spotify", href: SOCIAL_LINKS.spotify, icon: Icon.Spotify },
+    { label: "Telegram", href: SOCIAL_LINKS.telegram, icon: Icon.Telegram },
+  ];
+
   return (
     <footer style={{ background: "var(--ink)", color: "var(--bg)", marginTop: 80, position: "relative" }}>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, transform: "translateY(-100%)", lineHeight: 0 }}>
@@ -122,9 +146,9 @@ export function Footer() {
               Tumbuh bareng jadi muslim yang lebih dekat sama Allah — pelan-pelan, gak harus sempurna.
             </p>
           </div>
-          <FooterCol title="Jelajahi" items={["Bacaan", "Kelas", "Produk", "Ngaji Bareng", "Komunitas"]}/>
-          <FooterCol title="Bantuan" items={["FAQ", "Kontak", "Refund", "Syarat", "Privasi"]}/>
-          <FooterCol title="Sosial" items={["Instagram", "TikTok", "YouTube", "Spotify", "Telegram"]}/>
+          <FooterCol title="Jelajahi" items={explore} />
+          <FooterCol title="Bantuan" items={help} />
+          <FooterCol title="Sosial" items={social} />
         </div>
         <div style={{ marginTop: 48, paddingTop: 24, borderTop: "1px solid rgba(251,243,226,0.18)", display: "flex", justifyContent: "space-between", fontSize: 13, opacity: 0.6 }}>
           <span>© 2026 Muslim Hebat. Dibuat dengan ❤️ di Indonesia.</span>
@@ -140,7 +164,24 @@ function FooterCol({ title, items }) {
     <div>
       <div style={{ fontFamily: "var(--font-hand)", fontSize: 22, color: "var(--peach)", marginBottom: 8 }}>{title}</div>
       <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8, fontSize: 14, opacity: 0.85 }}>
-        {items.map(i => <li key={i}><a href="#">{i}</a></li>)}
+        {items.map((item) => {
+          const { label, href, icon: IconComponent } = item;
+          const isPlaceholder = href === "#";
+          return (
+            <li key={label}>
+              <a
+                href={href}
+                aria-label={isPlaceholder ? `${label} (akan segera hadir)` : undefined}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                style={{ display: "flex", alignItems: "center", gap: 6 }}
+              >
+                {IconComponent && <IconComponent size={14} />}
+                {label}
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

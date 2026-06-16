@@ -59,7 +59,7 @@ function PublicApp() {
   return (
     <div>
       <Analytics />
-      <Nav page={page} onNav={goNav} />
+      <Nav page={page} />
       <ErrorBoundary>
         <Routes>
           <Route path="/" element={<><Seo title="Muslim Hebat" description="Belajar Islam dengan bacaan ringan, produk bermanfaat, kelas, dan jadwal ngaji bareng." /><HomePage onNav={goNav} onOpenCerita={openCerita} /></>} />

@@ -1,5 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { UnauthorizedException } from "@nestjs/common";
+import * as bcrypt from "bcryptjs";
 import { AuthService } from "./auth.service";
 import { PrismaService } from "../prisma.service";
 
@@ -22,8 +23,6 @@ const mockPrisma = {
 jest.mock("bcryptjs", () => ({
   compare: jest.fn()
 }));
-
-const bcrypt = require("bcryptjs");
 
 describe("AuthService", () => {
   let service: AuthService;

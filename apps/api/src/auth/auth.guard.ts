@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import * as jwt from "jsonwebtoken";
+import { env } from "../config/env";
 
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
@@ -9,7 +10,7 @@ export class AdminAuthGuard implements CanActivate {
     if (!token) throw new UnauthorizedException("Missing session");
 
     try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET || "change-me-in-production") as { sub: string; email: string; role: string };
+      const payload = jwt.verify(token, env.JWT_SECRET) as { sub: string; email: string; role: string };
       if (payload.role !== "ADMIN") throw new UnauthorizedException("Invalid role");
       req.user = payload;
       return true;

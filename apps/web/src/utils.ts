@@ -1,7 +1,7 @@
-export function timeAgo(date) {
+export function timeAgo(date: string | Date | number): string {
   const now = new Date();
   const then = new Date(date);
-  const diffMs = now - then;
+  const diffMs = now.getTime() - then.getTime();
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);
   const diffHour = Math.floor(diffMin / 60);
@@ -19,18 +19,18 @@ export function timeAgo(date) {
   return `${diffYear} tahun lalu`;
 }
 
-export function getInitials(name) {
+export function getInitials(name: string | null | undefined): string {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
-export function stringToColor(str) {
+export function stringToColor(str: string): string {
   const colors = [
     "var(--sage)", "var(--peach)", "var(--coral)", "var(--lilac)", "var(--butter)",
     "#B8DDC4", "#FFD6A5", "#FFB4A8", "#D8CCEF", "#F7E4A0",
-    "#A8D5BA", "#F0C9A0", "#E8A090", "#C8B8E0", "#E8D490"
+    "#A8D5BA", "#F0C9A0", "#E8A090", "#C8B8E0", "#E8D490",
   ];
   let hash = 0;
   for (let i = 0; i < str.length; i++) {

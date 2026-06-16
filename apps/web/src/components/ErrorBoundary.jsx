@@ -1,4 +1,5 @@
 import React from "react";
+import * as Sentry from "@sentry/react";
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -11,8 +12,8 @@ export class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, info) {
+    Sentry.captureException(error, { extra: info });
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.error("ErrorBoundary caught:", error, info);
     }
   }

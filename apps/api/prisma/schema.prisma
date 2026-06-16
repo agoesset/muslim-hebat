@@ -39,34 +39,42 @@ model Article {
   emoji       String?
   date        String?
   time        String?
+  readingTime Int?
   reads       Int           @default(0)
   claps       Int           @default(0)
   tag         String?
+  tags        String[]      @default([])
   featured    Boolean       @default(false)
   size        String?
+  coverImage  String?
   status      ContentStatus @default(DRAFT)
   publishedAt DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  comments Comment[]
 }
 
 model Product {
-  id               String        @id @default(cuid())
-  slug             String        @unique
-  name             String
-  excerpt          String
-  description      String        @default("")
-  category         String?
-  priceCents       Int           @default(0)
-  originalPriceCents Int         @default(0)
-  rating           Float         @default(0)
-  sold             Int           @default(0)
-  tag              String?
-  color            String?
-  emoji            String?
-  status           ContentStatus @default(DRAFT)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  id                 String        @id @default(cuid())
+  slug               String        @unique
+  name               String
+  excerpt            String
+  description        String        @default("")
+  category           String?
+  priceCents         Int           @default(0)
+  originalPriceCents Int           @default(0)
+  rating             Float         @default(0)
+  sold               Int           @default(0)
+  tag                String?
+  tags               String[]      @default([])
+  featured           Boolean       @default(false)
+  image              String?
+  color              String?
+  emoji              String?
+  status             ContentStatus @default(DRAFT)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 }
 
 model KajianEvent {
@@ -74,6 +82,7 @@ model KajianEvent {
   slug        String        @unique
   title       String
   excerpt     String
+  description String        @default("")
   speaker     String?
   location    String?
   eventType   String?
@@ -85,6 +94,9 @@ model KajianEvent {
   attendees   Int           @default(0)
   priceCents  Int           @default(0)
   free        Boolean       @default(true)
+  tags        String[]      @default([])
+  featured    Boolean       @default(false)
+  coverImage  String?
   color       String?
   status      ContentStatus @default(DRAFT)
   createdAt   DateTime      @default(now())
@@ -92,37 +104,41 @@ model KajianEvent {
 }
 
 model Course {
-  id               String        @id @default(cuid())
-  slug             String        @unique
-  title            String
-  excerpt          String
-  description      String        @default("")
-  category         String?
-  level            String?
-  format           String?
-  instructor       String?
-  lessons          Int           @default(0)
-  duration         String?
-  students         Int           @default(0)
-  rating           Float         @default(0)
-  reviews          Int           @default(0)
-  priceCents       Int           @default(0)
-  originalPriceCents Int         @default(0)
-  tag              String?
-  batch            String?
-  startDate        String?
-  startDay         String?
-  schedule         String?
-  platform         String?
-  slots            Int           @default(0)
-  slotsTaken       Int           @default(0)
-  statusDetail     String?
-  color            String?
-  emoji            String?
-  status           ContentStatus @default(DRAFT)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  id                 String        @id @default(cuid())
+  slug               String        @unique
+  title              String
+  excerpt            String
+  description        String        @default("")
+  category           String?
+  level              String?
+  format             String?
+  instructor         String?
+  lessons            Int           @default(0)
+  duration           String?
+  students           Int           @default(0)
+  rating             Float         @default(0)
+  reviews            Int           @default(0)
+  priceCents         Int           @default(0)
+  originalPriceCents Int           @default(0)
+  tag                String?
+  tags               String[]      @default([])
+  featured           Boolean       @default(false)
+  image              String?
+  batch              String?
+  startDate          String?
+  startDay           String?
+  schedule           String?
+  platform           String?
+  slots              Int           @default(0)
+  slotsTaken         Int           @default(0)
+  statusDetail       String?
+  color              String?
+  emoji              String?
+  status             ContentStatus @default(DRAFT)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 }
+
 model Subscriber {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -137,4 +153,40 @@ model SiteSetting {
   value     Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  name      String
+  text      String
+  parentId  String?
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies   Comment[] @relation("CommentReplies")
+  createdAt DateTime @default(now())
+
+  @@index([articleId])
+  @@index([parentId])
+}
+
+model Testimonial {
+  id         String   @id @default(cuid())
+  name       String
+  role       String?
+  text       String
+  color      String?
+  targetType String
+  targetId   String?
+  createdAt  DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

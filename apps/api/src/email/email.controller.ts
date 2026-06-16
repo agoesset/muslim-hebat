@@ -1,9 +1,12 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { PrismaService } from "../prisma.service";
 import { AdminAuthGuard } from "../auth/auth.guard";
+import { AuditInterceptor } from "../audit/audit.interceptor";
 import { EmailService } from "./email.service";
 
 @Controller()
+@UseInterceptors(AuditInterceptor)
 export class EmailController {
   constructor(
     private readonly prisma: PrismaService,
@@ -12,6 +15,7 @@ export class EmailController {
 
   @Post("admin/newsletter/send")
   @UseGuards(AdminAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 3600000 } })
   async sendNewsletter(@Body() dto: { subject: string; html: string; text?: string }) {
     const subscribers = await this.prisma.subscriber.findMany({
       select: { email: true },

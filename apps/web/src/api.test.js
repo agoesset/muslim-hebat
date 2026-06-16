@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { api, API_BASE_URL } from "./api.js";
+import { api, API_BASE_URL } from "./api.ts";
 
 describe("api helper", () => {
   beforeEach(() => {
@@ -27,9 +27,10 @@ describe("api helper", () => {
       const result = await api("/public/articles");
 
       expect(fetch).toHaveBeenCalledWith(
-        "/api/public/articles",
+        expect.stringMatching(/^\/api\/public\/articles\?_=\d+$/),
         expect.objectContaining({
           credentials: "include",
+          cache: "no-store",
           headers: { "Content-Type": "application/json" }
         })
       );
@@ -85,8 +86,9 @@ describe("api helper", () => {
       await api("/test", { headers: { "X-Custom": "value" } });
 
       expect(fetch).toHaveBeenCalledWith(
-        "/api/test",
+        expect.stringMatching(/^\/api\/test\?_=\d+$/),
         expect.objectContaining({
+          cache: "no-store",
           headers: { "Content-Type": "application/json", "X-Custom": "value" }
         })
       );

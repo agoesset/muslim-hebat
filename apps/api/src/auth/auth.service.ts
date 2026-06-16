@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import bcrypt = require("bcryptjs");
+import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
+import { env } from "../config/env";
 import { PrismaService } from "../prisma.service";
 
 @Injectable()
@@ -27,7 +28,7 @@ export class AuthService {
   signSession(user: { id: string; email: string; role: string }) {
     return jwt.sign(
       { sub: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || "change-me-in-production",
+      env.JWT_SECRET,
       { expiresIn: "7d" }
     );
   }

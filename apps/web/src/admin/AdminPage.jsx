@@ -1,21 +1,22 @@
 import React from "react";
 import { api } from "../api.js";
 import { applyTheme } from "../theme.js";
-import { Icon } from "../icons.jsx";
+import { renderAdminIcon, AdminIcon } from "../lucide-icons.jsx";
 import { Blob, SunDecor } from "../shell.jsx";
 import "../styles.css";
+import "./admin.css";
 
 const resources = [
-  { key: "articles", label: "Bacaan", emoji: "📖", color: "var(--sage)", count: 0 },
-  { key: "products", label: "Produk", emoji: "📦", color: "var(--peach)", count: 0 },
-  { key: "kajian", label: "Kajian", emoji: "🎤", color: "var(--coral)", count: 0 },
-  { key: "classes", label: "Kelas", emoji: "🎓", color: "var(--lilac)", count: 0 },
+  { key: "articles", label: "Bacaan", icon: "articles", color: "var(--sage)", count: 0 },
+  { key: "products", label: "Produk", icon: "products", color: "var(--peach)", count: 0 },
+  { key: "kajian", label: "Kajian", icon: "kajian", color: "var(--coral)", count: 0 },
+  { key: "classes", label: "Kelas", icon: "classes", color: "var(--lilac)", count: 0 },
 ];
 
 const statusConfig = {
-  PUBLISHED: { color: "#10b981", bg: "rgba(16,185,129,0.12)", label: "Published", dot: "🟢" },
-  DRAFT: { color: "#f59e0b", bg: "rgba(245,158,11,0.12)", label: "Draft", dot: "🟡" },
-  ARCHIVED: { color: "#6b7280", bg: "rgba(107,114,128,0.12)", label: "Archived", dot: "⚪" },
+  PUBLISHED: { color: "#10b981", bg: "rgba(16,185,129,0.12)", label: "Published" },
+  DRAFT: { color: "#f59e0b", bg: "rgba(245,158,11,0.12)", label: "Draft" },
+  ARCHIVED: { color: "#6b7280", bg: "rgba(107,114,128,0.12)", label: "Archived" },
 };
 
 export function AdminPage() {
@@ -76,21 +77,21 @@ function Login({ onLogin }) {
       
       <form className="admin-login-card" onSubmit={submit}>
         <div className="admin-login-header">
-          <span className="admin-login-emoji">✨</span>
+          <span className="admin-login-emoji">{renderAdminIcon("sparkle", { size: 32 })}</span>
           <h1>Masuk Admin</h1>
           <p>Kelola konten Muslim Hebat dengan mudah</p>
         </div>
-        
+
         {error && (
           <div className="admin-toast admin-toast-error">
-            <span>⚠️</span> {error}
+            {renderAdminIcon("warning", { size: 16 })} {error}
           </div>
         )}
-        
+
         <div className="admin-form-group">
           <label>Email</label>
           <div className="admin-input-wrapper">
-            <Icon.Mail size={16} />
+            {renderAdminIcon("mail", { size: 16 })},
             <input 
               type="email" 
               value={email} 
@@ -103,18 +104,18 @@ function Login({ onLogin }) {
         <div className="admin-form-group">
           <label>Password</label>
           <div className="admin-input-wrapper">
-            <Icon.Lock size={16} />
-            <input 
-              type="password" 
-              value={password} 
+            {renderAdminIcon("lock", { size: 16 })}
+            <input
+              type="password"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
             />
           </div>
         </div>
-        
+
         <button className="admin-btn admin-btn-primary admin-btn-lg" disabled={isLoading}>
-          {isLoading ? "Memuat..." : "Masuk Dashboard"} <Icon.Arrow size={14} />
+          {isLoading ? "Memuat..." : "Masuk Dashboard"} {renderAdminIcon("arrow", { size: 14 })}
         </button>
       </form>
     </div>
@@ -137,10 +138,10 @@ function Dashboard({ user, onLogout }) {
   }, []);
 
   const sidebarItems = [
-    { id: "dashboard", label: "Dashboard", icon: "Grid", color: "var(--sage)" },
-    { id: "content", label: "Konten", icon: "FileText", color: "var(--peach)" },
-    { id: "subscribers", label: "Subscribers", icon: "Users", color: "var(--coral)" },
-    { id: "settings", label: "Settings", icon: "Settings", color: "var(--lilac)" },
+    { id: "dashboard", label: "Dashboard", icon: "dashboard", color: "var(--sage)" },
+    { id: "content", label: "Konten", icon: "content", color: "var(--peach)" },
+    { id: "subscribers", label: "Subscribers", icon: "subscribers", color: "var(--coral)" },
+    { id: "settings", label: "Settings", icon: "settings", color: "var(--lilac)" },
   ];
 
   return (
@@ -148,7 +149,7 @@ function Dashboard({ user, onLogout }) {
       {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-sidebar-brand">
-          <span className="admin-logo">✦</span>
+          <span className="admin-logo">{renderAdminIcon("logo", { size: 20 })}</span>
           <span className="admin-brand-text">Muslim Hebat</span>
           <span className="admin-badge">Admin</span>
         </div>
@@ -162,7 +163,7 @@ function Dashboard({ user, onLogout }) {
               style={{ "--nav-accent": item.color }}
             >
               <span className="admin-nav-icon" style={{ background: item.color }}>
-                {getIcon(item.icon)}
+                {renderAdminIcon(item.icon, { size: 18 })}
               </span>
               <span className="admin-nav-label">{item.label}</span>
               {item.id === "subscribers" && subscribers > 0 && (
@@ -183,7 +184,7 @@ function Dashboard({ user, onLogout }) {
             </div>
           </div>
           <button className="admin-btn admin-btn-ghost" onClick={onLogout}>
-            <Icon.LogOut size={16} /> Keluar
+            {renderAdminIcon("logOut", { size: 16 })} Keluar
           </button>
         </div>
       </aside>
@@ -203,12 +204,12 @@ function DashboardPanel({ counts, subscribers, onNavigate }) {
   const totalContent = Object.values(counts).reduce((a, b) => a + b, 0);
 
   const quickStats = [
-    { label: "Total Konten", value: totalContent, emoji: "📚", color: "var(--sage)", trend: "+12%" },
-    { label: "Bacaan", value: counts.articles, emoji: "📖", color: "var(--sage)", trend: "" },
-    { label: "Produk", value: counts.products, emoji: "📦", color: "var(--peach)", trend: "" },
-    { label: "Kajian", value: counts.kajian, emoji: "🎤", color: "var(--coral)", trend: "" },
-    { label: "Kelas", value: counts.classes, emoji: "🎓", color: "var(--lilac)", trend: "" },
-    { label: "Subscribers", value: subscribers, emoji: "👥", color: "var(--butter)", trend: "+5" },
+    { label: "Total Konten", value: totalContent, icon: "total", color: "var(--sage)", trend: "+12%" },
+    { label: "Bacaan", value: counts.articles, icon: "articles", color: "var(--sage)", trend: "" },
+    { label: "Produk", value: counts.products, icon: "products", color: "var(--peach)", trend: "" },
+    { label: "Kajian", value: counts.kajian, icon: "kajian", color: "var(--coral)", trend: "" },
+    { label: "Kelas", value: counts.classes, icon: "classes", color: "var(--lilac)", trend: "" },
+    { label: "Subscribers", value: subscribers, icon: "subscribers", color: "var(--butter)", trend: "+5" },
   ];
 
   return (
@@ -220,8 +221,8 @@ function DashboardPanel({ counts, subscribers, onNavigate }) {
           <p className="admin-panel-subtitle">Ringkasan performa konten Muslim Hebat</p>
         </div>
         <div className="admin-header-actions">
-          <a href="/" target="_blank" className="admin-btn admin-btn-secondary">
-            <Icon.ExternalLink size={14} /> Lihat Website
+          <a href="/" target="_blank" className="admin-btn admin-btn-secondary" rel="noreferrer">
+            {renderAdminIcon("externalLink", { size: 14 })} Lihat Website
           </a>
         </div>
       </header>
@@ -229,16 +230,16 @@ function DashboardPanel({ counts, subscribers, onNavigate }) {
       {/* Quick Stats Bento Grid */}
       <div className="admin-bento-grid">
         {quickStats.map((stat, i) => (
-          <div 
+          <div
             key={stat.label}
             className={`admin-stat-card ${i === 0 ? "admin-stat-card-large" : ""}`}
             style={{ background: stat.color }}
           >
-            <div className="admin-stat-emoji">{stat.emoji}</div>
+            <div className="admin-stat-emoji">{renderAdminIcon(stat.icon, { size: 24 })}</div>
             <div className="admin-stat-content">
               <div className="admin-stat-value">{stat.value.toLocaleString()}</div>
               <div className="admin-stat-label">{stat.label}</div>
-              {stat.trend && <div className="admin-stat-trend">📈 {stat.trend} bulan ini</div>}
+              {stat.trend && <div className="admin-stat-trend">{renderAdminIcon("trend", { size: 14 })} {stat.trend} bulan ini</div>}
             </div>
           </div>
         ))}
@@ -249,15 +250,15 @@ function DashboardPanel({ counts, subscribers, onNavigate }) {
         <h2 className="admin-section-title">Aksi Cepat</h2>
         <div className="admin-actions-row">
           {resources.map((r) => (
-            <button 
-              key={r.key} 
+            <button
+              key={r.key}
               className="admin-action-card"
               onClick={() => onNavigate("content")}
               style={{ "--action-color": r.color }}
             >
-              <span className="admin-action-emoji">{r.emoji}</span>
+              <span className="admin-action-emoji">{renderAdminIcon(r.icon, { size: 20 })}</span>
               <span className="admin-action-label">Tambah {r.label}</span>
-              <Icon.Arrow size={14} />
+              {renderAdminIcon("arrow", { size: 14 })}
             </button>
           ))}
         </div>
@@ -268,7 +269,7 @@ function DashboardPanel({ counts, subscribers, onNavigate }) {
         <Blob color="var(--peach)" size={180} top={-60} right={-40} />
         <SunDecor size={100} color="var(--butter)" style={{ position: "absolute", bottom: -20, left: 40 }} />
         <div className="admin-welcome-content">
-          <span className="admin-sticker">Tips harian 💡</span>
+          <span className="admin-sticker">Tips harian {renderAdminIcon("tip", { size: 14 })}</span>
           <h3>Kelola konten dengan konsisten!</h3>
           <p>Tambah bacaan baru minimal 2x seminggu untuk menjaga engagement pembaca.</p>
         </div>
@@ -345,7 +346,7 @@ function ContentPanel({ counts }) {
             className={`admin-resource-tab ${activeResource === r.key ? "active" : ""}`}
             onClick={() => setActiveResource(r.key)}
           >
-            <span>{r.emoji}</span>
+            <span>{renderAdminIcon(r.icon, { size: 16 })}</span>
             <span>{r.label}</span>
             <span className="admin-tab-count">{counts[r.key] || 0}</span>
           </button>
@@ -358,9 +359,9 @@ function ContentPanel({ counts }) {
         <aside className="admin-form-panel">
           <div className="admin-card">
             <div className="admin-card-header">
-              <h3>{editing ? "✏️ Edit" : "➕ Tambah"} {resource.label}</h3>
+              <h3>{editing ? renderAdminIcon("edit", { size: 16 }) : renderAdminIcon("add", { size: 16 })} {editing ? "Edit" : "Tambah"} {resource.label}</h3>
               {editing && (
-                <button 
+                <button
                   className="admin-btn admin-btn-ghost admin-btn-sm"
                   onClick={() => { setEditing(null); setDraft({ status: "DRAFT" }); }}
                 >
@@ -418,21 +419,21 @@ function ContentPanel({ counts }) {
                 </div>
                 <div className="admin-form-field">
                   <label>Status</label>
-                  <select 
-                    value={draft.status || "DRAFT"} 
+                  <select
+                    value={draft.status || "DRAFT"}
                     onChange={(e) => setDraft({ ...draft, status: e.target.value })}
                   >
-                    <option value="DRAFT">🟡 Draft</option>
-                    <option value="PUBLISHED">🟢 Published</option>
-                    <option value="ARCHIVED">⚪ Archived</option>
+                    <option value="DRAFT">Draft</option>
+                    <option value="PUBLISHED">Published</option>
+                    <option value="ARCHIVED">Archived</option>
                   </select>
                 </div>
               </div>
 
               <div className="admin-form-actions">
                 <button type="submit" className="admin-btn admin-btn-primary">
-                  {editing ? "💾 Simpan Perubahan" : "➕ Buat Baru"}
-                </button>
+                {editing ? <>{renderAdminIcon("save", { size: 16 })} Simpan Perubahan</> : <>{renderAdminIcon("add", { size: 16 })} Buat Baru</>}
+              </button>
               </div>
             </form>
           </div>
@@ -442,16 +443,16 @@ function ContentPanel({ counts }) {
         <section className="admin-list-panel">
           <div className="admin-card">
             <div className="admin-card-header">
-              <h3>📋 Daftar {resource.label}</h3>
-              <select 
+              <h3>Daftar {resource.label}</h3>
+              <select
                 className="admin-filter-select"
-                value={filter} 
+                value={filter}
                 onChange={(e) => setFilter(e.target.value)}
               >
                 <option value="ALL">Semua Status</option>
-                <option value="PUBLISHED">🟢 Published</option>
-                <option value="DRAFT">🟡 Draft</option>
-                <option value="ARCHIVED">⚪ Archived</option>
+                <option value="PUBLISHED">Published</option>
+                <option value="DRAFT">Draft</option>
+                <option value="ARCHIVED">Archived</option>
               </select>
             </div>
 
@@ -462,7 +463,7 @@ function ContentPanel({ counts }) {
               </div>
             ) : filteredItems.length === 0 ? (
               <div className="admin-empty-state">
-                <div className="admin-empty-emoji">📭</div>
+                <div className="admin-empty-emoji">{renderAdminIcon("empty", { size: 40 })}</div>
                 <p>Belum ada {resource.label.toLowerCase()}</p>
                 <span>Tambahkan yang pertama menggunakan form di samping</span>
               </div>
@@ -476,11 +477,11 @@ function ContentPanel({ counts }) {
                         <div className="admin-item-title">{item.title || item.name || "Untitled"}</div>
                         <div className="admin-item-meta">
                           <code className="admin-item-slug">/{item.slug}</code>
-                          <span 
+                          <span
                             className="admin-status-pill"
                             style={{ color: status.color, background: status.bg }}
                           >
-                            {status.dot} {status.label}
+                            {status.label}
                           </span>
                           {item.category && (
                             <span className="admin-item-category">{item.category}</span>
@@ -488,17 +489,18 @@ function ContentPanel({ counts }) {
                         </div>
                       </div>
                       <div className="admin-item-actions">
-                        <button 
+                        <button
                           className="admin-btn admin-btn-ghost admin-btn-sm"
                           onClick={() => { setEditing(item.id); setDraft(item); }}
                         >
-                          ✏️ Edit
+                          {renderAdminIcon("edit", { size: 14 })} Edit
                         </button>
-                        <button 
+                        <button
                           className="admin-btn admin-btn-danger admin-btn-sm"
                           onClick={() => remove(item.id)}
+                          aria-label="Hapus item"
                         >
-                          🗑️
+                          {renderAdminIcon("delete", { size: 14 })}
                         </button>
                       </div>
                     </div>
@@ -559,18 +561,18 @@ function SubscribersPanel() {
     <div className="admin-panel">
       <header className="admin-panel-header">
         <div>
-          <h1 className="admin-panel-title">👥 Subscribers</h1>
+          <h1 className="admin-panel-title">{renderAdminIcon("subscribers", { size: 24 })} Subscribers</h1>
           <p className="admin-panel-subtitle">{filtered.length} dari {items.length} email terdaftar</p>
         </div>
         <button className="admin-btn admin-btn-primary" onClick={exportCsv}>
-          <Icon.Download size={14} /> Export CSV
+          {renderAdminIcon("download", { size: 14 })} Export CSV
         </button>
       </header>
 
       <div className="admin-card">
         <div className="admin-search-box">
-          <Icon.Search size={16} />
-          <input 
+          {renderAdminIcon("search", { size: 16 })}
+          <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Cari email atau nama..."
@@ -597,7 +599,7 @@ function SubscribersPanel() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="admin-empty-state">
-            <div className="admin-empty-emoji">📭</div>
+            <div className="admin-empty-emoji">{renderAdminIcon("empty", { size: 40 })}</div>
             <p>Tidak ada subscriber</p>
           </div>
         ) : (
@@ -638,17 +640,17 @@ function SettingsPanel() {
   }
 
   const themes = [
-    { id: "warm", label: "Warm", emoji: "🌅", desc: "Krem hangat", bg: "#FBF3E2" },
-    { id: "cool", label: "Cool", emoji: "❄️", desc: "Biru fresh", bg: "#F0F4FF" },
-    { id: "sage", label: "Sage", emoji: "🌿", desc: "Hijau natural", bg: "#F5F1E8" },
-    { id: "blossom", label: "Blossom", emoji: "🌸", desc: "Pink lembut", bg: "#FFFAF0" },
+    { id: "warm", label: "Warm", icon: "warm", desc: "Krem hangat", bg: "#FBF3E2" },
+    { id: "cool", label: "Cool", icon: "cool", desc: "Biru fresh", bg: "#F0F4FF" },
+    { id: "sage", label: "Sage", icon: "sage", desc: "Hijau natural", bg: "#F5F1E8" },
+    { id: "blossom", label: "Blossom", icon: "blossom", desc: "Pink lembut", bg: "#FFFAF0" },
   ];
 
   return (
     <div className="admin-panel">
       <header className="admin-panel-header">
         <div>
-          <h1 className="admin-panel-title">⚙️ Settings</h1>
+          <h1 className="admin-panel-title">{renderAdminIcon("settings", { size: 24 })} Settings</h1>
           <p className="admin-panel-subtitle">Konfigurasi website</p>
         </div>
       </header>
@@ -665,24 +667,24 @@ function SettingsPanel() {
             >
               <span className="admin-theme-preview" style={{ background: t.bg }} />
               <div className="admin-theme-info">
-                <span className="admin-theme-emoji">{t.emoji}</span>
+                <span className="admin-theme-emoji">{renderAdminIcon(t.icon, { size: 20 })}</span>
                 <span className="admin-theme-label">{t.label}</span>
                 <span className="admin-theme-desc">{t.desc}</span>
               </div>
-              {theme === t.id && <span className="admin-theme-check">✓</span>}
+              {theme === t.id && <span className="admin-theme-check">{renderAdminIcon("check", { size: 16 })}</span>}
             </button>
           ))}
         </div>
 
         {saved && (
           <div className="admin-toast admin-toast-success">
-            ✅ Tema tersimpan!
+            {renderAdminIcon("check", { size: 16 })} Tema tersimpan!
           </div>
         )}
 
         <div className="admin-form-actions" style={{ marginTop: 24 }}>
           <button className="admin-btn admin-btn-primary" onClick={save}>
-            💾 Simpan Tema
+            {renderAdminIcon("save", { size: 16 })} Simpan Tema
           </button>
         </div>
       </div>
@@ -700,21 +702,4 @@ function formatDate(value) {
   } catch {
     return value;
   }
-}
-
-function getIcon(name) {
-  const icons = {
-    Grid: "⊞",
-    FileText: "📝",
-    Users: "👥",
-    Settings: "⚙️",
-    Mail: "✉️",
-    Lock: "🔒",
-    Arrow: "→",
-    ExternalLink: "↗",
-    Search: "🔍",
-    Download: "⬇",
-    LogOut: "→",
-  };
-  return icons[name] || "•";
 }

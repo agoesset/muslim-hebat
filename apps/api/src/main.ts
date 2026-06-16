@@ -5,7 +5,8 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { Request, Response, NextFunction } from "express";
 import { readdirSync, statSync } from "fs";
 import { join } from "path";
-import cookieParser = require("cookie-parser");
+import * as cookieParser from "cookie-parser";
+import * as express from "express";
 import { PrismaClient } from "@prisma/client";
 import { AppModule } from "./app.module";
 
@@ -75,8 +76,16 @@ async function bootstrap() {
     res.type("application/xml").send(xml);
   });
 
+  // Serve uploaded files
+  app.use("/uploads", express.static("./uploads"));
+
   app.setGlobalPrefix("api", {
-    exclude: [{ path: "health", method: RequestMethod.GET }]
+    exclude: [
+      { path: "health", method: RequestMethod.GET },
+      { path: "sitemap.xml", method: RequestMethod.GET },
+      { path: "robots.txt", method: RequestMethod.GET },
+      { path: "rss.xml", method: RequestMethod.GET },
+    ]
   });
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,

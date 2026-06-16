@@ -7,6 +7,10 @@ import { ContentController } from "./content/content.controller";
 import { SubscribersController } from "./subscribers/subscribers.controller";
 import { SettingsController } from "./settings/settings.controller";
 import { HomeController } from "./home/home.controller";
+import { SitemapController } from "./sitemap/sitemap.controller";
+import { EmailController } from "./email/email.controller";
+import { EmailService } from "./email/email.service";
+import { UploadController } from "./upload/upload.controller";
 
 @Module({
   imports: [],
@@ -16,8 +20,11 @@ import { HomeController } from "./home/home.controller";
     ContentController,
     SubscribersController,
     SettingsController,
-    HomeController
+    HomeController,
+    SitemapController,
+    EmailController,
+    UploadController
   ],
-  providers: [PrismaService, AuthService]
+  providers: [PrismaService, AuthService, EmailService]
 })
 export class AppModule {}

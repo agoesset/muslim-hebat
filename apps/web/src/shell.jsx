@@ -66,19 +66,11 @@ export function Nav({ page }) {
 
 export function Logo() {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      <img
-        src="/logo.avif"
-        alt="Logo Muslim Hebat"
-        style={{ width: "36px", height: "36px", borderRadius: "8px", objectFit: "cover" }}
-      />
-      <div style={{ display: "flex", flexDirection: "column", lineHeight: 0.95 }}>
-        <span style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, letterSpacing: "-0.025em" }}>
-          Muslim Hebat<span style={{ color: "var(--coral-deep)" }}>.</span>
-        </span>
-        <span style={{ fontFamily: "var(--font-hand)", fontSize: 14, color: "var(--coral-deep)", marginTop: 2 }}>tumbuh bareng, yuk!</span>
-      </div>
-    </div>
+    <img
+      src="/logo.avif"
+      alt="Logo Muslim Hebat"
+      style={{ width: "44px", height: "44px", borderRadius: "10px", objectFit: "cover", display: "block" }}
+    />
   );
 }
 
@@ -156,12 +148,11 @@ export function Footer() {
       <div className="shell" style={{ paddingTop: 56, paddingBottom: 32 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr", gap: 32, alignItems: "start" }}>
           <div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 40, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
-              Muslim<br/>Hebat<span style={{ color: "var(--coral)" }}>.</span>
-            </div>
-            <p style={{ marginTop: 16, opacity: 0.7, fontSize: 14, maxWidth: 280 }}>
-              Tumbuh bareng jadi muslim yang lebih dekat sama Allah — pelan-pelan, gak harus sempurna.
-            </p>
+            <img
+              src="/logo.avif"
+              alt="Logo Muslim Hebat"
+              style={{ width: "64px", height: "64px", borderRadius: "12px", objectFit: "cover" }}
+            />
           </div>
           <FooterCol title="Jelajahi" items={explore} />
           <FooterCol title="Bantuan" items={help} />

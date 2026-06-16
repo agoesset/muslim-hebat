@@ -620,7 +620,7 @@ function InstructorRow() {
     { name: "dr. Aisyah Dahlan", role: "Parenting Islami", classes: 3, color: "var(--lilac)" },
     { name: "Ust. Hanan Attaki", role: "Ibadah Harian", classes: 5, color: "var(--coral)" },
     { name: "Ust. Hasan Bashri", role: "Tahsin & Tajwid", classes: 6, color: "var(--sage)" },
-    { name: "Ustdzh. Mariam S.", role: "Bahasa Arab", classes: 3, color: "var(--butter)" },
+    { name: "Ustadzah Mariam S.", role: "Bahasa Arab", classes: 3, color: "var(--butter)" },
     { name: "Erick Yusuf", role: "Bisnis Muslim", classes: 2, color: "var(--peach)" },
   ];
   return (

@@ -1,5 +1,6 @@
 // HomePage extension — Articles, Product highlight, Kajian strip, Newsletter.
 
+import React from "react";
 import { Icon } from "./icons.jsx";
 import { Blob, SunDecor, WaveDivider } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";

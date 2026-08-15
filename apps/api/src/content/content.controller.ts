@@ -1,11 +1,26 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { PrismaService } from "../prisma.service";
 import { AdminAuthGuard } from "../auth/auth.guard";
 import { AuditInterceptor } from "../audit/audit.interceptor";
-import { CommentDto, ContentDto, CourseDto, KajianEventDto, ProductDto, TestimonialDto } from "./content.dto";
+import {
+  ApproveCommentDto,
+  CommentDto,
+  ContentDto,
+  CourseDto,
+  KajianEventDto,
+  ProductDto,
+  TestimonialDto,
+  UpdateContentDto,
+  UpdateCourseDto,
+  UpdateKajianEventDto,
+  UpdateProductDto,
+  UpdateTestimonialDto
+} from "./content.dto";
 
 const publishedWhere = { status: "PUBLISHED" as const };
 const orderByUpdated = { updatedAt: "desc" as const };
+const MAX_TAKE = 50;
 
 function parseNumber(value?: string) {
   if (value === undefined) return undefined;
@@ -13,13 +28,24 @@ function parseNumber(value?: string) {
   return Number.isNaN(n) ? undefined : n;
 }
 
-function buildSearchWhere(search?: string) {
+function parseTake(value?: string) {
+  const n = parseNumber(value);
+  if (n === undefined) return MAX_TAKE;
+  return Math.min(Math.max(n, 0), MAX_TAKE);
+}
+
+function parseSkip(value?: string) {
+  const n = parseNumber(value);
+  if (n === undefined) return 0;
+  return Math.max(n, 0);
+}
+
+function buildSearchWhere(search?: string, fields: string[] = ["title", "excerpt"]) {
   if (!search) return undefined;
   return {
-    OR: [
-      { title: { contains: search, mode: "insensitive" as const } },
-      { excerpt: { contains: search, mode: "insensitive" as const } }
-    ]
+    OR: fields.map((field) => ({
+      [field]: { contains: search, mode: "insensitive" as const }
+    }))
   };
 }
 
@@ -39,14 +65,14 @@ export class ContentController {
   ) {
     const where: any = { ...publishedWhere };
     if (featured === "true") where.featured = true;
-    const searchWhere = buildSearchWhere(search);
+    const searchWhere = buildSearchWhere(search, ["title", "excerpt"]);
     if (searchWhere) where.OR = searchWhere.OR;
 
     return this.prisma.article.findMany({
       where,
       orderBy: orderByUpdated,
-      take: parseNumber(limit),
-      skip: parseNumber(offset)
+      take: parseTake(limit),
+      skip: parseSkip(offset)
     });
   }
 
@@ -66,6 +92,7 @@ export class ContentController {
   }
 
   @Post("public/articles/:slug/clap")
+  @Throttle({ default: { limit: 20, ttl: 60000 } })
   async clapArticle(@Param("slug") slug: string) {
     const article = await this.prisma.article.findFirst({
       where: { slug, ...publishedWhere }
@@ -87,12 +114,13 @@ export class ContentController {
     if (!article) throw new NotFoundException("Article not found");
 
     return this.prisma.comment.findMany({
-      where: { articleId: article.id, parentId: null },
+      where: { articleId: article.id, parentId: null, approved: true },
       orderBy: { createdAt: "desc" }
     });
   }
 
   @Post("public/articles/:slug/comments")
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   async createComment(@Param("slug") slug: string, @Body() dto: CommentDto) {
     const article = await this.prisma.article.findFirst({
       where: { slug, ...publishedWhere },
@@ -105,9 +133,48 @@ export class ContentController {
         articleId: article.id,
         name: dto.name,
         text: dto.text,
-        parentId: dto.parentId ?? null
+        parentId: dto.parentId ?? null,
+        approved: false
       }
     });
+  }
+
+  @Get("public/search")
+  async search(@Query("q") q?: string) {
+    const query = (q || "").trim();
+    if (query.length < 2) {
+      return { articles: [], products: [], kajian: [], courses: [] };
+    }
+
+    const selectCard = { id: true, slug: true, excerpt: true, emoji: true };
+    const [articles, products, kajian, courses] = await Promise.all([
+      this.prisma.article.findMany({
+        where: { ...publishedWhere, ...buildSearchWhere(query, ["title", "excerpt"]) },
+        take: 5,
+        orderBy: orderByUpdated,
+        select: { ...selectCard, title: true }
+      }),
+      this.prisma.product.findMany({
+        where: { ...publishedWhere, ...buildSearchWhere(query, ["name", "excerpt"]) },
+        take: 5,
+        orderBy: orderByUpdated,
+        select: { ...selectCard, name: true }
+      }),
+      this.prisma.kajianEvent.findMany({
+        where: { ...publishedWhere, ...buildSearchWhere(query, ["title", "excerpt"]) },
+        take: 5,
+        orderBy: { startsAt: "asc" },
+        select: { id: true, slug: true, title: true, excerpt: true, speaker: true, location: true }
+      }),
+      this.prisma.course.findMany({
+        where: { ...publishedWhere, ...buildSearchWhere(query, ["title", "excerpt"]) },
+        take: 5,
+        orderBy: orderByUpdated,
+        select: { ...selectCard, title: true, instructor: true, category: true }
+      })
+    ]);
+
+    return { articles, products, kajian, courses };
   }
 
   // ─── Public Products ─────────────────────────────────────────────────
@@ -121,14 +188,14 @@ export class ContentController {
   ) {
     const where: any = { ...publishedWhere };
     if (featured === "true") where.featured = true;
-    const searchWhere = buildSearchWhere(search);
+    const searchWhere = buildSearchWhere(search, ["name", "excerpt"]);
     if (searchWhere) where.OR = searchWhere.OR;
 
     return this.prisma.product.findMany({
       where,
       orderBy: orderByUpdated,
-      take: parseNumber(limit),
-      skip: parseNumber(offset)
+      take: parseTake(limit),
+      skip: parseSkip(offset)
     });
   }
 
@@ -152,14 +219,14 @@ export class ContentController {
   ) {
     const where: any = { ...publishedWhere };
     if (featured === "true") where.featured = true;
-    const searchWhere = buildSearchWhere(search);
+    const searchWhere = buildSearchWhere(search, ["title", "excerpt"]);
     if (searchWhere) where.OR = searchWhere.OR;
 
     return this.prisma.kajianEvent.findMany({
       where,
       orderBy: { startsAt: "asc" },
-      take: parseNumber(limit),
-      skip: parseNumber(offset)
+      take: parseTake(limit),
+      skip: parseSkip(offset)
     });
   }
 
@@ -183,14 +250,14 @@ export class ContentController {
   ) {
     const where: any = { ...publishedWhere };
     if (featured === "true") where.featured = true;
-    const searchWhere = buildSearchWhere(search);
+    const searchWhere = buildSearchWhere(search, ["title", "excerpt"]);
     if (searchWhere) where.OR = searchWhere.OR;
 
     return this.prisma.course.findMany({
       where,
       orderBy: orderByUpdated,
-      take: parseNumber(limit),
-      skip: parseNumber(offset)
+      take: parseTake(limit),
+      skip: parseSkip(offset)
     });
   }
 
@@ -244,7 +311,7 @@ export class ContentController {
 
   @Patch("admin/articles/:id")
   @UseGuards(AdminAuthGuard)
-  updateArticle(@Param("id") id: string, @Body() dto: Partial<ContentDto>) {
+  updateArticle(@Param("id") id: string, @Body() dto: UpdateContentDto) {
     return this.prisma.article.update({ where: { id }, data: normalizeArticle(dto) as any });
   }
 
@@ -278,7 +345,7 @@ export class ContentController {
 
   @Patch("admin/products/:id")
   @UseGuards(AdminAuthGuard)
-  updateProduct(@Param("id") id: string, @Body() dto: Partial<ProductDto>) {
+  updateProduct(@Param("id") id: string, @Body() dto: UpdateProductDto) {
     return this.prisma.product.update({ where: { id }, data: dto });
   }
 
@@ -312,7 +379,7 @@ export class ContentController {
 
   @Patch("admin/kajian/:id")
   @UseGuards(AdminAuthGuard)
-  updateKajian(@Param("id") id: string, @Body() dto: Partial<KajianEventDto>) {
+  updateKajian(@Param("id") id: string, @Body() dto: UpdateKajianEventDto) {
     return this.prisma.kajianEvent.update({ where: { id }, data: normalizeKajian(dto) as any });
   }
 
@@ -346,7 +413,7 @@ export class ContentController {
 
   @Patch("admin/classes/:id")
   @UseGuards(AdminAuthGuard)
-  updateClass(@Param("id") id: string, @Body() dto: Partial<CourseDto>) {
+  updateClass(@Param("id") id: string, @Body() dto: UpdateCourseDto) {
     return this.prisma.course.update({ where: { id }, data: dto });
   }
 
@@ -364,10 +431,34 @@ export class ContentController {
     return this.prisma.comment.findMany({ orderBy: { createdAt: "desc" } });
   }
 
+  @Patch("admin/comments/:id")
+  @UseGuards(AdminAuthGuard)
+  updateComment(@Param("id") id: string, @Body() dto: ApproveCommentDto) {
+    return this.prisma.comment.update({
+      where: { id },
+      data: { approved: dto.approved ?? true }
+    });
+  }
+
   @Delete("admin/comments/:id")
   @UseGuards(AdminAuthGuard)
   deleteComment(@Param("id") id: string) {
     return this.prisma.comment.delete({ where: { id } });
+  }
+
+  @Get("admin/stats")
+  @UseGuards(AdminAuthGuard)
+  async adminStats() {
+    const [articles, products, kajian, classes, subscribers, unreadMessages, comments] = await Promise.all([
+      this.prisma.article.count(),
+      this.prisma.product.count(),
+      this.prisma.kajianEvent.count(),
+      this.prisma.course.count(),
+      this.prisma.subscriber.count(),
+      this.prisma.contactMessage.count({ where: { read: false } }),
+      this.prisma.comment.count()
+    ]);
+    return { articles, products, kajian, classes, subscribers, unreadMessages, comments };
   }
 
   // ─── Admin Testimonials ──────────────────────────────────────────────
@@ -386,7 +477,7 @@ export class ContentController {
 
   @Patch("admin/testimonials/:id")
   @UseGuards(AdminAuthGuard)
-  updateTestimonial(@Param("id") id: string, @Body() dto: Partial<TestimonialDto>) {
+  updateTestimonial(@Param("id") id: string, @Body() dto: UpdateTestimonialDto) {
     return this.prisma.testimonial.update({ where: { id }, data: dto });
   }
 

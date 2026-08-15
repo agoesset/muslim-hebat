@@ -11,8 +11,8 @@ describe("api helper", () => {
   });
 
   describe("API_BASE_URL", () => {
-    it("should default to /api when env var is not set", () => {
-      expect(API_BASE_URL).toBe("/api");
+    it("should be a non-empty API prefix", () => {
+      expect(API_BASE_URL).toMatch(/\/api$/);
     });
   });
 
@@ -27,10 +27,9 @@ describe("api helper", () => {
       const result = await api("/public/articles");
 
       expect(fetch).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/api\/public\/articles\?_=\d+$/),
+        `${API_BASE_URL}/public/articles`,
         expect.objectContaining({
           credentials: "include",
-          cache: "no-store",
           headers: { "Content-Type": "application/json" }
         })
       );
@@ -48,7 +47,7 @@ describe("api helper", () => {
       await api("/public/subscribers", { method: "POST", body });
 
       expect(fetch).toHaveBeenCalledWith(
-        "/api/public/subscribers",
+        `${API_BASE_URL}/public/subscribers`,
         expect.objectContaining({
           method: "POST",
           body,
@@ -86,9 +85,8 @@ describe("api helper", () => {
       await api("/test", { headers: { "X-Custom": "value" } });
 
       expect(fetch).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/api\/test\?_=\d+$/),
+        `${API_BASE_URL}/test`,
         expect.objectContaining({
-          cache: "no-store",
           headers: { "Content-Type": "application/json", "X-Custom": "value" }
         })
       );

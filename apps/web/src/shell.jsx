@@ -4,7 +4,6 @@ import React from "react";
 import { Icon } from "./icons.jsx";
 import { useCta } from "./context/cta-context.jsx";
 import { SOCIAL_LINKS, SITE_LINKS } from "./site-links.ts";
-import { usePublicData } from "./hooks/usePublicData.js";
 
 export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 }) {
   // scalloped wave — bumps that read as friendly, organic
@@ -26,7 +25,7 @@ export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 })
 
 import { Link } from "react-router-dom";
 
-export function Nav({ page }) {
+export function Nav({ page, onSearch }) {
   const { openInterest } = useCta();
   const links = [
     { id: "home",   label: "Beranda", path: "/" },
@@ -53,7 +52,7 @@ export function Nav({ page }) {
             </Link>
           ))}
         </nav>
-        <button type="button" className="btn btn--sm">
+        <button type="button" className="btn btn--sm" onClick={onSearch} aria-label="Cari">
           <Icon.Search size={14}/> Cari
         </button>
         <button type="button" className="btn btn--sm btn--primary" onClick={() => openInterest({ title: "Daftar gratis di Muslim Hebat", source: "header:daftar-gratis", intent: "subscribe" })}>
@@ -109,15 +108,13 @@ export function Blob({ color = "var(--peach)", size = 200, top, left, right, bot
   );
 }
 
-export function Footer() {
-  const { data: settingsArr } = usePublicData("/public/settings");
-
+export function Footer({ settings }) {
   const siteSetting = React.useMemo(() => {
-    if (!settingsArr) return null;
-    const site = settingsArr.find(s => s.key === "site");
+    if (!settings) return null;
+    const site = settings.find((s) => s.key === "site");
     if (!site) return null;
     return typeof site.value === "string" ? JSON.parse(site.value) : site.value;
-  }, [settingsArr]);
+  }, [settings]);
 
   const explore = [
     { label: "Bacaan", href: SITE_LINKS.bacaan },
@@ -126,11 +123,7 @@ export function Footer() {
     { label: "Ngaji Bareng", href: SITE_LINKS.kajian },
   ];
   const help = [
-    { label: "FAQ", href: SITE_LINKS.faq },
-    { label: "Kontak", href: siteSetting?.contactEmail ? `mailto:${siteSetting.contactEmail}` : SITE_LINKS.kontak },
-    { label: "Refund", href: SITE_LINKS.refund },
-    { label: "Syarat", href: SITE_LINKS.syarat },
-    { label: "Privasi", href: SITE_LINKS.privasi },
+    { label: "Kontak", href: SITE_LINKS.kontak },
   ];
   const social = [
     { label: "Instagram", href: siteSetting?.instagramUrl || SOCIAL_LINKS.instagram, icon: Icon.Instagram },

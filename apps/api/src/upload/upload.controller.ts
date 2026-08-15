@@ -1,32 +1,32 @@
-import { BadRequestException, Controller, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { BadRequestException, Controller, Post, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { randomUUID } from "crypto";
 import { diskStorage } from "multer";
 import { extname } from "path";
+import { AdminAuthGuard } from "../auth/auth.guard";
 import { AuditInterceptor } from "../audit/audit.interceptor";
-
-const UPLOAD_DIR = "./uploads";
+import { env } from "../config/env";
 
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
-  "image/svg+xml",
   "application/pdf"
 ];
 
-const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".svg", ".pdf"];
+const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".pdf"];
 
 @Controller()
+@UseGuards(AdminAuthGuard)
 @UseInterceptors(AuditInterceptor)
 export class UploadController {
   @Post("upload")
   @UseInterceptors(
     FileInterceptor("file", {
       storage: diskStorage({
-        destination: UPLOAD_DIR,
+        destination: env.UPLOAD_DIR,
         filename: (_req: any, file: any, cb: any) => {
-          const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-          cb(null, unique + extname(file.originalname));
+          cb(null, randomUUID() + extname(file.originalname).toLowerCase());
         },
       }),
       fileFilter: (_req: any, file: any, cb: any) => {
@@ -37,7 +37,7 @@ export class UploadController {
           cb(new BadRequestException("Invalid file type"), false);
         }
       },
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+      limits: { fileSize: 5 * 1024 * 1024 },
     })
   )
   upload(@UploadedFile() file: any) {

@@ -4,15 +4,9 @@ import { api } from "../../api.js";
 import { renderAdminIcon } from "../../lucide-icons.jsx";
 import { resources, statusConfig } from "../constants.js";
 import { RichTextEditor } from "../RichTextEditor.jsx";
+import { generateSlug } from "../generateSlug.js";
 
-export function generateSlug(text) {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_]+/g, "-")
-    .replace(/-+/g, "-");
-}
+export { generateSlug };
 
 export function ContentFormPanel() {
   const { resourceType = "articles", id } = useParams();

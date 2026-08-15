@@ -2,7 +2,10 @@ import React from "react";
 import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
+import { useNavigate } from "react-router-dom";
 import { useCta } from "./context/cta-context.jsx";
+import { usePublicData } from "./hooks/usePublicData.js";
+import { RelatedProducts } from "./RelatedContent.jsx";
 
 function rupiah(cents = 0) {
   return cents === 0 ? "Gratis" : `Rp ${Number(cents).toLocaleString("id")}`;
@@ -10,6 +13,8 @@ function rupiah(cents = 0) {
 
 export function ProdukDetailPage({ product, onNav }) {
   const { openInterest } = useCta();
+  const navigate = useNavigate();
+  const { data: moreProducts } = usePublicData("/public/products?limit=4");
   const p = product;
   const price = rupiah(p.priceCents || 0);
   const isFree = !p.priceCents;
@@ -78,6 +83,14 @@ export function ProdukDetailPage({ product, onNav }) {
         </div>
       </section>
 
+      <RelatedProducts
+        products={(moreProducts || []).filter((item) => item.slug !== p.slug).slice(0, 3).map((item) => ({
+          ...item,
+          cat: item.category,
+          price: item.priceCents || 0
+        }))}
+        onOpen={(item) => navigate(`/produk/${item.slug}`)}
+      />
       <NewsletterBlock />
     </div>
   );

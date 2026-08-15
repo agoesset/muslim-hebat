@@ -173,21 +173,21 @@ export function GlobalSearch({ open, onClose, onNavigate }) {
                 icon="📦"
                 color="var(--peach)"
                 items={results.products}
-                renderItem={(p) => ({ label: p.name, sub: p.excerpt?.substring(0, 60) + "...", onClick: () => { onNavigate(`/produk`); onClose(false); } })}
+                renderItem={(p) => ({ label: p.name, sub: p.excerpt?.substring(0, 60) + "...", onClick: () => { onNavigate(`/produk/${p.slug}`); onClose(false); } })}
               />
               <SearchGroup
                 title="Kajian"
                 icon="🕌"
                 color="var(--lilac)"
                 items={results.kajian}
-                renderItem={(k) => ({ label: k.title, sub: k.speaker || k.location, onClick: () => { onNavigate(`/kajian`); onClose(false); } })}
+                renderItem={(k) => ({ label: k.title, sub: k.speaker || k.location, onClick: () => { onNavigate(`/kajian/${k.slug}`); onClose(false); } })}
               />
               <SearchGroup
                 title="Kelas"
                 icon="🎓"
                 color="var(--coral)"
                 items={results.courses}
-                renderItem={(c) => ({ label: c.title, sub: c.instructor || c.category, onClick: () => { onNavigate(`/kelas`); onClose(false); } })}
+                renderItem={(c) => ({ label: c.title, sub: c.instructor || c.category, onClick: () => { onNavigate(`/kelas/${c.slug}`); onClose(false); } })}
               />
             </>
           )}

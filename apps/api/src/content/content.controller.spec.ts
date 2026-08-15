@@ -107,7 +107,8 @@ const mockPrisma = {
     findUnique: jest.fn().mockResolvedValue(mockArticle),
     create: jest.fn().mockResolvedValue(mockArticle),
     update: jest.fn().mockResolvedValue(mockArticle),
-    delete: jest.fn().mockResolvedValue(mockArticle)
+    delete: jest.fn().mockResolvedValue(mockArticle),
+    count: jest.fn().mockResolvedValue(1)
   },
   product: {
     findMany: jest.fn().mockResolvedValue([mockProduct]),
@@ -115,7 +116,8 @@ const mockPrisma = {
     findUnique: jest.fn().mockResolvedValue(mockProduct),
     create: jest.fn().mockResolvedValue(mockProduct),
     update: jest.fn().mockResolvedValue(mockProduct),
-    delete: jest.fn().mockResolvedValue(mockProduct)
+    delete: jest.fn().mockResolvedValue(mockProduct),
+    count: jest.fn().mockResolvedValue(1)
   },
   kajianEvent: {
     findMany: jest.fn().mockResolvedValue([mockKajian]),
@@ -123,7 +125,8 @@ const mockPrisma = {
     findUnique: jest.fn().mockResolvedValue(mockKajian),
     create: jest.fn().mockResolvedValue(mockKajian),
     update: jest.fn().mockResolvedValue(mockKajian),
-    delete: jest.fn().mockResolvedValue(mockKajian)
+    delete: jest.fn().mockResolvedValue(mockKajian),
+    count: jest.fn().mockResolvedValue(1)
   },
   course: {
     findMany: jest.fn().mockResolvedValue([mockCourse]),
@@ -131,12 +134,21 @@ const mockPrisma = {
     findUnique: jest.fn().mockResolvedValue(mockCourse),
     create: jest.fn().mockResolvedValue(mockCourse),
     update: jest.fn().mockResolvedValue(mockCourse),
-    delete: jest.fn().mockResolvedValue(mockCourse)
+    delete: jest.fn().mockResolvedValue(mockCourse),
+    count: jest.fn().mockResolvedValue(1)
   },
   comment: {
     findMany: jest.fn().mockResolvedValue([mockComment]),
     create: jest.fn().mockResolvedValue(mockComment),
-    delete: jest.fn().mockResolvedValue(mockComment)
+    delete: jest.fn().mockResolvedValue(mockComment),
+    update: jest.fn().mockResolvedValue({ ...mockComment, approved: true }),
+    count: jest.fn().mockResolvedValue(1)
+  },
+  subscriber: {
+    count: jest.fn().mockResolvedValue(3)
+  },
+  contactMessage: {
+    count: jest.fn().mockResolvedValue(2)
   },
   testimonial: {
     findMany: jest.fn().mockResolvedValue([]),
@@ -308,7 +320,7 @@ describe("ContentController", () => {
       const result = await controller.articleComments("test-article");
 
       expect(mockPrisma.comment.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { articleId: "article-1", parentId: null } })
+        expect.objectContaining({ where: { articleId: "article-1", parentId: null, approved: true } })
       );
       expect(result).toEqual([mockComment]);
     });
@@ -320,7 +332,7 @@ describe("ContentController", () => {
       const result = await controller.createComment("test-article", dto);
 
       expect(mockPrisma.comment.create).toHaveBeenCalledWith(
-        expect.objectContaining({ data: { articleId: "article-1", name: "Budi", text: "Mantap!", parentId: null } })
+        expect.objectContaining({ data: { articleId: "article-1", name: "Budi", text: "Mantap!", parentId: null, approved: false } })
       );
       expect(result).toEqual(mockComment);
     });
@@ -430,6 +442,41 @@ describe("ContentController", () => {
   });
 
   // ─── Admin Testimonials ──────────────────────────────────────────
+
+  describe("search", () => {
+    it("returns empty groups when query is too short", async () => {
+      const result = await controller.search("a");
+      expect(result).toEqual({ articles: [], products: [], kajian: [], courses: [] });
+    });
+
+    it("searches products by name instead of title", async () => {
+      await controller.search("islam");
+      expect(mockPrisma.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              expect.objectContaining({ name: expect.anything() })
+            ])
+          })
+        })
+      );
+    });
+  });
+
+  describe("adminStats", () => {
+    it("returns aggregate counts", async () => {
+      const result = await controller.adminStats();
+      expect(result).toEqual({
+        articles: 1,
+        products: 1,
+        kajian: 1,
+        classes: 1,
+        subscribers: 3,
+        unreadMessages: 2,
+        comments: 1
+      });
+    });
+  });
 
   describe("adminTestimonials", () => {
     it("should return all testimonials", async () => {

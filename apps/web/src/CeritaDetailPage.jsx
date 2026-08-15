@@ -4,9 +4,11 @@ import React from "react";
 import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
+import DOMPurify from "dompurify";
 import { api } from "./api.js";
 import { usePublicData } from "./hooks/usePublicData.js";
 import { toast } from "./Toast.jsx";
+import { shareContent } from "./share.js";
 
 export function CeritaDetailPage({ onNav, cerita }) {
   const c = cerita;
@@ -74,11 +76,11 @@ function CeritaDetailHero({ c }) {
             <div style={{ width: 44, height: 44, borderRadius: "50%", background: c.color, border: "1.5px solid var(--ink)" }}/>
             <div style={{ textAlign: "left" }}>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{c.author}</div>
-              <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>{c.date}, 2026 · {c.time} baca</div>
+              <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>{formatArticleDate(c)} · {c.readingTime || c.time || "5 mnt"} baca</div>
             </div>
           </div>
           <span style={{ color: "var(--ink-soft)" }}>·</span>
-          <span style={{ fontSize: 13, color: "var(--ink-soft)" }}>{c.reads.toLocaleString("id")} baca</span>
+          <span style={{ fontSize: 13, color: "var(--ink-soft)" }}>{(c.reads || 0).toLocaleString("id")} baca</span>
           <span style={{ color: "var(--ink-soft)" }}>·</span>
           <span style={{ fontSize: 13, color: "var(--ink-soft)" }}>{c.claps} 👏</span>
         </div>
@@ -106,10 +108,9 @@ function CeritaBody({ c, clapped, setClapped, saved, setSaved }) {
       <div style={{ display: "grid", gridTemplateColumns: "60px 1fr", gap: 32, maxWidth: 920, margin: "0 auto" }}>
         {/* floating sidebar actions */}
         <div style={{ position: "sticky", top: 90, alignSelf: "start", display: "flex", flexDirection: "column", gap: 10 }}>
-          <ActionBtn icon={<Icon.Heart size={16}/>} label={c.claps + (clapped ? 1 : 0)} active={clapped} onClick={() => setClapped(!clapped)} activeBg="var(--coral)"/>
-          <ActionBtn icon={<Icon.Bookmark size={16}/>} label="Simpan" active={saved} onClick={() => setSaved(!saved)} activeBg="var(--butter)"/>
-          <ActionBtn icon={<Icon.ArrowUR size={16}/>} label="Bagikan"/>
-          <ActionBtn icon={<Icon.Mail size={16}/>}/>
+          <ActionBtn icon={<Icon.Heart size={16}/>} label={c.claps + (clapped ? 1 : 0)} active={clapped} onClick={() => handleClap(c, clapped, setClapped)} activeBg="var(--coral)" ariaLabel="Kasih clap"/>
+          <ActionBtn icon={<Icon.Bookmark size={16}/>} label="Simpan" active={saved} onClick={() => setSaved(!saved)} activeBg="var(--butter)" ariaLabel="Simpan bacaan"/>
+          <ActionBtn icon={<Icon.ArrowUR size={16}/>} label="Bagikan" onClick={() => shareArticle(c)} ariaLabel="Bagikan bacaan"/>
         </div>
 
         {/* article body */}
@@ -124,7 +125,7 @@ function CeritaBody({ c, clapped, setClapped, saved, setSaved }) {
 
           <div style={{ marginTop: 32, padding: 28, background: "var(--bg-soft)", borderRadius: 24, textAlign: "center" }}>
             <p style={{ margin: 0, fontFamily: "var(--font-hand)", fontSize: 24, color: "var(--coral-deep)" }}>kalau bacaan ini ngena</p>
-            <button onClick={() => setClapped(!clapped)} className="btn" style={{
+            <button onClick={() => handleClap(c, clapped, setClapped)} className="btn" style={{
               background: clapped ? "var(--coral)" : "var(--paper)",
               marginTop: 12, fontSize: 16, padding: "16px 28px"
             }}>
@@ -137,8 +138,58 @@ function CeritaBody({ c, clapped, setClapped, saved, setSaved }) {
   );
 }
 
+function looksLikeHtml(text) {
+  return /<\/?[a-z][\s\S]*>/i.test(text || "");
+}
+
+function sanitizeHtml(html) {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ["p", "h2", "h3", "ul", "ol", "li", "a", "strong", "em", "blockquote", "br", "span"],
+    ALLOWED_ATTR: ["href", "target", "rel"]
+  });
+}
+
+function formatArticleDate(c) {
+  const raw = c.publishedAt || c.createdAt;
+  if (!raw) return c.date || "";
+  try {
+    return new Date(raw).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  } catch {
+    return c.date || "";
+  }
+}
+
+async function handleClap(c, clapped, setClapped) {
+  if (clapped) return;
+  setClapped(true);
+  try {
+    await api(`/public/articles/${c.slug}/clap`, { method: "POST" });
+  } catch {
+    setClapped(false);
+    toast("Gagal kasih clap. Coba lagi ya.", "error");
+  }
+}
+
+function shareArticle(c) {
+  shareContent({
+    title: c.title,
+    text: c.excerpt,
+    url: window.location.href
+  });
+}
+
 function ArticleBodyText({ c }) {
   const text = (c.body && c.body.trim()) || c.excerpt || "Konten bacaan sedang disiapkan.";
+
+  if (looksLikeHtml(text)) {
+    return (
+      <div
+        className="article-html"
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(text) }}
+      />
+    );
+  }
+
   const paragraphs = text.split(/\n{2,}|\r?\n/).map((p) => p.trim()).filter(Boolean);
   const first = paragraphs[0] || text;
   const initial = first.charAt(0);
@@ -168,9 +219,9 @@ function ArticleBodyText({ c }) {
   );
 }
 
-function ActionBtn({ icon, label, active, onClick, activeBg = "var(--coral)" }) {
+function ActionBtn({ icon, label, active, onClick, activeBg = "var(--coral)", ariaLabel }) {
   return (
-    <button onClick={onClick} className="btn" style={{
+    <button type="button" onClick={onClick} aria-label={ariaLabel || label} className="btn" style={{
       flexDirection: "column", padding: "12px 6px", minWidth: 52,
       background: active ? activeBg : "var(--paper)",
       fontSize: 10, gap: 2, boxShadow: active ? "2px 3px 0 var(--ink)" : "2px 3px 0 var(--ink)"
@@ -215,13 +266,7 @@ function CommentsSection({ slug }) {
   const [text, setText] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
 
-  const fallbackComments = [
-    { name: "Rina", avatar: "var(--peach)", date: "1 jam lalu", text: "Yang nomor 2 ngena banget. Sering banget ngerasa berat sholat, padahal pas wudhu aja, mood udah lumayan." },
-    { name: "Faiz", avatar: "var(--sage)", date: "3 jam lalu", text: "Suka banget gaya nulisnya — santai tapi nendang. Lanjut bikin yang serupa dong!" },
-    { name: "Bunda Lia", avatar: "var(--lilac)", date: "kemarin", text: "Aku praktekin yang nomor 3 minggu lalu — beneran works. Kerjaan rumah jadi gak overwhelming." },
-  ];
-
-  const comments = apiComments && apiComments.length > 0 ? apiComments : fallbackComments;
+  const comments = Array.isArray(apiComments) ? apiComments : [];
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -232,10 +277,9 @@ function CommentsSection({ slug }) {
         method: "POST",
         body: JSON.stringify({ name, text })
       });
-      setCommentsData(prev => [newComment, ...(prev || [])]);
       setName("");
       setText("");
-      toast("Komentar berhasil dikirim! 🤍", "success");
+      toast(newComment.approved ? "Komentar berhasil dikirim! 🤍" : "Komentar terkirim dan menunggu moderasi.", "success");
     } catch (err) {
       toast(err.message || "Gagal mengirim komentar. Coba lagi ya.", "error");
     } finally {
@@ -293,6 +337,9 @@ function CommentsSection({ slug }) {
           </div>
         </form>
 
+        {comments.length === 0 && (
+          <p style={{ color: "var(--ink-soft)", fontSize: 14 }}>Belum ada obrolan. Jadi yang pertama, yuk.</p>
+        )}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {comments.map((cm, i) => {
             const dateStr = cm.createdAt ? new Date(cm.createdAt).toLocaleDateString("id-ID", {

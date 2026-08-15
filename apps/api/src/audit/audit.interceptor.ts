@@ -31,7 +31,6 @@ export class AuditInterceptor implements NestInterceptor {
       tap(() => {
         const log = {
           userId: user.sub || user.id || null,
-          email: user.email || null,
           method,
           path,
           resource,

@@ -12,6 +12,8 @@ import { ContentListPanel } from "./panels/ContentListPanel.jsx";
 import { ContentFormPanel } from "./panels/ContentFormPanel.jsx";
 import { SubscribersPanel } from "./panels/SubscribersPanel.jsx";
 import { SettingsPanel } from "./panels/SettingsPanel.jsx";
+import { ContactsPanel } from "./panels/ContactsPanel.jsx";
+import { CommentsPanel } from "./panels/CommentsPanel.jsx";
 
 export function AdminPage() {
   const [user, setUser] = React.useState(null);
@@ -59,12 +61,17 @@ export function AdminPage() {
   // Render nested routes inside AdminLayout
   return (
     <Routes>
-      <Route element={<AdminLayout user={user} onLogout={() => setUser(null)} />}>
+      <Route element={<AdminLayout user={user} onLogout={async () => {
+        try { await api("/auth/logout", { method: "POST" }); } catch {}
+        setUser(null);
+      }} />}>
         <Route index element={<DashboardPanel />} />
         <Route path="konten" element={<Navigate to="/admin/konten/articles" replace />} />
         <Route path="konten/:resourceType" element={<ContentListPanel />} />
         <Route path="konten/:resourceType/new" element={<ContentFormPanel />} />
         <Route path="konten/:resourceType/edit/:id" element={<ContentFormPanel />} />
+        <Route path="pesan" element={<ContactsPanel />} />
+        <Route path="komentar" element={<CommentsPanel />} />
         <Route path="subscribers" element={<SubscribersPanel />} />
         <Route path="settings" element={<SettingsPanel />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
@@ -85,7 +92,7 @@ function LoadingScreen() {
 }
 
 function Login({ onLogin }) {
-  const [email, setEmail] = React.useState("admin@muslimhebat.local");
+  const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -162,15 +169,22 @@ function Login({ onLogin }) {
 function AdminLayout({ user, onLogout }) {
   const [counts, setCounts] = React.useState({ articles: 0, products: 0, kajian: 0, classes: 0 });
   const [subscribers, setSubscribers] = React.useState(0);
+  const [unreadMessages, setUnreadMessages] = React.useState(0);
+  const [navOpen, setNavOpen] = React.useState(false);
 
   React.useEffect(() => {
-    Promise.all([
-      api("/admin/articles").then(d => setCounts(c => ({ ...c, articles: d.length }))).catch(() => {}),
-      api("/admin/products").then(d => setCounts(c => ({ ...c, products: d.length }))).catch(() => {}),
-      api("/admin/kajian").then(d => setCounts(c => ({ ...c, kajian: d.length }))).catch(() => {}),
-      api("/admin/classes").then(d => setCounts(c => ({ ...c, classes: d.length }))).catch(() => {}),
-      api("/admin/subscribers").then(d => setSubscribers(d.length)).catch(() => {}),
-    ]);
+    api("/admin/stats")
+      .then((stats) => {
+        setCounts({
+          articles: stats.articles || 0,
+          products: stats.products || 0,
+          kajian: stats.kajian || 0,
+          classes: stats.classes || 0,
+        });
+        setSubscribers(stats.subscribers || 0);
+        setUnreadMessages(stats.unreadMessages || 0);
+      })
+      .catch(() => {});
   }, []);
 
   const sidebarItems = [
@@ -179,14 +193,19 @@ function AdminLayout({ user, onLogout }) {
     { id: "konten/products", label: "Produk", icon: "products", color: "var(--peach)", badgeKey: "products" },
     { id: "konten/kajian", label: "Kajian", icon: "kajian", color: "var(--coral)", badgeKey: "kajian" },
     { id: "konten/classes", label: "Kelas", icon: "classes", color: "var(--lilac)", badgeKey: "classes" },
+    { id: "pesan", label: "Pesan", icon: "mail", color: "var(--butter)", badgeKey: "pesan" },
+    { id: "komentar", label: "Komentar", icon: "content", color: "var(--peach)" },
     { id: "subscribers", label: "Subscribers", icon: "subscribers", color: "var(--coral)", badgeKey: "subscribers" },
     { id: "settings", label: "Settings", icon: "settings", color: "var(--lilac)" },
   ];
 
   return (
-    <div className="admin-app">
-      {/* Sidebar */}
-      <aside className="admin-sidebar">
+    <div className={`admin-app ${navOpen ? "admin-nav-open" : ""}`}>
+      <button type="button" className="admin-nav-toggle" onClick={() => setNavOpen((open) => !open)} aria-label="Buka menu admin">
+        Menu
+      </button>
+      {navOpen && <button type="button" className="admin-nav-backdrop" onClick={() => setNavOpen(false)} aria-label="Tutup menu" />}
+      <aside className="admin-sidebar" onClick={() => setNavOpen(false)}>
         <div className="admin-sidebar-brand">
           <img
             src="/logo.avif"
@@ -215,6 +234,9 @@ function AdminLayout({ user, onLogout }) {
                 <span className="admin-nav-label">{item.label}</span>
                 {item.badgeKey === "subscribers" && subscribers > 0 && (
                   <span className="admin-nav-badge">{subscribers}</span>
+                )}
+                {item.badgeKey === "pesan" && unreadMessages > 0 && (
+                  <span className="admin-nav-badge">{unreadMessages}</span>
                 )}
                 {item.badgeKey && item.badgeKey !== "subscribers" && counts[item.badgeKey] > 0 && (
                   <span className="admin-nav-badge" style={{ background: "rgba(31,58,45,0.08)", color: "var(--ink)" }}>
@@ -245,8 +267,10 @@ function AdminLayout({ user, onLogout }) {
       {/* Main Content */}
       <main className="admin-main">
         {/* Pass shared state down to routing panels */}
-        <Outlet context={{ user, counts, setCounts, subscribers, setSubscribers }} />
+        <Outlet context={{ user, counts, setCounts, subscribers, setSubscribers, unreadMessages, setUnreadMessages }} />
       </main>
     </div>
   );
 }
+
+export default AdminPage;

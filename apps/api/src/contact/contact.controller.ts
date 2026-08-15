@@ -1,9 +1,12 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, UseGuards, UseInterceptors } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { PrismaService } from "../prisma.service";
-import { ContactDto } from "./contact.dto";
+import { ContactDto, UpdateContactDto } from "./contact.dto";
+import { AdminAuthGuard } from "../auth/auth.guard";
+import { AuditInterceptor } from "../audit/audit.interceptor";
 
 @Controller()
+@UseInterceptors(AuditInterceptor)
 export class ContactController {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -19,5 +22,22 @@ export class ContactController {
       }
     });
     return { ok: true };
+  }
+
+  @Get("admin/contact")
+  @UseGuards(AdminAuthGuard)
+  list() {
+    return this.prisma.contactMessage.findMany({
+      orderBy: { createdAt: "desc" }
+    });
+  }
+
+  @Patch("admin/contact/:id")
+  @UseGuards(AdminAuthGuard)
+  markRead(@Param("id") id: string, @Body() dto: UpdateContactDto) {
+    return this.prisma.contactMessage.update({
+      where: { id },
+      data: { read: dto.read ?? true }
+    });
   }
 }

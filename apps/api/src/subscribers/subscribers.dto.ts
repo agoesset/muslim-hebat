@@ -14,6 +14,11 @@ export class SubscriberDto {
 }
 
 export class UnsubscribeDto {
+  @IsOptional()
   @IsEmail()
-  email!: string;
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  token?: string;
 }

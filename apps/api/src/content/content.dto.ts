@@ -1,4 +1,5 @@
-import { IsBoolean, IsEnum, IsInt, IsISO8601, IsNumber, IsOptional, IsString, Min, MinLength } from "class-validator";
+import { PartialType } from "@nestjs/mapped-types";
+import { IsBoolean, IsEnum, IsInt, IsISO8601, IsNumber, IsOptional, IsString, Matches, Min, MinLength } from "class-validator";
 
 export enum ContentStatusDto {
   DRAFT = "DRAFT",
@@ -6,9 +7,12 @@ export enum ContentStatusDto {
   ARCHIVED = "ARCHIVED"
 }
 
+const slugPattern = /^[a-z0-9-]+$/;
+
 export class ContentDto {
   @IsString()
   @MinLength(2)
+  @Matches(slugPattern)
   slug!: string;
 
   @IsString()
@@ -94,6 +98,7 @@ export class ContentDto {
 export class ProductDto {
   @IsString()
   @MinLength(2)
+  @Matches(slugPattern)
   slug!: string;
 
   @IsString()
@@ -164,6 +169,7 @@ export class ProductDto {
 export class KajianEventDto {
   @IsString()
   @MinLength(2)
+  @Matches(slugPattern)
   slug!: string;
 
   @IsString()
@@ -249,6 +255,7 @@ export class KajianEventDto {
 export class CourseDto {
   @IsString()
   @MinLength(2)
+  @Matches(slugPattern)
   slug!: string;
 
   @IsString()
@@ -413,4 +420,16 @@ export class TestimonialDto {
   @IsOptional()
   @IsString()
   targetId?: string;
+}
+
+export class UpdateContentDto extends PartialType(ContentDto) {}
+export class UpdateProductDto extends PartialType(ProductDto) {}
+export class UpdateKajianEventDto extends PartialType(KajianEventDto) {}
+export class UpdateCourseDto extends PartialType(CourseDto) {}
+export class UpdateTestimonialDto extends PartialType(TestimonialDto) {}
+
+export class ApproveCommentDto {
+  @IsOptional()
+  @IsBoolean()
+  approved?: boolean;
 }

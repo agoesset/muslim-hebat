@@ -175,9 +175,9 @@ function mapKajian(k) {
     color: k.color || "var(--sage)",
     tags: k.tags || [],
     featured: k.featured || false,
-    attendees: Math.floor(Math.random() * 2000) + 100, // placeholder
-    free: true, // placeholder — no price field in kajian yet
-    price: "",
+    attendees: k.attendees || 0,
+    free: k.free ?? ((k.priceCents || 0) === 0),
+    price: k.priceCents ? `Rp ${Number(k.priceCents).toLocaleString("id")}` : "",
     startsAt: k.startsAt,
     status: k.status
   };
@@ -210,7 +210,7 @@ function mapClass(c) {
     title: c.title,
     instructor: c.instructor || "Muslim Hebat",
     instructorAvatar: c.color || "var(--peach)",
-    lessons: 12, // default
+    lessons: c.lessons || 12,
     duration: c.duration || "4 minggu",
     level: c.level || "Semua level",
     students: c.students || 0,
@@ -226,7 +226,7 @@ function mapClass(c) {
     schedule: isLive ? "Senin & Rabu, 19:30–21:00 WIB" : null,
     platform: isLive ? "Zoom + grup WA" : "Akses seumur hidup",
     slots: isLive ? 50 : null,
-    slotsTaken: isLive ? Math.floor(Math.random() * 40) + 5 : null,
+    slotsTaken: isLive ? (c.slotsTaken || 0) : null,
     status: status,
     desc: c.description || c.excerpt,
     featured: c.featured || false,

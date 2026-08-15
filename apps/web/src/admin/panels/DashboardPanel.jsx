@@ -9,12 +9,12 @@ export function DashboardPanel() {
   const totalContent = Object.values(counts).reduce((a, b) => a + b, 0);
 
   const quickStats = [
-    { label: "Total Konten", value: totalContent, icon: "total", color: "var(--sage)", trend: "+12%" },
+    { label: "Total Konten", value: totalContent, icon: "total", color: "var(--sage)", trend: "" },
     { label: "Bacaan", value: counts.articles, icon: "articles", color: "var(--sage)", trend: "" },
     { label: "Produk", value: counts.products, icon: "products", color: "var(--peach)", trend: "" },
     { label: "Kajian", value: counts.kajian, icon: "kajian", color: "var(--coral)", trend: "" },
     { label: "Kelas", value: counts.classes, icon: "classes", color: "var(--lilac)", trend: "" },
-    { label: "Subscribers", value: subscribers, icon: "subscribers", color: "var(--butter)", trend: "+5" },
+    { label: "Subscribers", value: subscribers, icon: "subscribers", color: "var(--butter)", trend: "" },
   ];
 
   return (

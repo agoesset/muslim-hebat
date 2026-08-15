@@ -74,7 +74,7 @@ export function SubscribersPanel() {
 
     setAdding(true);
     try {
-      await api("/public/subscribers", {
+      await api("/admin/subscribers", {
         method: "POST",
         body: JSON.stringify({
           email: newEmail.trim(),
@@ -96,15 +96,12 @@ export function SubscribersPanel() {
     }
   };
 
-  const handleDeleteSubscriber = async (email) => {
-    if (!confirm(`Hapus subscriber dengan email ${email}?`)) return;
+  const handleDeleteSubscriber = async (item) => {
+    if (!confirm(`Hapus subscriber dengan email ${item.email}?`)) return;
 
     try {
-      await api("/public/subscribers/unsubscribe", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
-      setToastMessage(`Subscriber ${email} berhasil dihapus`);
+      await api(`/admin/subscribers/${item.id}`, { method: "DELETE" });
+      setToastMessage(`Subscriber ${item.email} berhasil dihapus`);
       fetchSubscribers();
       setTimeout(() => setToastMessage(""), 3000);
     } catch (err) {
@@ -147,6 +144,8 @@ export function SubscribersPanel() {
           {toastMessage}
         </div>
       )}
+
+      <NewsletterCard onDone={setToastMessage} />
 
       {/* Manual Add Card */}
       <div className="admin-card" style={{ padding: "24px", marginBottom: "24px" }}>
@@ -339,7 +338,7 @@ export function SubscribersPanel() {
                       </td>
                       <td style={{ padding: "16px 24px", textAlign: "right" }}>
                         <button
-                          onClick={() => handleDeleteSubscriber(item.email)}
+                          onClick={() => handleDeleteSubscriber(item)}
                           className="admin-btn admin-btn-danger admin-btn-sm"
                           style={{ padding: "6px 12px", display: "inline-flex", alignItems: "center", gap: "4px" }}
                           title="Hapus subscriber"
@@ -381,6 +380,54 @@ export function SubscribersPanel() {
         )}
       </div>
     </div>
+  );
+}
+
+function NewsletterCard({ onDone }) {
+  const [subject, setSubject] = React.useState("");
+  const [html, setHtml] = React.useState("");
+  const [sending, setSending] = React.useState(false);
+
+  async function send(e) {
+    e.preventDefault();
+    setSending(true);
+    try {
+      const result = await api("/admin/newsletter/send", {
+        method: "POST",
+        body: JSON.stringify({ subject, html })
+      });
+      onDone(`Newsletter terkirim: ${result.sent}/${result.total}${result.skipped ? " (SMTP belum disetel)" : ""}`);
+      setSubject("");
+      setHtml("");
+    } catch (err) {
+      onDone(`Gagal kirim newsletter: ${err.message}`);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <form className="admin-card" onSubmit={send} style={{ padding: 24, marginBottom: 24 }}>
+      <h3 style={{ margin: "0 0 12px" }}>Kirim newsletter</h3>
+      <input
+        required
+        value={subject}
+        onChange={(e) => setSubject(e.target.value)}
+        placeholder="Subjek"
+        style={{ width: "100%", padding: "10px 12px", marginBottom: 12, borderRadius: 6, border: "1.5px solid rgba(31,58,45,0.15)" }}
+      />
+      <textarea
+        required
+        value={html}
+        onChange={(e) => setHtml(e.target.value)}
+        placeholder="Isi HTML"
+        rows={5}
+        style={{ width: "100%", padding: "10px 12px", marginBottom: 12, borderRadius: 6, border: "1.5px solid rgba(31,58,45,0.15)" }}
+      />
+      <button type="submit" className="admin-btn admin-btn-primary" disabled={sending}>
+        {sending ? "Mengirim..." : "Kirim ke semua subscriber"}
+      </button>
+    </form>
   );
 }
 

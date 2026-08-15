@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Nav, Footer } from "./shell.jsx";
 import { HomePage } from "./HomePage.jsx";
 import { ProdukPage } from "./ProdukPage.jsx";
@@ -10,28 +10,35 @@ import { CeritaDetailPage } from "./CeritaDetailPage.jsx";
 import { ProdukDetailPage } from "./ProdukDetailPage.jsx";
 import { KelasDetailPage } from "./KelasDetailPage.jsx";
 import { KajianDetailPage } from "./KajianDetailPage.jsx";
-import { AdminPage } from "./admin/AdminPage.jsx";
 import { applyTheme, DEFAULT_THEME } from "./theme.js";
 import { Seo } from "./seo.jsx";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import { Analytics } from "./components/Analytics.jsx";
 import { usePublicData } from "./hooks/usePublicData.js";
-
 import { CtaProvider } from "./context/cta-context.jsx";
+import { ToastContainer } from "./Toast.jsx";
+import { GlobalSearch } from "./GlobalSearch.jsx";
+import { ContactPage } from "./ContactPage.jsx";
+import { UnsubscribePage } from "./UnsubscribePage.jsx";
+import { NotFoundPage } from "./NotFoundPage.jsx";
+
+const AdminPage = React.lazy(() =>
+  import("./admin/AdminPage.jsx").then((mod) => ({ default: mod.AdminPage }))
+);
 
 const pageIds = {
   "/": "home",
   "/bacaan": "bacaan",
   "/kelas": "kelas",
   "/produk": "produk",
-  "/kajian": "kajian"
+  "/kajian": "kajian",
+  "/kontak": "kontak"
 };
 
 export default function App() {
   const { data: settings } = usePublicData("/public/settings");
 
   React.useEffect(() => {
-    // 1. Try to restore from localStorage first for instant layout/color styling
     try {
       const savedTheme = localStorage.getItem("muslim-hebat-theme");
       if (savedTheme) {
@@ -62,18 +69,29 @@ export default function App() {
   return (
     <BrowserRouter>
       <CtaProvider>
+        <ToastContainer />
         <Routes>
-          <Route path="/admin/*" element={<AdminPage />} />
-          <Route path="*" element={<PublicApp />} />
+          <Route
+            path="/admin/*"
+            element={
+              <ErrorBoundary>
+                <React.Suspense fallback={<div className="shell" style={{ padding: 48 }}>Memuat admin…</div>}>
+                  <AdminPage />
+                </React.Suspense>
+              </ErrorBoundary>
+            }
+          />
+          <Route path="*" element={<PublicApp settings={settings} />} />
         </Routes>
       </CtaProvider>
     </BrowserRouter>
   );
 }
 
-function PublicApp() {
+function PublicApp({ settings }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = React.useState(false);
   const page = location.pathname.startsWith("/bacaan/") ? "bacaan" :
     location.pathname.startsWith("/produk/") ? "produk" :
     location.pathname.startsWith("/kelas/") ? "kelas" :
@@ -89,7 +107,8 @@ function PublicApp() {
   return (
     <div>
       <Analytics />
-      <Nav page={page} />
+      <Nav page={page} onSearch={() => setSearchOpen(true)} />
+      <GlobalSearch open={searchOpen} onClose={setSearchOpen} onNavigate={navigate} />
       <ErrorBoundary>
         <Routes>
           <Route path="/" element={<><Seo title="Muslim Hebat" description="Belajar Islam dengan bacaan ringan, produk bermanfaat, kelas, dan jadwal ngaji bareng." /><HomePage onNav={goNav} onOpenCerita={openCerita} /></>} />
@@ -101,13 +120,16 @@ function PublicApp() {
           <Route path="/produk/:slug" element={<ProdukDetailRoute onNav={goNav} />} />
           <Route path="/kajian" element={<><Seo title="Ngaji Bareng | Muslim Hebat" description="Jadwal kajian online dan offline terdekat dari Muslim Hebat." /><KajianPage onNav={goNav} /></>} />
           <Route path="/kajian/:slug" element={<KajianDetailRoute onNav={goNav} />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/kontak" element={<ContactPage onNav={goNav} />} />
+          <Route path="/unsubscribe" element={<UnsubscribePage onNav={goNav} />} />
+          <Route path="*" element={<NotFoundPage onNav={goNav} />} />
         </Routes>
       </ErrorBoundary>
-      <Footer />
+      <Footer settings={settings} />
     </div>
   );
 }
+
 function CeritaDetailRoute({ onNav, onOpenCerita }) {
   const { slug } = useParams();
   const { data: apiArticle, loading, error } = usePublicData(`/public/articles/${slug}`);
@@ -125,11 +147,14 @@ function CeritaDetailRoute({ onNav, onOpenCerita }) {
       <Seo
         title={`${cerita.title} | Muslim Hebat`}
         description={cerita.excerpt}
+        image={cerita.coverImage}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Article",
           headline: cerita.title,
           description: cerita.excerpt,
+          datePublished: cerita.publishedAt || cerita.createdAt,
+          image: cerita.coverImage,
           author: { "@type": "Person", name: cerita.author || "Muslim Hebat" }
         }}
       />
@@ -149,7 +174,9 @@ function ProductJsonLd(product) {
       "@type": "Offer",
       price: (product.priceCents || 0) / 100,
       priceCurrency: "IDR",
-      availability: "https://schema.org/InStock"
+      availability: product.status === "ARCHIVED"
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock"
     }
   };
 }
@@ -182,7 +209,7 @@ function ProdukDetailRoute({ onNav }) {
   const { data: product, loading, error } = usePublicData(`/public/products/${slug}`);
   if (loading) return <div className="shell" style={{ padding: "60px 0" }}><p>Memuat produk…</p></div>;
   if (error || !product) return <div className="shell" style={{ padding: "60px 0" }}><p>Produk tidak ditemukan.</p></div>;
-  return <><Seo title={`${product.name} | Muslim Hebat`} description={product.excerpt} jsonLd={ProductJsonLd(product)} /><ProdukDetailPage product={product} onNav={onNav} /></>;
+  return <><Seo title={`${product.name} | Muslim Hebat`} description={product.excerpt} image={product.image} jsonLd={ProductJsonLd(product)} /><ProdukDetailPage product={product} onNav={onNav} /></>;
 }
 
 function KelasDetailRoute({ onNav }) {
@@ -190,7 +217,7 @@ function KelasDetailRoute({ onNav }) {
   const { data: course, loading, error } = usePublicData(`/public/classes/${slug}`);
   if (loading) return <div className="shell" style={{ padding: "60px 0" }}><p>Memuat kelas…</p></div>;
   if (error || !course) return <div className="shell" style={{ padding: "60px 0" }}><p>Kelas tidak ditemukan.</p></div>;
-  return <><Seo title={`${course.title} | Muslim Hebat`} description={course.excerpt} jsonLd={CourseJsonLd(course)} /><KelasDetailPage course={course} onNav={onNav} /></>;
+  return <><Seo title={`${course.title} | Muslim Hebat`} description={course.excerpt} image={course.image} jsonLd={CourseJsonLd(course)} /><KelasDetailPage course={course} onNav={onNav} /></>;
 }
 
 function KajianDetailRoute({ onNav }) {
@@ -198,7 +225,7 @@ function KajianDetailRoute({ onNav }) {
   const { data: event, loading, error } = usePublicData(`/public/kajian/${slug}`);
   if (loading) return <div className="shell" style={{ padding: "60px 0" }}><p>Memuat kajian…</p></div>;
   if (error || !event) return <div className="shell" style={{ padding: "60px 0" }}><p>Kajian tidak ditemukan.</p></div>;
-  return <><Seo title={`${event.title} | Muslim Hebat`} description={event.excerpt} jsonLd={EventJsonLd(event)} /><KajianDetailPage event={event} onNav={onNav} /></>;
+  return <><Seo title={`${event.title} | Muslim Hebat`} description={event.excerpt} image={event.coverImage} jsonLd={EventJsonLd(event)} /><KajianDetailPage event={event} onNav={onNav} /></>;
 }
 
 function routeForPage(id) {
@@ -207,6 +234,7 @@ function routeForPage(id) {
     bacaan: "/bacaan",
     kelas: "/kelas",
     produk: "/produk",
-    kajian: "/kajian"
+    kajian: "/kajian",
+    kontak: "/kontak"
   }[id] || "/";
 }

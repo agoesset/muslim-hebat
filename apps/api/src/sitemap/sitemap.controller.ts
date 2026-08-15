@@ -1,8 +1,7 @@
 import { Controller, Get, Header } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
-import { env } from "../config/env";
 
-const SITE_URL = env.SITE_URL || env.WEB_ORIGIN || "https://muslimhebat.com";
+const SITE_URL = process.env.SITE_URL || process.env.WEB_ORIGIN || "https://muslimhebat.com";
 
 @Controller()
 export class SitemapController {
@@ -29,10 +28,10 @@ export class SitemapController {
 
     const urlTags = [
       ...staticPages.map(p => url(p.loc, undefined, p.changefreq, p.priority)),
-      ...articles.map(a => url(`/bacaan/${a.slug}`, a.updatedAt, "weekly", "0.6")),
-      ...products.map(p => url(`/produk/${p.slug}`, p.updatedAt, "weekly", "0.6")),
-      ...kajian.map(k => url(`/kajian/${k.slug}`, k.updatedAt, "weekly", "0.6")),
-      ...courses.map(c => url(`/kelas/${c.slug}`, c.updatedAt, "weekly", "0.6")),
+      ...articles.map((a: { slug: string; updatedAt?: Date | null }) => url(`/bacaan/${a.slug}`, a.updatedAt ?? undefined, "weekly", "0.6")),
+      ...products.map((p: { slug: string; updatedAt?: Date | null }) => url(`/produk/${p.slug}`, p.updatedAt ?? undefined, "weekly", "0.6")),
+      ...kajian.map((k: { slug: string; updatedAt?: Date | null }) => url(`/kajian/${k.slug}`, k.updatedAt ?? undefined, "weekly", "0.6")),
+      ...courses.map((c: { slug: string; updatedAt?: Date | null }) => url(`/kelas/${c.slug}`, c.updatedAt ?? undefined, "weekly", "0.6")),
     ];
 
     return `<?xml version="1.0" encoding="UTF-8"?>
@@ -50,7 +49,7 @@ ${urlTags.join("\n")}
       take: 20,
     });
 
-    const items = articles.map(a => {
+    const items = articles.map((a: { slug: string; title?: string | null; excerpt?: string | null; publishedAt?: Date | null; createdAt: Date; author?: string | null; category?: string | null }) => {
       const link = `${SITE_URL}/bacaan/${a.slug}`;
       const pubDate = a.publishedAt ? new Date(a.publishedAt).toUTCString() : new Date(a.createdAt).toUTCString();
       const desc = (a.excerpt || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -102,8 +101,16 @@ Sitemap: ${SITE_URL}/sitemap.xml
   }
 }
 
+function xmlEscape(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function url(loc: string, lastmod?: Date, changefreq = "weekly", priority = "0.5") {
-  const parts = [`  <url>\n    <loc>${SITE_URL}${loc}</loc>`];
+  const parts = [`  <url>\n    <loc>${xmlEscape(`${SITE_URL}${loc}`)}</loc>`];
   if (lastmod) parts.push(`\n    <lastmod>${lastmod.toISOString()}</lastmod>`);
   parts.push(`\n    <changefreq>${changefreq}</changefreq>`);
   parts.push(`\n    <priority>${priority}</priority>`);

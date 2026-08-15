@@ -25,8 +25,16 @@ export const env = cleanEnv(process.env, {
   APP_VERSION: str({ default: "" }),
   SENTRY_TRACES_SAMPLE_RATE: num({ default: 0.1 }),
   SENTRY_PROFILE_SAMPLE_RATE: num({ default: 0 }),
+  METRICS_TOKEN: str({ default: "" }),
+  UPLOAD_DIR: str({ default: "./uploads" }),
 });
 
-if (env.isProduction && env.JWT_SECRET.length < 32) {
-  throw new Error("JWT_SECRET must be at least 32 characters in production");
+const weakSecret = /^(change-me|replace-)/i;
+if (env.isProduction) {
+  if (env.JWT_SECRET.length < 32 || weakSecret.test(env.JWT_SECRET)) {
+    throw new Error("JWT_SECRET must be a unique secret of at least 32 characters in production");
+  }
+  if (/change-me/i.test(env.DATABASE_URL)) {
+    throw new Error("DATABASE_URL must not use a placeholder password in production");
+  }
 }

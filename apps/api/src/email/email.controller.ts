@@ -1,9 +1,25 @@
 import { Body, Controller, Post, UseGuards, UseInterceptors } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
+import { IsOptional, IsString, MinLength } from "class-validator";
 import { PrismaService } from "../prisma.service";
 import { AdminAuthGuard } from "../auth/auth.guard";
 import { AuditInterceptor } from "../audit/audit.interceptor";
 import { EmailService } from "./email.service";
+import { randomBytes } from "crypto";
+
+export class NewsletterDto {
+  @IsString()
+  @MinLength(1)
+  subject!: string;
+
+  @IsString()
+  @MinLength(1)
+  html!: string;
+
+  @IsOptional()
+  @IsString()
+  text?: string;
+}
 
 @Controller()
 @UseInterceptors(AuditInterceptor)
@@ -16,20 +32,29 @@ export class EmailController {
   @Post("admin/newsletter/send")
   @UseGuards(AdminAuthGuard)
   @Throttle({ default: { limit: 5, ttl: 3600000 } })
-  async sendNewsletter(@Body() dto: { subject: string; html: string; text?: string }) {
+  async sendNewsletter(@Body() dto: NewsletterDto) {
     const subscribers = await this.prisma.subscriber.findMany({
-      select: { email: true },
+      select: { id: true, email: true, unsubToken: true },
       orderBy: { createdAt: "desc" },
     });
 
-    const emails = subscribers.map((s) => s.email);
-    const result = await this.email.sendNewsletter({
-      to: emails,
+    const recipients = await Promise.all(subscribers.map(async (subscriber) => {
+      if (subscriber.unsubToken) {
+        return { email: subscriber.email, unsubToken: subscriber.unsubToken };
+      }
+      const unsubToken = randomBytes(24).toString("hex");
+      await this.prisma.subscriber.update({
+        where: { id: subscriber.id },
+        data: { unsubToken }
+      });
+      return { email: subscriber.email, unsubToken };
+    }));
+
+    return this.email.sendNewsletter({
+      to: recipients,
       subject: dto.subject,
       html: dto.html,
       text: dto.text,
     });
-
-    return result;
   }
 }

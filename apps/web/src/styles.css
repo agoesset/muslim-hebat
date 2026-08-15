@@ -442,6 +442,15 @@ input, textarea, select { min-width: 0; }
     right: 12px;
     bottom: 12px;
   }
+
+  [style*='min-width: 160'] {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  [style*='grid-template-columns: 200px 1fr'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -481,6 +490,16 @@ input, textarea, select { min-width: 0; }
   [style*='aspect-ratio: 16 / 8'],
   [style*='aspect-ratio: 16/8'] {
     aspect-ratio: 4 / 3 !important;
+  }
+
+  [style*='min-width: 160'] {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  [style*='width: 300']:not(img):not(svg) {
+    width: min(240px, 60vw) !important;
+    height: min(240px, 60vw) !important;
   }
 }
 

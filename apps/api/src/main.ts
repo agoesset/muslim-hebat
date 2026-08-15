@@ -3,13 +3,12 @@ import { ValidationPipe, RequestMethod } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Request, Response, NextFunction } from "express";
-import { readdirSync, statSync, readFileSync } from "fs";
+import { existsSync, readdirSync, statSync, readFileSync } from "fs";
 import { join } from "path";
 import * as cookieParser from "cookie-parser";
 import * as compression from "compression";
 import * as express from "express";
 import helmet from "helmet";
-import { PrismaClient } from "@prisma/client";
 import { AppModule } from "./app.module";
 import { env } from "./config/env";
 import { initSentry } from "./config/sentry";
@@ -88,6 +87,8 @@ async function bootstrap() {
     metricsService.use(req, res, next);
   });
 
+  app.set("trust proxy", 1);
+
   app.enableCors({
     origin: env.WEB_ORIGIN.split(","),
     credentials: true,
@@ -108,6 +109,7 @@ async function bootstrap() {
     if (!isEntryChunk) return next();
 
     const assetsPath = join(publicPath, "assets");
+    if (!existsSync(assetsPath)) return next();
     const extension = fileName.endsWith(".css") ? ".css" : ".js";
     const latestEntry = readdirSync(assetsPath)
       .filter((name) => /^index-[A-Za-z0-9_-]+\.(js|css)$/.test(name) && name.endsWith(extension))
@@ -129,35 +131,19 @@ async function bootstrap() {
     }
   });
 
-  // Dynamic SEO sitemap (root path, outside /api prefix)
-  const adapter = app.getHttpAdapter();
-  const sitemapPrisma = new PrismaClient();
-  adapter.get("/sitemap.xml", async (_req: any, res: any) => {
-    const siteUrl = (process.env.SITE_URL || process.env.VITE_SITE_URL || "https://muslimhebat.com").replace(/\/$/, "");
-    const [articles, products, courses, kajian] = await Promise.all([
-      sitemapPrisma.article.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } }),
-      sitemapPrisma.product.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } }),
-      sitemapPrisma.course.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } }),
-      sitemapPrisma.kajianEvent.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } })
-    ]);
-    const toSitemapEntry = (prefix: string) => (item: { slug: string; updatedAt: Date }) => [`${prefix}/${item.slug}`, item.updatedAt] as [string, Date];
-    const urls: [string, Date][] = [
-      ["/", new Date()], ["/bacaan", new Date()], ["/produk", new Date()], ["/kelas", new Date()], ["/kajian", new Date()],
-      ...articles.map(toSitemapEntry("/bacaan")),
-      ...products.map(toSitemapEntry("/produk")),
-      ...courses.map(toSitemapEntry("/kelas")),
-      ...kajian.map(toSitemapEntry("/kajian"))
-    ];
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([path, updated]) => `  <url><loc>${siteUrl}${path}</loc><lastmod>${new Date(updated).toISOString()}</lastmod></url>`).join("\n")}\n</urlset>`;
-    res.type("application/xml").send(xml);
-  });
-
   // Serve uploaded files
-  app.use("/uploads", express.static("./uploads"));
+  app.use("/uploads", (req: Request, res: Response, next: NextFunction) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    if (req.path.toLowerCase().endsWith(".pdf")) {
+      res.setHeader("Content-Disposition", "attachment");
+    }
+    next();
+  }, express.static(env.UPLOAD_DIR));
 
   app.setGlobalPrefix("api", {
     exclude: [
       { path: "health", method: RequestMethod.GET },
+      { path: "health/ready", method: RequestMethod.GET },
       { path: "sitemap.xml", method: RequestMethod.GET },
       { path: "robots.txt", method: RequestMethod.GET },
       { path: "rss.xml", method: RequestMethod.GET },
@@ -170,25 +156,33 @@ async function bootstrap() {
   }));
 
   // SPA fallback: serve index.html for non-API, non-static routes with CSP nonce
+  // Skip if index.html not available (e.g. local dev with Vite serving frontend)
   const indexHtmlPath = join(publicPath, "index.html");
-  const indexHtmlTemplate = readFileSync(indexHtmlPath, "utf-8");
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    if (
-      req.path.startsWith("/api") ||
-      req.path.startsWith("/health") ||
-      req.path.includes(".")
-    ) {
-      next();
-    } else {
-      const nonce = res.locals.nonce as string;
-      const html = indexHtmlTemplate
-        .replace(/__CSP_NONCE__/g, nonce)
-        .replace(/<script /g, `<script nonce="${nonce}" `)
-        .replace(/<link rel="stylesheet" /g, `<link rel="stylesheet" nonce="${nonce}" `);
-      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-      res.type("html").send(html);
-    }
-  });
+  let indexHtmlTemplate: string | undefined;
+  try {
+    indexHtmlTemplate = readFileSync(indexHtmlPath, "utf-8");
+  } catch {
+    // not available in dev mode
+  }
+  if (indexHtmlTemplate) {
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      if (
+        req.path.startsWith("/api") ||
+        req.path.startsWith("/health") ||
+        req.path.includes(".")
+      ) {
+        next();
+      } else {
+        const nonce = res.locals.nonce as string;
+        const html = indexHtmlTemplate
+          .replace(/__CSP_NONCE__/g, nonce)
+          .replace(/<script /g, `<script nonce="${nonce}" `)
+          .replace(/<link rel="stylesheet" /g, `<link rel="stylesheet" nonce="${nonce}" `);
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+        res.type("html").send(html);
+      }
+    });
+  }
 
   await app.listen(env.PORT, "0.0.0.0");
 }

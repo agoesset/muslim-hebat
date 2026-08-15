@@ -26,12 +26,12 @@ export class MetricsMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: NextFunction) {
     const start = Date.now();
-    const route = req.route?.path || req.path;
 
     res.on("finish", () => {
       const duration = (Date.now() - start) / 1000;
       const status = res.statusCode.toString();
       const method = req.method;
+      const route = req.route?.path || "unmatched";
       httpRequestsTotal.inc({ method, route, status });
       httpRequestDuration.observe({ method, route, status }, duration);
 

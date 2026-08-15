@@ -1,9 +1,9 @@
-import { IsObject, IsString, MinLength } from "class-validator";
+import { IsObject, IsOptional, IsString } from "class-validator";
 
 export class SiteSettingDto {
+  @IsOptional()
   @IsString()
-  @MinLength(2)
-  key!: string;
+  key?: string;
 
   @IsObject()
   value!: Record<string, unknown>;

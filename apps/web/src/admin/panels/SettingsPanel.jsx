@@ -4,8 +4,14 @@ import { renderAdminIcon } from "../../lucide-icons.jsx";
 import { applyTheme } from "../../theme.js";
 
 export function SettingsPanel() {
-  const [theme, setTheme] = React.useState("cool");
-  const savedThemeRef = React.useRef("cool");
+  const [theme, setTheme] = React.useState({
+    palette: "cool",
+    density: "cozy",
+    font: "grotesk",
+    bento: true,
+    illustrations: true,
+  });
+  const savedThemeRef = React.useRef(theme);
   const [siteMetadata, setSiteMetadata] = React.useState({
     title: "",
     description: "",
@@ -28,9 +34,16 @@ export function SettingsPanel() {
         if (Array.isArray(settings)) {
           const themeSetting = settings.find((s) => s.key === "theme");
           if (themeSetting && themeSetting.value && themeSetting.value.palette) {
-            setTheme(themeSetting.value.palette);
-            savedThemeRef.current = themeSetting.value.palette;
-            applyTheme({ palette: themeSetting.value.palette, density: "cozy", font: "grotesk" });
+            const nextTheme = {
+              palette: themeSetting.value.palette,
+              density: themeSetting.value.density || "cozy",
+              font: themeSetting.value.font || "grotesk",
+              bento: themeSetting.value.bento ?? true,
+              illustrations: themeSetting.value.illustrations ?? true,
+            };
+            setTheme(nextTheme);
+            savedThemeRef.current = nextTheme;
+            applyTheme(nextTheme);
           }
 
           const siteSetting = settings.find((s) => s.key === "site");
@@ -58,14 +71,14 @@ export function SettingsPanel() {
   // Preview the theme changes instantly
   React.useEffect(() => {
     if (!loading) {
-      applyTheme({ palette: theme, density: "cozy", font: "grotesk" });
+      applyTheme(theme);
     }
   }, [theme, loading]);
 
   // Restore the saved theme if the user leaves the panel without saving
   React.useEffect(() => {
     return () => {
-      applyTheme({ palette: savedThemeRef.current, density: "cozy", font: "grotesk" });
+      applyTheme(savedThemeRef.current);
     };
   }, []);
 
@@ -74,7 +87,7 @@ export function SettingsPanel() {
     setSaving(true);
     setSaved(false);
     try {
-      const themeVal = { palette: theme, density: "cozy", font: "grotesk" };
+      const themeVal = { ...theme };
       await Promise.all([
         api("/admin/settings/theme", {
           method: "PUT",
@@ -180,8 +193,8 @@ export function SettingsPanel() {
               <button
                 type="button"
                 key={t.id}
-                className={`admin-theme-card ${theme === t.id ? "active" : ""}`}
-                onClick={() => setTheme(t.id)}
+                className={`admin-theme-card ${theme.palette === t.id ? "active" : ""}`}
+                onClick={() => setTheme((prev) => ({ ...prev, palette: t.id }))}
                 style={{ "--theme-bg": t.bg }}
               >
                 <span className="admin-theme-preview" style={{ background: t.bg }}>
@@ -191,7 +204,7 @@ export function SettingsPanel() {
                   <span className="admin-theme-label">{t.label}</span>
                   <span className="admin-theme-desc">{t.desc}</span>
                 </div>
-                {theme === t.id && <span className="admin-theme-check">{renderAdminIcon("check", { size: 16 })}</span>}
+                {theme.palette === t.id && <span className="admin-theme-check">{renderAdminIcon("check", { size: 16 })}</span>}
               </button>
             ))}
           </div>

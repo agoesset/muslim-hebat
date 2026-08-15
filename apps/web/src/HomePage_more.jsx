@@ -4,7 +4,7 @@ import React from "react";
 import { Icon } from "./icons.jsx";
 import { Blob, SunDecor, WaveDivider } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
-import { CERITA_DATA } from "./data/cerita.js";
+import { useNavigate } from "react-router-dom";
 import { api } from "./api.js";
 import { useCta } from "./context/cta-context.jsx";
 import { usePublicData } from "./hooks/usePublicData.js";
@@ -102,11 +102,14 @@ export function ArticleSection({ onNav, onOpenCerita }) {
 export function ProductHighlight({ onNav }) {
   const { data: products, loading, error } = usePublicData("/public/products");
   const { openInterest } = useCta();
+  const navigate = useNavigate();
 
   if (loading) return <section className="shell" style={{ marginBottom: 40 }}><p>Memuat produk…</p></section>;
   if (error || !products || products.length === 0) return null;
 
   const display = products.slice(0, 5).map(p => ({
+    id: p.id,
+    slug: p.slug,
     name: p.name,
     price: p.priceCents || 0,
     original: p.originalPriceCents || 0,
@@ -139,7 +142,7 @@ export function ProductHighlight({ onNav }) {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16 }}>
           {display.map((p, i) => (
-            <article key={i} className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative" }}>
+            <article key={p.slug || i} className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", cursor: p.slug ? "pointer" : "default" }} onClick={() => p.slug && navigate(`/produk/${p.slug}`)}>
               {p.tag && (
                 <span className="sticker illus-only" style={{
                   position: "absolute", top: 8, right: -8, zIndex: 2,
@@ -172,7 +175,7 @@ export function ProductHighlight({ onNav }) {
                   className="btn btn--sm"
                   style={{ padding: "6px 10px", boxShadow: "2px 2px 0 var(--ink)", flexShrink: 0 }}
                   aria-label={`Minat ${p.name}`}
-                  onClick={() => openInterest({ title: `Minat: ${p.name}`, source: `produk:${p.slug || p.id}`, intent: p.price === 0 ? "download" : "buy", price: p.price === 0 ? "Gratis" : `Rp ${p.price.toLocaleString("id")}` })}
+                  onClick={(e) => { e.stopPropagation(); openInterest({ title: `Minat: ${p.name}`, source: `produk:${p.slug || p.id}`, intent: p.price === 0 ? "download" : "buy", price: p.price === 0 ? "Gratis" : `Rp ${p.price.toLocaleString("id")}` }); }}
                 >
                   <Icon.Download size={12}/>
                 </button>
@@ -193,6 +196,7 @@ export function ProductHighlight({ onNav }) {
 export function KajianStrip({ onNav }) {
   const { data: events, loading, error } = usePublicData("/public/kajian");
   const { openInterest } = useCta();
+  const navigate = useNavigate();
 
   if (loading) return <section className="shell" style={{ marginBottom: 40 }}><p>Memuat jadwal…</p></section>;
   if (error || !events || events.length === 0) return null;
@@ -210,7 +214,7 @@ export function KajianStrip({ onNav }) {
       />
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
         {events.map((e, i) => (
-          <article key={i} className="card" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <article key={e.slug || i} className="card" style={{ display: "flex", flexDirection: "column", gap: 14, cursor: e.slug ? "pointer" : "default" }} onClick={() => e.slug && navigate(`/kajian/${e.slug}`)}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
               <div style={{
                 background: e.color, borderRadius: 16, padding: "10px 14px",
@@ -234,14 +238,14 @@ export function KajianStrip({ onNav }) {
               <button
                 className="btn btn--sm btn--primary"
                 style={{ flex: 1 }}
-                onClick={() => openInterest({ title: `Daftar: ${e.title}`, source: `kajian:${e.slug || e.id}`, intent: "event", price: e.price || (e.free ? "Gratis" : "Berbayar") })}
+                onClick={(ev) => { ev.stopPropagation(); openInterest({ title: `Daftar: ${e.title}`, source: `kajian:${e.slug || e.id}`, intent: "event", price: e.price || (e.free ? "Gratis" : "Berbayar") }); }}
               >
                 Daftar gratis
               </button>
               <button
                 className="btn btn--sm"
                 aria-label="Ingatkan saya"
-                onClick={() => openInterest({ title: `Reminder: ${e.title}`, source: `kajian-reminder:${e.slug || e.id}`, intent: "reminder" })}
+                onClick={(ev) => { ev.stopPropagation(); openInterest({ title: `Reminder: ${e.title}`, source: `kajian-reminder:${e.slug || e.id}`, intent: "reminder" }); }}
               >
                 <Icon.Bell size={12}/>
               </button>

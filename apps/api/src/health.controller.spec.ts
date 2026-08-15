@@ -18,8 +18,16 @@ describe("HealthController", () => {
     controller = module.get<HealthController>(HealthController);
   });
 
-  it("should return health status with database connected", async () => {
+  it("should return liveness without hitting the database", async () => {
     expect(await controller.health()).toEqual({
+      ok: true,
+      service: "muslim-hebat-api"
+    });
+    expect(mockPrisma.$queryRaw).not.toHaveBeenCalled();
+  });
+
+  it("should return readiness with database connected", async () => {
+    expect(await controller.ready()).toEqual({
       ok: true,
       service: "muslim-hebat-api",
       database: "connected"

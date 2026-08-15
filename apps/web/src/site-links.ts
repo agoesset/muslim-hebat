@@ -11,9 +11,5 @@ export const SITE_LINKS = {
   kelas: "/kelas",
   produk: "/produk",
   kajian: "/kajian",
-  faq: "#",
-  kontak: "mailto:halo@muslimhebat.local",
-  refund: "#",
-  syarat: "#",
-  privasi: "#",
+  kontak: "/kontak",
 };

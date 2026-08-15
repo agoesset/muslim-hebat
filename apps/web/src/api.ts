@@ -6,8 +6,9 @@ interface ApiOptions extends RequestInit {
 
 export async function api<T = unknown>(path: string, options: ApiOptions = {}): Promise<T> {
   const method = (options.method || "GET").toUpperCase();
+  const isPrivate = path.startsWith("/admin") || path.startsWith("/auth");
   const cacheBustPath =
-    method === "GET"
+    method === "GET" && isPrivate
       ? `${path}${path.includes("?") ? "&" : "?"}_=${Date.now()}`
       : path;
 
@@ -21,7 +22,7 @@ export async function api<T = unknown>(path: string, options: ApiOptions = {}): 
 
   const response = await fetch(`${API_BASE_URL}${cacheBustPath}`, {
     credentials: "include",
-    cache: method === "GET" ? "no-store" : undefined,
+    cache: method === "GET" && isPrivate ? "no-store" : undefined,
     headers: requestHeaders,
     ...restOptions,
   });

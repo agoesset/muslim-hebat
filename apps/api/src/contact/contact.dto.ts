@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength } from "class-validator";
+import { IsBoolean, IsEmail, IsOptional, IsString, MinLength } from "class-validator";
 
 export class ContactDto {
   @IsString()
@@ -15,4 +15,10 @@ export class ContactDto {
   @IsString()
   @MinLength(10)
   message!: string;
+}
+
+export class UpdateContactDto {
+  @IsOptional()
+  @IsBoolean()
+  read?: boolean;
 }

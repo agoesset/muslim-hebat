@@ -50,17 +50,19 @@ npm run db:seed
 
 Default seed admin is `admin@muslimhebat.local` with password `ChangeMe123!` unless overridden by env vars.
 
-## Production
+## Production (VPS + Docker)
 
-Create `.env` from `.env.example`, replace every secret, then:
+Self-host with Docker Compose + Caddy (HTTPS). Full steps: [docs/vps.md](docs/vps.md).
 
 ```sh
-docker compose up --build -d
+cp .env.example .env
+# fill SITE_HOST, ACME_EMAIL, JWT_SECRET, POSTGRES_PASSWORD
+scripts/vps-deploy.sh
 ```
 
-OrbStack users can use the same `docker compose` commands; OrbStack provides the Docker-compatible engine on macOS.
+OrbStack users can use the same `docker compose` commands for local production-like runs.
 
-Seed the production container after the first deploy:
+Seed the production container after the first deploy (empty database only):
 
 ```sh
 docker compose exec api npm run seed
@@ -69,7 +71,8 @@ docker compose exec api npm run seed
 Health check:
 
 ```sh
-curl http://localhost/health
+curl https://muslimhebat.com/health
+curl https://muslimhebat.com/health/ready
 ```
 
 Backup database:

@@ -118,13 +118,13 @@ export function ContentFormPanel() {
         ? draft.body.replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(w => w.length > 0).length
         : 0;
       const computedTime = words > 0 ? Math.max(1, Math.ceil(words / 200)) : 0;
-      
+
       // Update only if it differs to prevent infinite loop
       if (draft.readingTime !== computedTime) {
         setDraft((prev) => ({ ...prev, readingTime: computedTime }));
       }
     }
-  }, [draft.body, resourceType]);
+  }, [resourceType, draft.body, draft.readingTime]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];

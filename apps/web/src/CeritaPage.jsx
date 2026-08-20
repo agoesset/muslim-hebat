@@ -4,6 +4,8 @@ import React from "react";
 import { Icon } from "./icons.jsx";
 import { Blob, SunDecor } from "./shell.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
+import { SkeletonGrid } from "./Skeleton.jsx";
+import { EmptyState } from "./EmptyState.jsx";
 
 import { usePublicData } from "./hooks/usePublicData.js";
 import { formatReadTime, kajianDateParts } from "./utils";
@@ -54,6 +56,16 @@ export function CeritaPage({ onNav, onOpenCerita }) {
         <div style={{ display: "grid", gridTemplateColumns: "1.7fr 1fr", gap: 24, alignItems: "start" }}>
           {/* main column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {loading && <SkeletonGrid count={3} columns={1} cardHeight={140} />}
+            {!loading && !featured && rest.length === 0 && (
+              <EmptyState
+                icon="📖"
+                title="Belum ada bacaan"
+                message="Bacaan baru tiap Jum'at pagi — pantau terus ya."
+                actionLabel="Ke beranda"
+                onAction={() => onNav && onNav("home")}
+              />
+            )}
             {featured && <CeritaFeatured c={featured} onOpenCerita={onOpenCerita}/>}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
               {rest.map(c => <CeritaCard key={c.id} c={c} onOpenCerita={onOpenCerita}/>)}

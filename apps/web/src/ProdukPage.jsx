@@ -6,6 +6,8 @@ import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
+import { SkeletonGrid } from "./Skeleton.jsx";
+import { EmptyState } from "./EmptyState.jsx";
 
 import { usePublicData } from "./hooks/usePublicData.js";
 import { useCta } from "./context/cta-context.jsx";
@@ -56,10 +58,19 @@ export function ProdukPage({ onNav }) {
           <button className="btn btn--sm btn--ghost">Urutkan: Terbaru ↓</button>
         </div>
 
-        {loading && <p>Memuat produk…</p>}
+        {loading && <SkeletonGrid count={6} />}
         {error && <p className="admin-error">Gagal memuat produk: {error}</p>}
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+          {!loading && filtered.length === 0 && (
+            <EmptyState
+              icon="📦"
+              title="Belum ada produk di kategori ini"
+              message="Coba kategori lain, atau lihat semua produk kami."
+              actionLabel="Lihat semua produk"
+              onAction={() => setActive("Semua")}
+            />
+          )}
           {filtered.map((p, i) => <ProdukCard key={p.id || p.slug} p={p} onOpen={() => navigate(`/produk/${p.slug}`)}/>) }
         </div>
       </section>

@@ -6,6 +6,8 @@ import { Icon } from "./icons.jsx";
 import { Blob, SunDecor } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
+import { SkeletonGrid } from "./Skeleton.jsx";
+import { EmptyState } from "./EmptyState.jsx";
 
 import { usePublicData } from "./hooks/usePublicData.js";
 import { useCta } from "./context/cta-context.jsx";
@@ -75,9 +77,18 @@ export function KajianPage({ onNav }) {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {loading && <p>Memuat jadwal…</p>}
+              {loading && <SkeletonGrid count={4} columns={1} cardHeight={110} />}
+              {!loading && filtered.length === 0 && (
+                <EmptyState
+                  icon="🕌"
+                  title="Tidak ada kajian yang cocok"
+                  message="Coba filter lain — kajian baru tiap minggu, insyaAllah."
+                  actionLabel="Reset filter"
+                  onAction={() => setFilter("Semua")}
+                />
+              )}
               {error && <p className="admin-error">Gagal memuat jadwal: {error}</p>}
-              {filtered.map((e) => <KajianRow key={e.id || e.slug} e={e} onOpen={() => navigate(`/kajian/${e.slug}`)}/>) }
+              {filtered.map((e) => <KajianRow key={e.id || e.slug} e={e} onOpen={() => navigate(`/kajian/${e.slug}`)}/>)}
             </div>
           </div>
 

@@ -23,9 +23,10 @@ export default defineConfig({
     allowedHosts: ["dev.muslimhebat.103.42.245.213.sslip.io", "dev.lowcode.my.id"],
     proxy: {
       "/api": "http://127.0.0.1:3000",
+      "/uploads": "http://127.0.0.1:3000",
       "/health": "http://127.0.0.1:3000",
       "/sitemap.xml": "http://127.0.0.1:3000",
-      "/rss.xml": "http://127.0.0.1:3000"
-    }
-  }
+      "/rss.xml": "http://127.0.0.1:3000",
+    },
+  },
 });

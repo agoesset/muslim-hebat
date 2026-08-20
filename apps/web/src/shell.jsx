@@ -1,9 +1,9 @@
 import React from "react";
-// Shared components: Nav, Footer, WaveDivider, sticker decorations.
+// Shared components: Nav (bottom floating pill), SiteCredits, WaveDivider, sticker decorations.
 
-import { Icon } from "./icons.jsx";
-import { useCta } from "./context/cta-context.jsx";
-import { SOCIAL_LINKS, SITE_LINKS } from "./site-links.ts";
+import { BookOpen, Home, Mail } from "lucide-react";
+
+import { SITE_LINKS } from "./site-links.ts";
 
 export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 }) {
   // scalloped wave — bumps that read as friendly, organic
@@ -25,39 +25,33 @@ export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 })
 
 import { Link } from "react-router-dom";
 
-export function Nav({ page, onSearch }) {
-  const { openInterest } = useCta();
-  const links = [
-    { id: "home",   label: "Beranda", path: "/" },
-    { id: "bacaan", label: "Bacaan", path: "/bacaan" },
-    { id: "kontak", label: "Kontak", path: "/kontak" },
-  ];
+const NAV_LINKS = [
+  { id: "home",   label: "Beranda", path: "/",       icon: Home },
+  { id: "bacaan", label: "Bacaan",  path: "/bacaan", icon: BookOpen },
+  { id: "kontak", label: "Kontak",  path: "/kontak", icon: Mail },
+];
+
+/* Bottom nav — floating pill, icon + label kecil, active state pill sage. */
+export function Nav({ page }) {
   return (
-    <header className="site-header" style={{ paddingTop: 24, paddingBottom: 8, position: "sticky", top: 0, zIndex: 50, background: "var(--bg)" }}>
-      <div className="shell row" style={{ gap: 18 }}>
-        <Link to="/" style={{ background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-          <Logo />
+    <nav className="bottom-nav" aria-label="Navigasi utama">
+      <div className="bottom-nav__pill">
+        <Link to="/" className="bottom-nav__logo" aria-label="Muslim Hebat — beranda">
+          <LogoMark size={32} />
         </Link>
-        <div className="grow"/>
-        <nav className="row illus-only" style={{ gap: 4, background: "var(--paper)", padding: 6, borderRadius: 999, border: "1.5px solid rgba(26,26,24,0.1)" }}>
-          {links.map(l => (
-            <Link key={l.id}
-                  to={l.path}
-                  className="nav-link"
-                  aria-current={page === l.id ? "page" : undefined}
-                  style={{ border: 0, background: page === l.id ? "var(--ink)" : "transparent", color: page === l.id ? "var(--bg)" : "var(--ink)", textDecoration: "none" }}>
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-        <button type="button" className="btn btn--sm header-search" onClick={onSearch} aria-label="Cari">
-          <Icon.Search size={14}/> <span className="btn-label">Cari</span>
-        </button>
-        <button type="button" className="btn btn--sm btn--primary header-cta" onClick={() => openInterest({ title: "Daftar gratis di Muslim Hebat", source: "header:daftar-gratis", intent: "subscribe" })}>
-          Daftar gratis <Icon.Arrow size={14}/>
-        </button>
+        {NAV_LINKS.map(({ id, label, path, icon: LinkIcon }) => (
+          <Link
+            key={id}
+            to={path}
+            className="bottom-nav__link"
+            aria-current={page === id ? "page" : undefined}
+          >
+            <LinkIcon size={16} strokeWidth={1.8} aria-hidden="true" />
+            <span>{label}</span>
+          </Link>
+        ))}
       </div>
-    </header>
+    </nav>
   );
 }
 
@@ -69,17 +63,6 @@ export function LogoMark({ size = 32, style = {} }) {
       <path d="M55 25 A18 18 0 1 1 42 65 A22 22 0 1 0 55 25Z" fill="var(--paper)" transform="translate(-7,2)" />
       <path d="M74 16 L77.5 25 L86 28 L77.5 31 L74 40 L70.5 31 L62 28 L70.5 25 Z" fill="var(--coral)" />
     </svg>
-  );
-}
-
-export function Logo() {
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-      <LogoMark size={36} />
-      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 19, color: "var(--ink)", letterSpacing: "-0.01em" }}>
-        Muslim&nbsp;Hebat
-      </span>
-    </span>
   );
 }
 
@@ -118,75 +101,25 @@ export function Blob({ color = "var(--peach)", size = 200, top, left, right, bot
   );
 }
 
-export function Footer({ settings }) {
-  const siteSetting = React.useMemo(() => {
-    if (!settings) return null;
-    const site = settings.find((s) => s.key === "site");
-    if (!site) return null;
-    return typeof site.value === "string" ? JSON.parse(site.value) : site.value;
-  }, [settings]);
-
-  const explore = [
-    { label: "Bacaan", href: SITE_LINKS.bacaan },
-  ];
-  const help = [
-    { label: "Kontak", href: SITE_LINKS.kontak },
-  ];
-  const social = [
-    { label: "Instagram", href: siteSetting?.instagramUrl || SOCIAL_LINKS.instagram, icon: Icon.Instagram },
-    { label: "TikTok", href: siteSetting?.tiktokUrl || SOCIAL_LINKS.tiktok, icon: Icon.TikTok },
-    { label: "YouTube", href: siteSetting?.youtubeUrl || SOCIAL_LINKS.youtube, icon: Icon.Youtube },
-    { label: "Spotify", href: siteSetting?.spotifyUrl || SOCIAL_LINKS.spotify, icon: Icon.Spotify },
-    { label: "Telegram", href: siteSetting?.telegramUrl || SOCIAL_LINKS.telegram, icon: Icon.Telegram },
-  ];
-
+/* Bottom bar minimalis — pengganti footer besar: copyright + 2 link penting. */
+export function SiteCredits() {
   return (
-    <footer style={{ background: "var(--ink)", color: "var(--bg)", marginTop: 80, position: "relative" }}>
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, transform: "translateY(-100%)", lineHeight: 0 }}>
-        <WaveDivider color="var(--ink)" height={56}/>
-      </div>
-      <div className="shell" style={{ paddingTop: 56, paddingBottom: 32 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr", gap: 32, alignItems: "start" }}>
-          <div>
-            <LogoMark size={56} />
-          </div>
-          <FooterCol title="Jelajahi" items={explore} />
-          <FooterCol title="Bantuan" items={help} />
-          <FooterCol title="Sosial" items={social} />
-        </div>
-        <div style={{ marginTop: 48, paddingTop: 24, borderTop: "1px solid rgba(251,243,226,0.18)", display: "flex", justifyContent: "space-between", fontSize: 13, opacity: 0.6 }}>
-          <span>© 2026 Muslim Hebat. Dibuat dengan ❤️ di Indonesia.</span>
-          <span>v1.0 · barakallahu fiikum</span>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-function FooterCol({ title, items }) {
-  return (
-    <div>
-      <div style={{ fontFamily: "var(--font-hand)", fontSize: 22, color: "var(--peach)", marginBottom: 8 }}>{title}</div>
-      <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8, fontSize: 14, opacity: 0.85 }}>
-        {items.map((item) => {
-          const { label, href, icon: IconComponent } = item;
-          const isPlaceholder = href === "#";
-          return (
-            <li key={label}>
-              <a
-                href={href}
-                aria-label={isPlaceholder ? `${label} (akan segera hadir)` : undefined}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 0", minHeight: 32 }}
-              >
-                {IconComponent && <IconComponent size={14} />}
-                {label}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
+    <div
+      style={{
+        padding: 16,
+        textAlign: "center",
+        fontSize: 11,
+        color: "var(--ink-soft)",
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      <span>© 2026 Muslim Hebat</span>
+      <Link to={SITE_LINKS.kontak} style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>Kontak</Link>
+      <Link to="/unsubscribe" style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>Unsubscribe</Link>
     </div>
   );
 }

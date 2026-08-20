@@ -2,14 +2,8 @@ import React from "react";
 import { BrowserRouter, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Nav, Footer } from "./shell.jsx";
 import { HomePage } from "./HomePage.jsx";
-import { ProdukPage } from "./ProdukPage.jsx";
-import { KajianPage } from "./KajianPage.jsx";
-import { KelasPage } from "./KelasPage.jsx";
 import { CeritaPage } from "./CeritaPage.jsx";
 import { CeritaDetailPage } from "./CeritaDetailPage.jsx";
-import { ProdukDetailPage } from "./ProdukDetailPage.jsx";
-import { KelasDetailPage } from "./KelasDetailPage.jsx";
-import { KajianDetailPage } from "./KajianDetailPage.jsx";
 import { applyTheme, DEFAULT_THEME } from "./theme.js";
 import { Seo } from "./seo.jsx";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
@@ -31,9 +25,6 @@ const AdminPage = React.lazy(() =>
 const pageIds = {
   "/": "home",
   "/bacaan": "bacaan",
-  "/kelas": "kelas",
-  "/produk": "produk",
-  "/kajian": "kajian",
   "/kontak": "kontak"
 };
 
@@ -97,9 +88,6 @@ function PublicApp({ settings }) {
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = React.useState(false);
   const page = location.pathname.startsWith("/bacaan/") ? "bacaan" :
-    location.pathname.startsWith("/produk/") ? "produk" :
-    location.pathname.startsWith("/kelas/") ? "kelas" :
-    location.pathname.startsWith("/kajian/") ? "kajian" :
     pageIds[location.pathname] || "home";
   const goNav = (id) => navigate(routeForPage(id));
   const openCerita = (cerita) => navigate(`/bacaan/${cerita.slug}`);
@@ -115,15 +103,9 @@ function PublicApp({ settings }) {
       <GlobalSearch open={searchOpen} onClose={setSearchOpen} onNavigate={navigate} />
       <ErrorBoundary>
         <Routes>
-          <Route path="/" element={<><Seo title="Muslim Hebat" description="Belajar Islam dengan bacaan ringan, produk bermanfaat, kelas, dan jadwal ngaji bareng." /><HomePage onNav={goNav} onOpenCerita={openCerita} /></>} />
-          <Route path="/bacaan" element={<><Seo title="Bacaan | Muslim Hebat" description="Bacaan ringan tentang Islam, self-growth, parenting, dan ibadah harian." /><CeritaPage onNav={goNav} onOpenCerita={openCerita} /></>} />
+          <Route path="/" element={<><Seo title="Muslim Hebat — Blog" description="Bacaan ringan tentang Islam, self-growth, dan ibadah harian." /><HomePage onNav={goNav} onOpenCerita={openCerita} /></>} />
+          <Route path="/bacaan" element={<><Seo title="Bacaan | Muslim Hebat" description="Kumpulan tulisan ringan tentang Islam, self-growth, dan ibadah harian." /><CeritaPage onNav={goNav} onOpenCerita={openCerita} /></>} />
           <Route path="/bacaan/:slug" element={<CeritaDetailRoute onNav={goNav} onOpenCerita={openCerita} />} />
-          <Route path="/kelas" element={<><Seo title="Kelas | Muslim Hebat" description="Kelas online dan program belajar Islam untuk pemula sampai lanjutan." /><KelasPage onNav={goNav} /></>} />
-          <Route path="/kelas/:slug" element={<KelasDetailRoute onNav={goNav} />} />
-          <Route path="/produk" element={<><Seo title="Produk | Muslim Hebat" description="Produk digital, worksheet, template, dan materi belajar untuk bantu konsisten." /><ProdukPage onNav={goNav} /></>} />
-          <Route path="/produk/:slug" element={<ProdukDetailRoute onNav={goNav} />} />
-          <Route path="/kajian" element={<><Seo title="Ngaji Bareng | Muslim Hebat" description="Jadwal kajian online dan offline terdekat dari Muslim Hebat." /><KajianPage onNav={goNav} /></>} />
-          <Route path="/kajian/:slug" element={<KajianDetailRoute onNav={goNav} />} />
           <Route path="/kontak" element={<ContactPage onNav={goNav} />} />
           <Route path="/unsubscribe" element={<UnsubscribePage onNav={goNav} />} />
           <Route path="*" element={<NotFoundPage onNav={goNav} />} />
@@ -167,79 +149,10 @@ function CeritaDetailRoute({ onNav, onOpenCerita }) {
   );
 }
 
-function ProductJsonLd(product) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: product.excerpt,
-    category: product.category,
-    offers: {
-      "@type": "Offer",
-      // NOTE: despite the column name, priceCents stores whole rupiah (see seed + public UI)
-      price: (product.priceCents || 0),
-      priceCurrency: "IDR",
-      availability: product.status === "ARCHIVED"
-        ? "https://schema.org/OutOfStock"
-        : "https://schema.org/InStock"
-    }
-  };
-}
-
-function CourseJsonLd(course) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Course",
-    name: course.title,
-    description: course.excerpt,
-    provider: { "@type": "Organization", name: "Muslim Hebat", sameAs: "https://muslimhebat.com" }
-  };
-}
-
-function EventJsonLd(event) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: event.title,
-    description: event.excerpt,
-    startDate: event.startsAt,
-    eventAttendanceMode: event.eventType === "Online" ? "https://schema.org/OnlineEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode",
-    location: { "@type": "Place", name: event.location || "Online" },
-    organizer: { "@type": "Organization", name: "Muslim Hebat", url: "https://muslimhebat.com" }
-  };
-}
-
-function ProdukDetailRoute({ onNav }) {
-  const { slug } = useParams();
-  const { data: product, loading, error } = usePublicData(`/public/products/${slug}`);
-  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><SkeletonGrid count={1} columns={1} cardHeight={280} /></div>;
-  if (error || !product) return <div className="shell" style={{ padding: "60px 0" }}><EmptyState icon="📦" title="Produk tidak ditemukan" message="Mungkin sudah tidak dijual — coba lihat produk lain." /></div>;
-  return <><Seo title={`${product.name} | Muslim Hebat`} description={product.excerpt} image={product.image} jsonLd={ProductJsonLd(product)} /><ProdukDetailPage product={product} onNav={onNav} /></>;
-}
-
-function KelasDetailRoute({ onNav }) {
-  const { slug } = useParams();
-  const { data: course, loading, error } = usePublicData(`/public/classes/${slug}`);
-  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><SkeletonGrid count={1} columns={1} cardHeight={280} /></div>;
-  if (error || !course) return <div className="shell" style={{ padding: "60px 0" }}><EmptyState icon="🎓" title="Kelas tidak ditemukan" message="Mungkin pendaftarannya sudah ditutup — coba kelas lain." /></div>;
-  return <><Seo title={`${course.title} | Muslim Hebat`} description={course.excerpt} image={course.image} jsonLd={CourseJsonLd(course)} /><KelasDetailPage course={course} onNav={onNav} /></>;
-}
-
-function KajianDetailRoute({ onNav }) {
-  const { slug } = useParams();
-  const { data: event, loading, error } = usePublicData(`/public/kajian/${slug}`);
-  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><SkeletonGrid count={1} columns={1} cardHeight={280} /></div>;
-  if (error || !event) return <div className="shell" style={{ padding: "60px 0" }}><EmptyState icon="🕌" title="Kajian tidak ditemukan" message="Mungkin jadwalnya sudah lewat — coba jadwal kajian lain." /></div>;
-  return <><Seo title={`${event.title} | Muslim Hebat`} description={event.excerpt} image={event.coverImage} jsonLd={EventJsonLd(event)} /><KajianDetailPage event={event} onNav={onNav} /></>;
-}
-
 function routeForPage(id) {
   return {
     home: "/",
     bacaan: "/bacaan",
-    kelas: "/kelas",
-    produk: "/produk",
-    kajian: "/kajian",
     kontak: "/kontak"
   }[id] || "/";
 }

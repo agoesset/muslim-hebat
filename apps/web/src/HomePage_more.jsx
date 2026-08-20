@@ -292,7 +292,7 @@ export function NewsletterBlock() {
   }
 
   return (
-    <section className="shell" style={{ marginBottom: 40 }}>
+    <section id="newsletter" className="shell" style={{ marginBottom: 40 }}>
       <div className="card card--ink" style={{ padding: "56px 56px", display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 40, alignItems: "center", position: "relative", overflow: "hidden" }}>
         <Blob color="var(--coral)" size={220} top={-80} right={-40} opacity={0.6}/>
         <SunDecor size={120} color="var(--peach)" style={{ position: "absolute", bottom: -30, left: -30, opacity: 0.8 }}/>

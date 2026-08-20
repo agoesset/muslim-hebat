@@ -30,9 +30,7 @@ export function Nav({ page, onSearch }) {
   const links = [
     { id: "home",   label: "Beranda", path: "/" },
     { id: "bacaan", label: "Bacaan", path: "/bacaan" },
-    { id: "kelas",  label: "Kelas", path: "/kelas" },
-    { id: "produk", label: "Produk", path: "/produk" },
-    { id: "kajian", label: "Ngaji Bareng", path: "/kajian" },
+    { id: "kontak", label: "Kontak", path: "/kontak" },
   ];
   return (
     <header style={{ paddingTop: 24, paddingBottom: 8, position: "sticky", top: 0, zIndex: 50, background: "var(--bg)" }}>
@@ -130,9 +128,6 @@ export function Footer({ settings }) {
 
   const explore = [
     { label: "Bacaan", href: SITE_LINKS.bacaan },
-    { label: "Kelas", href: SITE_LINKS.kelas },
-    { label: "Produk", href: SITE_LINKS.produk },
-    { label: "Ngaji Bareng", href: SITE_LINKS.kajian },
   ];
   const help = [
     { label: "Kontak", href: SITE_LINKS.kontak },

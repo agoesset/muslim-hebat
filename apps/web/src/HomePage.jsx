@@ -1,42 +1,37 @@
 import React from "react";
-// HomePage — bento-heavy layout with all 7 sections.
+// HomePage — blog-first layout: hero, bacaan terbaru, newsletter.
 
 import { Icon } from "./icons.jsx";
 import { Blob, SunDecor } from "./shell.jsx";
-import { SectionHeader } from "./SectionHeader.jsx";
-import { ArticleSection, ProductHighlight, KajianStrip, NewsletterBlock } from "./HomePage_more.jsx";
+import { ArticleSection, NewsletterBlock } from "./HomePage_more.jsx";
 import { usePublicData } from "./hooks/usePublicData.js";
 
 const FALLBACK = null;
 
 export function HomePage({ onNav, onOpenCerita }) {
-  const { data: home, loading, error } = usePublicData("/public/home", FALLBACK);
+  const { data: home } = usePublicData("/public/home", FALLBACK);
 
   return (
     <div data-screen-label="01 Home">
-      <Hero onNav={onNav} home={home} loading={loading}/>
-      <QuoteRow home={home}/>
-      <BentoMain onNav={onNav} home={home} loading={loading}/>
+      <Hero onNav={onNav} home={home}/>
       <ArticleSection onNav={onNav} onOpenCerita={onOpenCerita}/>
-      <ProductHighlight onNav={onNav}/>
-      <KajianStrip onNav={onNav}/>
       <NewsletterBlock/>
     </div>
   );
 }
 
 /* ─── HERO ─────────────────────────────────────────────────────────── */
-function Hero({ onNav, home, loading }) {
+function Hero({ onNav, home }) {
   const hero = home?.hero || {};
   const prayer = home?.prayer || {};
   const daily = home?.daily || {};
 
-  const headline = hero.headline || ["Belajar Islam", "tanpa drama", "santai & konsisten."];
-  const stat = hero.stat || "+ 12,400 muslim";
-  const pill = hero.pill || "komunitas hangat sejak 2024";
-  const sub = hero.sub || "Bacaan ringan, produk bermanfaat, dan jadwal ngaji bareng yang bikin kamu makin semangat — semua di satu tempat.";
-  const ctaPrimary = hero.ctaPrimary || "Lihat produk";
-  const ctaSecondary = hero.ctaSecondary || "Baca bacaan terbaru";
+  const headline = hero.headline || ["Baca Islam", "tanpa drama", "pelan-pelan tiap hari."];
+  const stat = hero.stat || "+ 12,400 pembaca";
+  const pill = hero.pill || "bacaan baru tiap minggu";
+  const sub = hero.sub || "Tulisan ringan tentang Islam, self-growth, dan ibadah harian — dibahas santai, tanpa menggurui.";
+  const ctaPrimary = hero.ctaPrimary || "Mulai baca";
+  const ctaSecondary = hero.ctaSecondary || "Langganan buletin";
 
   const schedule = prayer.schedule || [
     { name: "Subuh", time: "04:38", done: true },
@@ -52,7 +47,7 @@ function Hero({ onNav, home, loading }) {
   const dailyStats = daily.stats || [
     { big: "14", sub: "hijriah", tag: "11 Dzul-Q" },
     { big: "3/5", sub: "sholat selesai" },
-    { big: "2", sub: "ngaji besok" }
+    { big: "3", sub: "bacaan baru" }
   ];
   const dailyDate = daily.date || "Rabu, 20 Mei";
   const dailyLabel = daily.label || "hari ini";
@@ -84,12 +79,12 @@ function Hero({ onNav, home, loading }) {
           </p>
 
           <div style={{ display: "flex", gap: 12 }}>
-            <button className="btn btn--primary" onClick={() => onNav("produk")}>
+            <button className="btn btn--primary" onClick={() => onNav && onNav("bacaan")}>
               {ctaPrimary} <Icon.Arrow size={16}/>
             </button>
-            <button className="btn" onClick={() => onNav && onNav("bacaan")}>
+            <a className="btn" href="#newsletter">
               {ctaSecondary}
-            </button>
+            </a>
           </div>
 
           {/* sticker */}
@@ -156,165 +151,5 @@ function Stat({ big, sub, tag }) {
       <div style={{ fontSize: 11, marginTop: 4, color: "var(--ink-soft)" }}>{sub}</div>
       {tag && <div style={{ fontSize: 9, marginTop: 2, fontFamily: "ui-monospace", color: "var(--ink-soft)", opacity: 0.7 }}>{tag}</div>}
     </div>
-  );
-}
-
-/* ─── Quote of the day full-width strip ─────────────────────────────── */
-function QuoteRow({ home }) {
-  const quote = home?.quote || {};
-  return (
-    <section className="shell" style={{ marginTop: 8, marginBottom: 24 }}>
-      <div className="card card--coral" style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 32, alignItems: "center", padding: "28px 36px", position: "relative", overflow: "hidden" }}>
-        <Blob color="var(--peach)" size={180} top={-60} left={-30} opacity={0.6}/>
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontFamily: "var(--font-hand)", fontSize: 28, color: "var(--ink)", lineHeight: 1 }}>quote</div>
-          <div style={{ fontFamily: "var(--font-hand)", fontSize: 28, color: "var(--coral-deep)", lineHeight: 1 }}>of the day</div>
-        </div>
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <div className="arabic" style={{ fontSize: 28, marginBottom: 10, color: "var(--ink)" }}>
-            {quote.arabic || "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا"}
-          </div>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 500, letterSpacing: "-0.01em", lineHeight: 1.25 }}>
-            {quote.translation || "“Siapa pun yang bertakwa kepada Allah, niscaya Dia akan mengadakan baginya jalan keluar.”"}
-          </div>
-          <div style={{ fontSize: 13, marginTop: 8, color: "var(--ink-soft)" }}>— {quote.source || "QS. Ath-Thalaq: 2"}</div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end", position: "relative", zIndex: 1 }}>
-          <button className="btn btn--sm"><Icon.Heart size={12}/> Simpan</button>
-          <button className="btn btn--sm"><Icon.ArrowUR size={12}/> Bagikan</button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Main bento: dzikir + komunitas + reminder ─────────────────────── */
-function BentoMain({ onNav, home, loading }) {
-  const bento = home?.bentoHeader || {};
-  const dzikir = home?.dzikir || {};
-  const community = home?.community || {};
-  const reminder = home?.reminder || {};
-  const miniQuote = home?.miniQuote || {};
-  const intention = home?.intention || {};
-
-  const kicker = bento.kicker || "ngalir santai";
-  const title = bento.title || "Bekal harian buat hati";
-  const sub = bento.sub || "Beberapa hal kecil yang bisa kamu lakuin hari ini biar makin dekat sama Allah.";
-
-  const dzikirItems = dzikir.items || [
-    { txt: "Astaghfirullāh", n: "100×", done: true },
-    { txt: "Subhānallāh wa bihamdihi", n: "33×", done: true },
-    { txt: "Lā ilāha illallāh wahdahu lā syarīka lah…", n: "10×", done: false },
-    { txt: "Allāhumma anta rabbī lā ilāha illā anta…", n: "1×", done: false }
-  ];
-
-  return (
-    <section className="shell" style={{ marginBottom: 32 }}>
-      <SectionHeader
-        kicker={kicker}
-        title={title}
-        sub={sub}
-      />
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gridAutoRows: "minmax(180px, auto)", gap: 20 }}>
-        {/* dzikir tracker */}
-        <div className="card card--sage" style={{ gridRow: "span 2", display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div>
-              <div className="pill pill--paper" style={{ fontSize: 11 }}><Icon.Sparkle size={11}/> {dzikir.label || "Dzikir pagi"}</div>
-              <h3 style={{ fontSize: 36, marginTop: 12, lineHeight: 1 }}>{dzikir.title || "Mulai pagi dengan dzikir ✿"}</h3>
-            </div>
-            <SunDecor size={70} color="var(--butter)" style={{ flexShrink: 0 }}/>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {dzikirItems.map((d, i) => (
-              <div key={i} style={{
-                display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
-                background: "rgba(255,252,245,0.55)", borderRadius: 14,
-                opacity: d.done ? 0.55 : 1
-              }}>
-                <span style={{
-                  width: 22, height: 22, borderRadius: 8, flexShrink: 0,
-                  background: d.done ? "var(--sage-deep)" : "transparent",
-                  border: "1.5px solid var(--ink)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "var(--paper)"
-                }}>
-                  {d.done && <Icon.Check size={14}/>}
-                </span>
-                <span style={{ flex: 1, fontSize: 14, textDecoration: d.done ? "line-through" : "none" }}>{d.txt}</span>
-                <span style={{ fontFamily: "ui-monospace", fontSize: 12, color: "var(--ink-soft)" }}>{d.n}</span>
-              </div>
-            ))}
-          </div>
-          <button className="btn btn--sm" style={{ alignSelf: "flex-start" }}>
-            Buka tracker dzikir <Icon.Arrow size={12}/>
-          </button>
-        </div>
-
-        {/* Komunitas mini card */}
-        <div className="card card--lilac" style={{ display: "flex", flexDirection: "column", gap: 12, position: "relative" }}>
-          <div className="pill pill--paper" style={{ fontSize: 11, alignSelf: "flex-start" }}><Icon.Smile size={11}/> {community.label || "komunitas"}</div>
-          <h3 style={{ fontSize: 28 }}>{community.title || "12,400+ teman seperjalanan"}</h3>
-          <p style={{ fontSize: 13, color: "var(--ink-soft)", margin: 0 }}>{community.sub || "Diskusi santai, sharing pengalaman, saling ingetin di Telegram & Discord."}</p>
-          <div style={{ display: "flex", alignItems: "center", marginTop: "auto" }}>
-            {(community.colors || ["#FFD6A5", "#A8D8B9", "#FFADAD", "#D8CCEF", "#F7E4A0"]).map((c, i) => (
-              <div key={i} style={{
-                width: 36, height: 36, borderRadius: "50%",
-                background: c, border: "2px solid var(--lilac)",
-                marginLeft: i === 0 ? 0 : -10
-              }}/>
-            ))}
-            <span style={{ marginLeft: 12, fontSize: 13, fontWeight: 600 }}>+ ribuan lainnya</span>
-          </div>
-          <button className="btn btn--sm" style={{ alignSelf: "flex-start" }}>
-            {community.cta || "Gabung sekarang"}
-          </button>
-        </div>
-
-        {/* Reminder card */}
-        <div className="card card--butter" style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative", overflow: "visible" }}>
-          <span className="sticker illus-only wiggle" style={{ position: "absolute", top: -14, right: 18, background: "var(--coral)", color: "var(--ink)" }}>
-            {reminder.sticker || "jangan lupa!"}
-          </span>
-          <div className="pill pill--paper" style={{ fontSize: 11, alignSelf: "flex-start" }}><Icon.Bell size={11}/> {reminder.label || "reminder"}</div>
-          <h3 style={{ fontSize: 26, lineHeight: 1.05 }}>{reminder.title || "Sudah baca Al-Mulk hari ini?"}</h3>
-          <p style={{ fontSize: 13, color: "var(--ink-soft)", margin: 0 }}>{reminder.sub || "30 ayat, ± 8 menit. Sunnah sebelum tidur biar dijauhkan dari azab kubur."}</p>
-          <div style={{ display: "flex", gap: 6, marginTop: "auto" }}>
-            <button className="btn btn--sm btn--primary">{reminder.ctaPrimary || "Baca sekarang"}</button>
-            <button className="btn btn--sm">{reminder.ctaSecondary || "Ingetin nanti"}</button>
-          </div>
-        </div>
-
-        {/* Mini quote card */}
-        <div className="card card--paper" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <span style={{ fontFamily: "var(--font-hand)", fontSize: 60, color: "var(--coral)", lineHeight: 0.7, height: 24 }}>“</span>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 18, lineHeight: 1.3, fontWeight: 500, margin: 0 }}>
-            {miniQuote.text || "Yang penting jalan terus, gak perlu sempurna — cukup konsisten satu langkah tiap hari."}
-          </p>
-          <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>— {miniQuote.author || "Ustadz Hanan Attaki"}</div>
-        </div>
-
-        {/* Mood / niat card */}
-        <div className="card card--coral" style={{ display: "flex", flexDirection: "column", gap: 12, position: "relative" }}>
-          <div className="pill pill--paper" style={{ fontSize: 11, alignSelf: "flex-start" }}>{intention.label || "niat hari ini"}</div>
-          <input
-            placeholder={intention.placeholder || "Hari ini aku mau…"}
-            style={{
-              border: 0, background: "rgba(255,252,245,0.55)",
-              borderRadius: 14, padding: "12px 14px",
-              fontSize: 16, fontFamily: "var(--font-body)", color: "var(--ink)",
-              outline: "none"
-            }}
-          />
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {(intention.suggestions || ["sholat tepat waktu", "baca 1 lembar Qur'an", "senyum ke ortu", "sedekah 5rb"]).map(s => (
-              <button key={s} className="pill" style={{ background: "var(--paper)", fontSize: 11, border: "1px solid var(--ink)", cursor: "pointer" }}>
-                + {s}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
   );
 }

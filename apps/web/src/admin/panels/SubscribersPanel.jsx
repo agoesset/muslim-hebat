@@ -78,7 +78,7 @@ export function SubscribersPanel() {
         method: "POST",
         body: JSON.stringify({
           email: newEmail.trim(),
-          name: newName.trim() || null,
+          name: newName.trim() || undefined,
           source: newSource.trim() || "manual",
         }),
       });

@@ -9,6 +9,7 @@ import { NewsletterBlock } from "./HomePage_more.jsx";
 
 import { usePublicData } from "./hooks/usePublicData.js";
 import { useCta } from "./context/cta-context.jsx";
+import { kajianDateParts } from "./utils";
 
 export function KajianPage({ onNav }) {
   const navigate = useNavigate();
@@ -18,13 +19,17 @@ export function KajianPage({ onNav }) {
 
   const events = React.useMemo(() => {
     if (!apiEvents) return [];
-    return apiEvents.map(e => ({
-      ...e,
-      type: e.eventType,
-      loc: e.location,
-      cat: e.eventType,
-      price: e.free ? "Gratis" : (e.priceCents ? `Rp ${e.priceCents.toLocaleString("id")}` : "Gratis")
-    }));
+    return apiEvents.map(e => {
+      const parts = kajianDateParts(e);
+      return {
+        ...e,
+        ...parts,
+        type: e.eventType,
+        loc: e.location,
+        cat: e.eventType,
+        price: e.free ? "Gratis" : (e.priceCents ? `Rp ${e.priceCents.toLocaleString("id")}` : "Gratis")
+      };
+    });
   }, [apiEvents]);
 
   const filters = React.useMemo(() => {

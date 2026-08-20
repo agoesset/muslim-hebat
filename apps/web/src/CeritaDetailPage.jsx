@@ -9,6 +9,7 @@ import { api } from "./api.js";
 import { usePublicData } from "./hooks/usePublicData.js";
 import { toast } from "./Toast.jsx";
 import { shareContent } from "./share.js";
+import { formatReadTime } from "./utils";
 
 export function CeritaDetailPage({ onNav, cerita }) {
   const c = cerita;
@@ -76,7 +77,7 @@ function CeritaDetailHero({ c }) {
             <div style={{ width: 44, height: 44, borderRadius: "50%", background: c.color, border: "1.5px solid var(--ink)" }}/>
             <div style={{ textAlign: "left" }}>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{c.author}</div>
-              <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>{formatArticleDate(c)} · {c.readingTime || c.time || "5 mnt"} baca</div>
+              <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>{formatArticleDate(c)} · {formatReadTime(c)} baca</div>
             </div>
           </div>
           <span style={{ color: "var(--ink-soft)" }}>·</span>

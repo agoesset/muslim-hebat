@@ -3,6 +3,7 @@ import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
 import { useCta } from "./context/cta-context.jsx";
+import { kajianDateParts } from "./utils";
 
 function rupiah(cents = 0, free = true) {
   return free || !cents ? "Gratis" : `Rp ${Number(cents).toLocaleString("id")}`;
@@ -11,6 +12,7 @@ function rupiah(cents = 0, free = true) {
 export function KajianDetailPage({ event, onNav }) {
   const { openInterest } = useCta();
   const e = event;
+  const dateParts = kajianDateParts(e);
   const price = rupiah(e.priceCents, e.free);
   const daftar = () => openInterest({ title: `Daftar: ${e.title}`, source: `kajian:${e.slug}`, intent: "event", price });
   const reminder = () => openInterest({ title: `Reminder: ${e.title}`, source: `kajian-reminder:${e.slug}`, intent: "reminder" });
@@ -27,9 +29,9 @@ export function KajianDetailPage({ event, onNav }) {
         <Blob color={e.color || "var(--lilac)"} size={260} top={40} right={20} opacity={0.35}/>
         <div className="card card--paper" style={{ padding: "44px 48px", display: "grid", gridTemplateColumns: "auto 1fr", gap: 34, alignItems: "center" }}>
           <div className="card" style={{ background: e.color || "var(--lilac)", border: "1.5px solid var(--ink)", padding: 28, minWidth: 160, textAlign: "center", boxShadow: "6px 7px 0 var(--ink)" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 76, lineHeight: 1 }}>{e.date || "-"}</div>
-            <div style={{ fontWeight: 800, textTransform: "uppercase" }}>{e.month || ""}</div>
-            <div style={{ color: "var(--ink-soft)", marginTop: 4 }}>{e.day || ""}</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 76, lineHeight: 1 }}>{dateParts.date}</div>
+            <div style={{ fontWeight: 800, textTransform: "uppercase" }}>{dateParts.month}</div>
+            <div style={{ color: "var(--ink-soft)", marginTop: 4 }}>{dateParts.day}</div>
           </div>
           <div>
             <span className="pill pill--ink">{e.eventType || "Kajian"}</span>

@@ -172,7 +172,8 @@ function ProductJsonLd(product) {
     category: product.category,
     offers: {
       "@type": "Offer",
-      price: (product.priceCents || 0) / 100,
+      // NOTE: despite the column name, priceCents stores whole rupiah (see seed + public UI)
+      price: (product.priceCents || 0),
       priceCurrency: "IDR",
       availability: product.status === "ARCHIVED"
         ? "https://schema.org/OutOfStock"

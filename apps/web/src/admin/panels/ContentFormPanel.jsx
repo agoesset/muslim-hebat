@@ -8,6 +8,65 @@ import { generateSlug } from "../generateSlug.js";
 
 export { generateSlug };
 
+// Field allowlists mirroring the backend DTOs (apps/api/src/content/content.dto.ts).
+// The API runs ValidationPipe with forbidNonWhitelisted, so any extra key (id,
+// createdAt, updatedAt, or title on a name-resource and vice versa) is a 400.
+const DTO_FIELDS = {
+  articles: [
+    "slug", "title", "excerpt", "body", "category", "author", "color", "emoji",
+    "date", "time", "reads", "claps", "tag", "featured", "size", "tags",
+    "readingTime", "coverImage", "status", "publishedAt",
+  ],
+  products: [
+    "slug", "name", "excerpt", "description", "category", "priceCents",
+    "originalPriceCents", "rating", "sold", "tag", "tags", "featured", "image",
+    "color", "emoji", "status",
+  ],
+  kajian: [
+    "slug", "title", "excerpt", "description", "speaker", "location",
+    "eventType", "startsAt", "date", "month", "day", "time", "attendees",
+    "priceCents", "free", "tags", "featured", "coverImage", "color", "status",
+  ],
+  classes: [
+    "slug", "title", "excerpt", "description", "category", "level", "format",
+    "instructor", "lessons", "duration", "students", "rating", "reviews",
+    "priceCents", "originalPriceCents", "tag", "tags", "featured", "image",
+    "batch", "startDate", "startDay", "schedule", "platform", "slots",
+    "slotsTaken", "statusDetail", "color", "emoji", "status",
+  ],
+};
+
+// Resources whose name column is `name` instead of `title`
+const NAME_RESOURCES = new Set(["products"]);
+
+function buildPayload(resourceType, draft) {
+  const allowed = new Set(DTO_FIELDS[resourceType] || []);
+  const payload = {};
+  for (const [key, value] of Object.entries(draft || {})) {
+    if (!allowed.has(key)) continue;
+    // Never send server-managed fields back to the API
+    if (key === "id" || key === "createdAt" || key === "updatedAt") continue;
+    // class-validator rejects "" for ISO dates / numbers; nulls also fail
+    if (value === "" || value === null || value === undefined) continue;
+    payload[key] = value;
+  }
+
+  // Cast numeric strings coming from form inputs to actual numbers
+  for (const key of ["priceCents", "originalPriceCents", "readingTime", "slots", "slotsTaken", "lessons"]) {
+    if (payload[key] !== undefined && typeof payload[key] === "string") {
+      payload[key] = parseInt(payload[key], 10) || 0;
+    }
+  }
+
+  // Keep legacy `time` string in sync with `readingTime` so older UI paths that
+  // still read `c.time` ("6 mnt") stay consistent after admin edits.
+  if (resourceType === "articles" && typeof payload.readingTime === "number" && payload.readingTime > 0) {
+    payload.time = `${payload.readingTime} mnt`;
+  }
+
+  return payload;
+}
+
 export function ContentFormPanel() {
   const { resourceType = "articles", id } = useParams();
   const navigate = useNavigate();
@@ -22,6 +81,7 @@ export function ContentFormPanel() {
 
   const resource = resources.find((r) => r.key === resourceType) || resources[0];
   const isEdit = !!id;
+  const titleKey = NAME_RESOURCES.has(resourceType) ? "name" : "title";
 
   // Fetch item details if editing
   React.useEffect(() => {
@@ -42,9 +102,9 @@ export function ContentFormPanel() {
     }
   }, [resourceType, id, isEdit]);
 
-  // Sync slug auto-generation from Title/Name
+  // Sync slug auto-generation from Title/Name (only the field this resource actually uses)
   const handleTitleChange = (val) => {
-    const updates = { title: val, name: val };
+    const updates = { [titleKey]: val };
     if (!isEdit && !isSlugTouched) {
       updates.slug = generateSlug(val);
     }
@@ -107,14 +167,10 @@ export function ContentFormPanel() {
     const path = isEdit ? `/admin/${resourceType}/${id}` : `/admin/${resourceType}`;
     const method = isEdit ? "PATCH" : "POST";
 
-    // Clean up empty strings or fields to match backend DB expectations
-    const payload = { ...draft };
-    if (payload.priceCents) payload.priceCents = parseInt(payload.priceCents);
-    if (payload.originalPriceCents) payload.originalPriceCents = parseInt(payload.originalPriceCents);
-    if (payload.readingTime) payload.readingTime = parseInt(payload.readingTime);
-    if (payload.slots) payload.slots = parseInt(payload.slots);
-    if (payload.slotsTaken) payload.slotsTaken = parseInt(payload.slotsTaken);
-    if (payload.lessons) payload.lessons = parseInt(payload.lessons);
+    // Strip to DTO-allowed keys only: no id/createdAt/updatedAt, no stray
+    // title/name cross-pollution, no empty strings or nulls. This keeps the
+    // backend's forbidNonWhitelisted ValidationPipe happy (was a 400 before).
+    const payload = buildPayload(resourceType, draft);
 
     try {
       await api(path, {
@@ -412,8 +468,8 @@ export function ContentFormPanel() {
                     <input
                       type="number"
                       min={0}
-                      value={draft.priceCents ? draft.priceCents / 100 : ""}
-                      onChange={(e) => setDraft((prev) => ({ ...prev, priceCents: Math.round(parseFloat(e.target.value) * 100) || 0 }))}
+                      value={draft.priceCents ?? ""}
+                      onChange={(e) => setDraft((prev) => ({ ...prev, priceCents: Math.round(parseFloat(e.target.value)) || 0 }))}
                       placeholder="Contoh: 50000"
                       required
                       style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1.5px solid rgba(31,58,45,0.15)" }}
@@ -424,8 +480,8 @@ export function ContentFormPanel() {
                     <input
                       type="number"
                       min={0}
-                      value={draft.originalPriceCents ? draft.originalPriceCents / 100 : ""}
-                      onChange={(e) => setDraft((prev) => ({ ...prev, originalPriceCents: Math.round(parseFloat(e.target.value) * 100) || 0 }))}
+                      value={draft.originalPriceCents ?? ""}
+                      onChange={(e) => setDraft((prev) => ({ ...prev, originalPriceCents: Math.round(parseFloat(e.target.value)) || 0 }))}
                       placeholder="Contoh: 75000"
                       style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1.5px solid rgba(31,58,45,0.15)" }}
                     />
@@ -484,7 +540,15 @@ export function ContentFormPanel() {
                       onChange={(e) => {
                         const dateStr = e.target.value;
                         if (!dateStr) {
-                          setDraft((prev) => ({ ...prev, startsAt: null, date: null, month: null, day: null }));
+                          // Omit (undefined) instead of null — null fails @IsISO8601/@IsInt validation
+                          setDraft((prev) => {
+                            const next = { ...prev };
+                            delete next.startsAt;
+                            delete next.date;
+                            delete next.month;
+                            delete next.day;
+                            return next;
+                          });
                           return;
                         }
                         const d = new Date(dateStr);
@@ -520,8 +584,8 @@ export function ContentFormPanel() {
                       type="number"
                       min={0}
                       disabled={!!draft.free}
-                      value={draft.free ? "" : (draft.priceCents ? draft.priceCents / 100 : "")}
-                      onChange={(e) => setDraft((prev) => ({ ...prev, priceCents: Math.round(parseFloat(e.target.value) * 100) || 0 }))}
+                      value={draft.free ? "" : (draft.priceCents ?? "")}
+                      onChange={(e) => setDraft((prev) => ({ ...prev, priceCents: Math.round(parseFloat(e.target.value)) || 0 }))}
                       placeholder={draft.free ? "Gratis" : "Contoh: 25000"}
                       style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1.5px solid rgba(31,58,45,0.15)" }}
                     />
@@ -589,8 +653,8 @@ export function ContentFormPanel() {
                     <input
                       type="number"
                       min={0}
-                      value={draft.priceCents ? draft.priceCents / 100 : ""}
-                      onChange={(e) => setDraft((prev) => ({ ...prev, priceCents: Math.round(parseFloat(e.target.value) * 100) || 0 }))}
+                      value={draft.priceCents ?? ""}
+                      onChange={(e) => setDraft((prev) => ({ ...prev, priceCents: Math.round(parseFloat(e.target.value)) || 0 }))}
                       placeholder="Contoh: 150000"
                       required
                       style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1.5px solid rgba(31,58,45,0.15)" }}
@@ -601,8 +665,8 @@ export function ContentFormPanel() {
                     <input
                       type="number"
                       min={0}
-                      value={draft.originalPriceCents ? draft.originalPriceCents / 100 : ""}
-                      onChange={(e) => setDraft((prev) => ({ ...prev, originalPriceCents: Math.round(parseFloat(e.target.value) * 100) || 0 }))}
+                      value={draft.originalPriceCents ?? ""}
+                      onChange={(e) => setDraft((prev) => ({ ...prev, originalPriceCents: Math.round(parseFloat(e.target.value)) || 0 }))}
                       placeholder="Contoh: 300000"
                       style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1.5px solid rgba(31,58,45,0.15)" }}
                     />

@@ -8,10 +8,15 @@ import { useNavigate } from "react-router-dom";
 import { api } from "./api.js";
 import { useCta } from "./context/cta-context.jsx";
 import { usePublicData } from "./hooks/usePublicData.js";
+import { formatReadTime, kajianDateParts } from "./utils";
 
 /* ─── Articles ──────────────────────────────────────────────────────── */
 export function ArticleSection({ onNav, onOpenCerita }) {
-  const { data: articles, loading, error } = usePublicData("/public/articles");
+  const { data: apiArticles, loading, error } = usePublicData("/public/articles");
+  const articles = React.useMemo(
+    () => (apiArticles || []).map((a) => ({ ...a, time: formatReadTime(a) })),
+    [apiArticles]
+  );
 
   if (loading) return <section className="shell" style={{ marginBottom: 40 }}><p>Memuat bacaan…</p></section>;
   if (error || !articles || articles.length === 0) return null;
@@ -194,9 +199,13 @@ export function ProductHighlight({ onNav }) {
 
 /* ─── Kajian strip ────────────────────────────────────────────────────────────────────── */
 export function KajianStrip({ onNav }) {
-  const { data: events, loading, error } = usePublicData("/public/kajian");
+  const { data: apiEvents, loading, error } = usePublicData("/public/kajian");
   const { openInterest } = useCta();
   const navigate = useNavigate();
+  const events = React.useMemo(
+    () => (apiEvents || []).map((e) => ({ ...e, ...kajianDateParts(e) })),
+    [apiEvents]
+  );
 
   if (loading) return <section className="shell" style={{ marginBottom: 40 }}><p>Memuat jadwal…</p></section>;
   if (error || !events || events.length === 0) return null;

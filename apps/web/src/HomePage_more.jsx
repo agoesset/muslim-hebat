@@ -298,7 +298,7 @@ export function NewsletterBlock() {
         <SunDecor size={120} color="var(--peach)" style={{ position: "absolute", bottom: -30, left: -30, opacity: 0.8 }}/>
 
         <div style={{ position: "relative" }}>
-          <span className="sticker illus-only" style={{ background: "var(--coral)", marginBottom: 16 }}>
+          <span className="pill" style={{ background: "var(--peach)", borderColor: "transparent", color: "var(--ink)" }}>
             tiap Jum'at pagi ✉️
           </span>
           <h2 style={{ fontSize: 56, lineHeight: 0.95, color: "var(--bg)", marginTop: 16 }}>

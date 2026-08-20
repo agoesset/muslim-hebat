@@ -1,10 +1,13 @@
 import React from "react";
 // HomePage — blog-first layout: hero, bacaan terbaru, newsletter.
 
+import { BookOpen, Sparkles } from "lucide-react";
+
 import { Icon } from "./icons.jsx";
-import { Blob, SunDecor } from "./shell.jsx";
+import { Blob } from "./shell.jsx";
 import { ArticleSection, NewsletterBlock } from "./HomePage_more.jsx";
 import { usePublicData } from "./hooks/usePublicData.js";
+import { useMediaQuery } from "./useMediaQuery.js";
 
 const FALLBACK = null;
 
@@ -21,135 +24,116 @@ export function HomePage({ onNav, onOpenCerita }) {
 }
 
 /* ─── HERO ─────────────────────────────────────────────────────────── */
+/* Copy hero di-hardcode: nilai lama di DB masih ngomongin produk/jadwal ngaji,
+   sedangkan site sekarang blog-only. Hanya pill yang masih boleh di-override DB. */
+const HERO_COPY = {
+  line1: "Belajar Islam",
+  line2Lead: "yang",
+  line2Mark: "santai.",
+  pill: "bacaan baru tiap minggu",
+  sub: "Tulisan ringan tentang Islam, self-growth, dan ibadah harian — dibahas santai, tanpa menggurui.",
+  ctaPrimary: "Mulai baca",
+  ctaSecondary: "Langganan buletin",
+};
+
 function Hero({ onNav, home }) {
-  const hero = home?.hero || {};
-  const prayer = home?.prayer || {};
-  const daily = home?.daily || {};
-
-  const headline = hero.headline || ["Baca Islam", "tanpa drama", "pelan-pelan tiap hari."];
-  const stat = hero.stat || "+ 12,400 pembaca";
-  const pill = hero.pill || "bacaan baru tiap minggu";
-  const sub = hero.sub || "Tulisan ringan tentang Islam, self-growth, dan ibadah harian — dibahas santai, tanpa menggurui.";
-  const ctaPrimary = hero.ctaPrimary || "Mulai baca";
-  const ctaSecondary = hero.ctaSecondary || "Langganan buletin";
-
-  const schedule = prayer.schedule || [
-    { name: "Subuh", time: "04:38", done: true },
-    { name: "Dzuhur", time: "11:52", done: true },
-    { name: "Ashar", time: "15:24", active: true },
-    { name: "Maghrib", time: "17:58" },
-    { name: "Isya", time: "19:08" }
-  ];
-  const nextName = prayer.nextName || "Ashar";
-  const nextTime = prayer.nextTime || "15:24";
-  const nextLabel = prayer.nextLabel || "· 1 jam 12 menit lagi";
-
-  const dailyStats = daily.stats || [
-    { big: "14", sub: "hijriah", tag: "11 Dzul-Q" },
-    { big: "3/5", sub: "sholat selesai" },
-    { big: "3", sub: "bacaan baru" }
-  ];
-  const dailyDate = daily.date || "Rabu, 20 Mei";
-  const dailyLabel = daily.label || "hari ini";
+  const compact = useMediaQuery("(max-width: 760px)");
+  const pill = HERO_COPY.pill; // blog-only: ignore stale DB copy
 
   return (
-    <section className="shell" style={{ paddingTop: 24, paddingBottom: 24, position: "relative" }}>
-      <Blob color="var(--peach)" size={260} top={-40} right={120}/>
-      <Blob color="var(--sage)" size={220} top={120} left={-40} opacity={0.4}/>
+    <section
+      className="shell"
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        paddingTop: "clamp(32px, 5vw, 48px)",
+        paddingBottom: "clamp(24px, 4vw, 40px)",
+      }}
+    >
+      <HeroDecor compact={compact}/>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 20, alignItems: "stretch", position: "relative" }}>
-        {/* Big headline card */}
-        <div className="card" style={{ background: "var(--paper)", padding: "36px 40px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <span className="pill pill--ink"><Icon.Sparkle size={12}/> {pill}</span>
-            <span className="pill">{stat}</span>
-          </div>
+      <div style={{
+        position: "relative",
+        zIndex: 1,
+        maxWidth: 600,
+        margin: "0 auto",
+        textAlign: "center",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "clamp(10px, 1.8vw, 16px)",
+      }}>
+        <BookOpen
+          size={22}
+          strokeWidth={1.6}
+          color="var(--sage-deep)"
+          aria-hidden="true"
+          className="illus-only"
+          style={{ marginBottom: -2 }}
+        />
 
-          <h1 style={{ fontSize: "clamp(52px, 6.5vw, 86px)", fontWeight: 700, lineHeight: 0.95 }}>
-            {headline[0] || "Belajar Islam"}<br/>
-            <span style={{ display: "inline-flex", alignItems: "baseline", gap: 14 }}>
-              <span style={{ background: "var(--coral)", padding: "0 18px 6px", borderRadius: 18, display: "inline-block", transform: "rotate(-2deg)" }}>{headline[1] || "tanpa"}</span>
-              <span style={{ fontFamily: "var(--font-hand)", color: "var(--sage-deep)", fontWeight: 500 }}>{headline[2]?.split(" ")[0] || "drama"}</span>
-            </span><br/>
-            {headline[2] ? headline[2].split(" ").slice(1).join(" ") : "santai & konsisten."}
-          </h1>
+        <span
+          className="pill"
+          style={{ background: "var(--sage)", borderColor: "transparent", color: "var(--ink)", fontSize: 12 }}
+        >
+          <Sparkles size={12} strokeWidth={1.8} aria-hidden="true"/>
+          {pill}
+        </span>
 
-          <p style={{ fontSize: 17, maxWidth: 480, color: "var(--ink-soft)", margin: 0 }}>
-            {sub}
-          </p>
-
-          <div style={{ display: "flex", gap: 12 }}>
-            <button className="btn btn--primary" onClick={() => onNav && onNav("bacaan")}>
-              {ctaPrimary} <Icon.Arrow size={16}/>
-            </button>
-            <a className="btn" href="#newsletter">
-              {ctaSecondary}
-            </a>
-          </div>
-
-          {/* sticker */}
-          <span className="sticker illus-only" style={{ position: "absolute", top: 22, right: 22, transform: "rotate(8deg)", background: "var(--butter)" }}>
-            ✨ free for u
+        <h1 style={{
+          margin: 0,
+          fontFamily: "var(--font-display)",
+          fontWeight: 700,
+          fontSize: "clamp(34px, 6vw, 56px)",
+          lineHeight: 1.05,
+          letterSpacing: "-0.03em",
+        }}>
+          {HERO_COPY.line1}
+          <br/>
+          {HERO_COPY.line2Lead}{" "}
+          <span style={{
+            display: "inline-block",
+            background: "var(--coral)",
+            borderRadius: 10,
+            padding: "0 0.24em 0.06em",
+            transform: "rotate(-1deg)",
+          }}>
+            {HERO_COPY.line2Mark}
           </span>
-        </div>
+        </h1>
 
-        {/* right column stack */}
-        <div style={{ display: "grid", gridTemplateRows: "auto auto", gap: 20 }}>
-          {/* Prayer reminder card */}
-          <div className="card card--ink" style={{ position: "relative", overflow: "hidden" }}>
-            <SunDecor size={140} color="var(--peach)" style={{ position: "absolute", top: -30, right: -30, opacity: 0.85 }}/>
-            <div style={{ position: "relative" }}>
-              <div className="pill pill--paper" style={{ fontSize: 12 }}>
-                <Icon.Bell size={12}/> Sholat berikutnya
-              </div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 64, fontWeight: 700, marginTop: 16, lineHeight: 1, letterSpacing: "-0.04em" }}>
-                {nextName}
-              </div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 36, marginTop: 4, color: "var(--peach)", fontWeight: 600 }}>
-                {nextTime} <span style={{ fontSize: 14, color: "var(--bg)", opacity: 0.6, fontFamily: "var(--font-body)", fontWeight: 500 }}>{nextLabel}</span>
-              </div>
-              <div style={{ display: "flex", gap: 6, marginTop: 24, flexWrap: "wrap" }}>
-                {schedule.map(s => (
-                  <div key={s.name} style={{
-                    flex: "1 1 80px", padding: "8px 10px", borderRadius: 12,
-                    background: s.active ? "var(--peach)" : "rgba(251,243,226,0.08)",
-                    color: s.active ? "var(--ink)" : "var(--bg)",
-                    opacity: s.done ? 0.55 : 1,
-                    border: s.active ? "1.5px solid var(--bg)" : "1px solid transparent",
-                  }}>
-                    <div style={{ fontSize: 10, opacity: 0.75, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600 }}>{s.name}</div>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, marginTop: 2 }}>{s.time}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        <p style={{
+          margin: 0,
+          maxWidth: 420,
+          color: "var(--ink-soft)",
+          fontSize: "clamp(15px, 1.6vw, 16px)",
+          lineHeight: 1.55,
+        }}>
+          {HERO_COPY.sub}
+        </p>
 
-          {/* Today's micro stats card */}
-          <div className="card card--peach" style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-hand)", fontSize: 26, color: "var(--coral-deep)" }}>{dailyLabel}</span>
-              <span className="pill pill--paper" style={{ fontSize: 11 }}><Icon.Cal size={11}/> {dailyDate}</span>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-              {dailyStats.map(s => <Stat key={s.sub} big={s.big} sub={s.sub} tag={s.tag}/>)}
-            </div>
-            <button className="btn btn--sm" style={{ alignSelf: "flex-start" }}>
-              Lihat tracker lengkap <Icon.Arrow size={12}/>
-            </button>
-          </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginTop: 4, width: "100%" }}>
+          <button
+            type="button"
+            className="btn btn--primary hero-cta"
+            onClick={() => onNav && onNav("bacaan")}
+          >
+            {HERO_COPY.ctaPrimary} <Icon.Arrow size={18}/>
+          </button>
+          <a className="hero-cta-link" href="#newsletter">
+            {HERO_COPY.ctaSecondary}
+          </a>
         </div>
       </div>
     </section>
   );
 }
 
-function Stat({ big, sub, tag }) {
+/* Dekorasi hero — satu blob pastel, murni ilustratif & disembunyikan dari screen reader. */
+function HeroDecor({ compact }) {
   return (
-    <div style={{ background: "rgba(255,252,245,0.65)", borderRadius: 14, padding: "10px 12px" }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 32, fontWeight: 700, lineHeight: 1 }}>{big}</div>
-      <div style={{ fontSize: 11, marginTop: 4, color: "var(--ink-soft)" }}>{sub}</div>
-      {tag && <div style={{ fontSize: 9, marginTop: 2, fontFamily: "ui-monospace", color: "var(--ink-soft)", opacity: 0.7 }}>{tag}</div>}
+    <div aria-hidden="true" className="illus-only" style={{ position: "absolute", inset: 0, zIndex: 0, overflow: "hidden" }}>
+      <Blob color="var(--peach)" size={compact ? 160 : 220} top={-70} right={compact ? -60 : 10} opacity={0.3}/>
     </div>
   );
 }

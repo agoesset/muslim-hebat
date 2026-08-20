@@ -33,13 +33,13 @@ export function Nav({ page, onSearch }) {
     { id: "kontak", label: "Kontak", path: "/kontak" },
   ];
   return (
-    <header style={{ paddingTop: 24, paddingBottom: 8, position: "sticky", top: 0, zIndex: 50, background: "var(--bg)" }}>
+    <header className="site-header" style={{ paddingTop: 24, paddingBottom: 8, position: "sticky", top: 0, zIndex: 50, background: "var(--bg)" }}>
       <div className="shell row" style={{ gap: 18 }}>
         <Link to="/" style={{ background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
           <Logo />
         </Link>
         <div className="grow"/>
-        <nav className="row illus-only" style={{ gap: 4, background: "var(--paper)", padding: 6, borderRadius: 999, border: "1.5px solid rgba(31,58,45,0.1)" }}>
+        <nav className="row illus-only" style={{ gap: 4, background: "var(--paper)", padding: 6, borderRadius: 999, border: "1.5px solid rgba(26,26,24,0.1)" }}>
           {links.map(l => (
             <Link key={l.id}
                   to={l.path}
@@ -50,10 +50,10 @@ export function Nav({ page, onSearch }) {
             </Link>
           ))}
         </nav>
-        <button type="button" className="btn btn--sm" onClick={onSearch} aria-label="Cari">
-          <Icon.Search size={14}/> Cari
+        <button type="button" className="btn btn--sm header-search" onClick={onSearch} aria-label="Cari">
+          <Icon.Search size={14}/> <span className="btn-label">Cari</span>
         </button>
-        <button type="button" className="btn btn--sm btn--primary" onClick={() => openInterest({ title: "Daftar gratis di Muslim Hebat", source: "header:daftar-gratis", intent: "subscribe" })}>
+        <button type="button" className="btn btn--sm btn--primary header-cta" onClick={() => openInterest({ title: "Daftar gratis di Muslim Hebat", source: "header:daftar-gratis", intent: "subscribe" })}>
           Daftar gratis <Icon.Arrow size={14}/>
         </button>
       </div>

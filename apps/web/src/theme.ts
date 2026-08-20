@@ -33,10 +33,10 @@ interface Palette {
 
 export const PALETTES: Record<Theme["palette"], Palette> = {
   warm: {
-    "--bg": "#FBF3E2",
-    "--bg-soft": "#F4EAD2",
-    "--ink": "#1F3A2D",
-    "--ink-soft": "#4A5C50",
+    "--bg": "#FAF6ED",
+    "--bg-soft": "#F2EBDC",
+    "--ink": "#1A1A18",
+    "--ink-soft": "#4A4A46",
     "--paper": "#FFFCF5",
     "--sage": "#B8DDC4",
     "--sage-deep": "#6FA37E",

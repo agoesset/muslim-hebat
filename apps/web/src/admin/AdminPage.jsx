@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink, Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { api } from "../api.js";
 import { applyTheme } from "../theme.js";
+import { LogoMark } from "../shell.jsx";
 import { renderAdminIcon } from "../lucide-icons.jsx";
 import "../styles.css";
 import "./admin.css";
@@ -214,11 +215,7 @@ function AdminLayout({ user, onLogout }) {
       {navOpen && <button type="button" className="admin-nav-backdrop" onClick={() => setNavOpen(false)} aria-label="Tutup menu" />}
       <aside className="admin-sidebar" onClick={() => setNavOpen(false)}>
         <div className="admin-sidebar-brand">
-          <img
-            src="/logo.avif"
-            alt="Logo"
-            style={{ width: "24px", height: "24px", borderRadius: "6px", objectFit: "cover" }}
-          />
+          <LogoMark size={24} />
           <span className="admin-brand-text">Muslim Hebat</span>
           <span className="admin-badge">Admin</span>
         </div>

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, UseInterceptors } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { PrismaService } from "../prisma.service";
 import { ContactDto, UpdateContactDto } from "./contact.dto";
@@ -39,5 +39,12 @@ export class ContactController {
       where: { id },
       data: { read: dto.read ?? true }
     });
+  }
+
+  @Delete("admin/contact/:id")
+  @UseGuards(AdminAuthGuard)
+  async remove(@Param("id") id: string) {
+    await this.prisma.contactMessage.delete({ where: { id } });
+    return { ok: true };
   }
 }

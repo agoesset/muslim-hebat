@@ -35,6 +35,17 @@ export function ContactsPanel() {
     }
   }
 
+  async function removeItem(item) {
+    if (!window.confirm(`Hapus pesan dari ${item.name}? Tindakan ini tidak bisa dibatalkan.`)) return;
+    try {
+      await api(`/admin/contact/${item.id}`, { method: "DELETE" });
+      setItems((prev) => prev.filter((row) => row.id !== item.id));
+      if (!item.read) setUnreadMessages?.((count) => Math.max(0, (count || 1) - 1));
+    } catch (err) {
+      setToastMessage(err.message);
+    }
+  }
+
   return (
     <div className="admin-panel">
       <header className="admin-panel-header">
@@ -66,6 +77,13 @@ export function ContactsPanel() {
                     Tandai dibaca
                   </button>
                 )}
+                <button
+                  className="admin-btn admin-btn-sm admin-btn-danger"
+                  style={{ marginTop: 12, marginLeft: !item.read ? 8 : 0 }}
+                  onClick={() => removeItem(item)}
+                >
+                  Hapus
+                </button>
               </article>
             ))}
           </div>

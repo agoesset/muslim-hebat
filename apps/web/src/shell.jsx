@@ -1,4 +1,5 @@
 import React from "react";
+import { Bookmark, Grid2X2, Home, Search, UserRound } from "lucide-react";
 // Shared components: Nav (bottom floating pill), SiteCredits, WaveDivider, sticker decorations.
 
 import { SITE_LINKS } from "./site-links.ts";
@@ -24,24 +25,26 @@ export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 })
 import { Link } from "react-router-dom";
 
 const NAV_LINKS = [
-  { id: "home",   label: "Beranda", path: "/" },
-  { id: "bacaan", label: "Bacaan",  path: "/bacaan" },
-  { id: "kontak", label: "Kontak",  path: "/kontak" },
+  { id: "home", label: "Beranda", path: "/", icon: Home },
+  { id: "bacaan", label: "Bacaan", path: "/bacaan", icon: Bookmark },
+  { id: "kategori", label: "Kategori", path: "/bacaan", icon: Grid2X2, fab: true },
+  { id: "cari", label: "Cari", path: "/cari", icon: Search },
+  { id: "profil", label: "Profil", path: "/profil", icon: UserRound },
 ];
 
-/* Bottom nav — pill teks saja; halaman aktif ditandai bold + underline. */
 export function Nav({ page }) {
   return (
     <nav className="bottom-nav" aria-label="Navigasi utama">
       <div className="bottom-nav__pill">
-        {NAV_LINKS.map(({ id, label, path }) => (
+        {NAV_LINKS.map(({ id, label, path, icon: NavIcon, fab }) => (
           <Link
             key={id}
             to={path}
-            className="bottom-nav__link"
+            className={`bottom-nav__link${fab ? " bottom-nav__link--fab" : ""}`}
             aria-current={page === id ? "page" : undefined}
           >
-            {label}
+            <span className="bottom-nav__icon"><NavIcon size={fab ? 23 : 21} strokeWidth={1.8} aria-hidden="true" /></span>
+            <span>{label}</span>
           </Link>
         ))}
       </div>

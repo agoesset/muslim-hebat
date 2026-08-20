@@ -7,7 +7,7 @@ import { EmptyState } from "./EmptyState.jsx";
 import { usePublicData } from "./hooks/usePublicData.js";
 import { formatArticleDate, formatReadTime } from "./utils";
 
-const KATEGORI = ["Semua", "Self-growth", "Parenting", "Tafsir santai", "Productivity", "Hubungan", "Ibadah harian"];
+const TABS = ["Terbaru", "Populer", "Ditandai"];
 
 function normalizeArticles(apiArticles) {
   if (!apiArticles) return [];
@@ -20,32 +20,38 @@ function normalizeArticles(apiArticles) {
 }
 
 export function CeritaPage({ onNav }) {
-  const [cat, setCat] = React.useState("Semua");
+  const [tab, setTab] = React.useState("Terbaru");
   const { data: apiArticles, loading, error } = usePublicData("/public/articles");
   const articles = React.useMemo(() => normalizeArticles(apiArticles), [apiArticles]);
 
-  const list = cat === "Semua" ? articles : articles.filter((c) => c.cat === cat);
+  const list = React.useMemo(() => {
+    if (tab === "Populer") return [...articles].sort((a, b) => (b.claps || 0) - (a.claps || 0));
+    if (tab === "Ditandai") return articles.filter((article) => article.bookmarked || article.saved);
+    return articles;
+  }, [articles, tab]);
 
   return (
     <div data-screen-label="04 Bacaan">
       <section className="page blog-section">
-        <div className="home-hero">
+        <div className="archive-head">
+          <span className="eyebrow">Ruang baca</span>
           <h1 className="home-hero__title">Bacaan</h1>
           <p className="home-hero__sub">
             Kumpulan tulisan ringan soal Islam, self-growth, dan ibadah harian.
           </p>
         </div>
 
-        <div className="chip-row" role="group" aria-label="Filter kategori">
-          {KATEGORI.map((k) => (
+        <div className="reading-tabs" role="tablist" aria-label="Urutkan bacaan">
+          {TABS.map((item) => (
             <button
-              key={k}
+              key={item}
               type="button"
-              className="chip"
-              aria-pressed={cat === k}
-              onClick={() => setCat(k)}
+              className="reading-tab"
+              role="tab"
+              aria-selected={tab === item}
+              onClick={() => setTab(item)}
             >
-              {k}
+              {item}
             </button>
           ))}
         </div>

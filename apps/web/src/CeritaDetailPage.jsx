@@ -2,6 +2,7 @@
 
 import React from "react";
 import DOMPurify from "dompurify";
+import { Bookmark } from "lucide-react";
 import { NewsletterBlock } from "./HomePage_more.jsx";
 import { api } from "./api.js";
 import { usePublicData } from "./hooks/usePublicData.js";
@@ -93,6 +94,24 @@ function CeritaDetailHero({ c }) {
 
 function CeritaBody({ c, clapped, setClapped }) {
   const tags = [c.cat, c.tag].filter(Boolean);
+  const storageKey = `muslim-hebat:bookmark:${c.slug}`;
+  const [saved, setSaved] = React.useState(() => {
+    try {
+      return localStorage.getItem(storageKey) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  function toggleSaved() {
+    const next = !saved;
+    setSaved(next);
+    try {
+      localStorage.setItem(storageKey, String(next));
+    } catch {
+      // Bookmark tetap berfungsi untuk sesi aktif jika storage tidak tersedia.
+    }
+  }
 
   return (
     <section className="page blog-section">
@@ -106,6 +125,11 @@ function CeritaBody({ c, clapped, setClapped }) {
             ))}
           </div>
         )}
+
+        <button type="button" className={saved ? "btn btn--primary article-save" : "btn btn--outline article-save"} onClick={toggleSaved} aria-pressed={saved}>
+          <Bookmark size={18} fill={saved ? "currentColor" : "none"} aria-hidden="true" />
+          {saved ? "Artikel Tersimpan" : "Simpan Artikel"}
+        </button>
 
         <div
           style={{

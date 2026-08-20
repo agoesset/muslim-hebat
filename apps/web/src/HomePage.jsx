@@ -5,7 +5,7 @@ import { BookOpen, Sparkles } from "lucide-react";
 
 import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
-import { ArticleSection, NewsletterBlock } from "./HomePage_more.jsx";
+import { ArticleSection, NewsletterBlock, BLOG_CONTAINER } from "./HomePage_more.jsx";
 import { usePublicData } from "./hooks/usePublicData.js";
 import { useMediaQuery } from "./useMediaQuery.js";
 
@@ -46,6 +46,7 @@ function Hero({ onNav, home }) {
       style={{
         position: "relative",
         overflow: "hidden",
+        maxWidth: BLOG_CONTAINER,
         paddingTop: "clamp(32px, 5vw, 48px)",
         paddingBottom: "clamp(24px, 4vw, 40px)",
       }}
@@ -55,7 +56,6 @@ function Hero({ onNav, home }) {
       <div style={{
         position: "relative",
         zIndex: 1,
-        maxWidth: 600,
         margin: "0 auto",
         textAlign: "center",
         display: "flex",

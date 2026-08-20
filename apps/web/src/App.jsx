@@ -1,5 +1,6 @@
 import React from "react";
-import { BrowserRouter, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
+import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Bookmark, Search, UserRound } from "lucide-react";
 import { Nav, SiteCredits } from "./shell.jsx";
 import { HomePage } from "./HomePage.jsx";
 import { CeritaPage } from "./CeritaPage.jsx";
@@ -25,6 +26,8 @@ const AdminPage = React.lazy(() =>
 const pageIds = {
   "/": "home",
   "/bacaan": "bacaan",
+  "/cari": "cari",
+  "/profil": "profil",
   "/kontak": "kontak"
 };
 
@@ -105,6 +108,9 @@ function PublicApp() {
           <Route path="/" element={<><Seo title="Muslim Hebat — Blog" description="Bacaan ringan tentang Islam, self-growth, dan ibadah harian." /><HomePage onNav={goNav} onOpenCerita={openCerita} onSearch={() => setSearchOpen(true)} /></>} />
           <Route path="/bacaan" element={<><Seo title="Bacaan | Muslim Hebat" description="Kumpulan tulisan ringan tentang Islam, self-growth, dan ibadah harian." /><CeritaPage onNav={goNav} onOpenCerita={openCerita} /></>} />
           <Route path="/bacaan/:slug" element={<CeritaDetailRoute onNav={goNav} onOpenCerita={openCerita} />} />
+          <Route path="/cari" element={<PlaceholderPage icon={Search} eyebrow="Temukan inspirasi" title="Cari Bacaan" description="Cari artikel berdasarkan topik, judul, atau kata kunci." search />} />
+          <Route path="/disimpan" element={<PlaceholderPage icon={Bookmark} eyebrow="Koleksi pribadi" title="Artikel Disimpan" description="Artikel yang kamu simpan akan tampil di sini." />} />
+          <Route path="/profil" element={<PlaceholderPage icon={UserRound} eyebrow="Ruangmu" title="Profil" description="Kelola profil dan temukan kembali bacaan favoritmu." savedLink />} />
           <Route path="/kontak" element={<ContactPage onNav={goNav} />} />
           <Route path="/unsubscribe" element={<UnsubscribePage onNav={goNav} />} />
           <Route path="*" element={<NotFoundPage onNav={goNav} />} />
@@ -113,6 +119,19 @@ function PublicApp() {
       <SiteCredits />
       <Nav page={page} />
     </div>
+  );
+}
+
+function PlaceholderPage({ icon: PageIcon, eyebrow, title, description, search = false, savedLink = false }) {
+  return (
+    <main className="page placeholder-page">
+      <span className="placeholder-page__icon"><PageIcon size={28} strokeWidth={1.7} aria-hidden="true" /></span>
+      <span className="eyebrow">{eyebrow}</span>
+      <h1>{title}</h1>
+      <p>{description}</p>
+      {search && <label className="search-bar"><Search size={19} aria-hidden="true" /><input type="search" placeholder="istighfar" aria-label="Cari bacaan" /></label>}
+      {savedLink && <Link className="btn btn--outline" to="/disimpan"><Bookmark size={17} aria-hidden="true" />Lihat artikel disimpan</Link>}
+    </main>
   );
 }
 
@@ -153,6 +172,8 @@ function routeForPage(id) {
   return {
     home: "/",
     bacaan: "/bacaan",
+    cari: "/cari",
+    profil: "/profil",
     kontak: "/kontak"
   }[id] || "/";
 }

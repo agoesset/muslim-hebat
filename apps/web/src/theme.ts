@@ -31,32 +31,34 @@ interface Palette {
   "--lilac": string;
   "--lilac-deep": string;
   "--butter": string;
+  "--plum": string;
+  "--near-black": string;
 }
 
 /**
- * `warm` adalah palet default: warna persis oatter.shop
- * (cream #FAF6ED, ink #1A1A18, secondary #7C7A70) dengan aksen versi muted
- * supaya tetap menyatu dengan cream. Nilainya harus sama dengan `:root`
+ * `warm` adalah palet default Muslim Hebat. Nilainya harus sama dengan `:root`
  * di styles.css — applyTheme() menimpa custom property di runtime.
  */
 export const PALETTES: Record<Theme["palette"], Palette> = {
   warm: {
-    "--bg": "#FAF6ED",
-    "--bg-soft": "#F3EEE2",
-    "--ink": "#1A1A18",
-    "--ink-soft": "#7C7A70",
-    "--paper": "#FAF6ED",
-    "--line": "rgba(26, 26, 24, 0.14)",
-    "--line-soft": "rgba(26, 26, 24, 0.08)",
-    "--sage": "#C6D8C4",
-    "--sage-deep": "#6D8A6B",
-    "--peach": "#F2D6BE",
-    "--peach-deep": "#B5825A",
-    "--coral": "#F0A794",
-    "--coral-deep": "#B75F49",
-    "--lilac": "#D9CFDD",
-    "--lilac-deep": "#857A90",
-    "--butter": "#EFE1B4",
+    "--bg": "#FAF7F2",
+    "--bg-soft": "#FFF6F5",
+    "--ink": "#1E2A44",
+    "--ink-soft": "#7C395B",
+    "--paper": "#FFFFFF",
+    "--line": "rgba(30, 42, 68, 0.16)",
+    "--line-soft": "rgba(30, 42, 68, 0.08)",
+    "--sage": "#9FAB72",
+    "--sage-deep": "#7C395B",
+    "--peach": "#FFF6F5",
+    "--peach-deep": "#7C395B",
+    "--coral": "#FF7A65",
+    "--coral-deep": "#7C395B",
+    "--lilac": "#FFF6F5",
+    "--lilac-deep": "#7C395B",
+    "--butter": "#FAF7F2",
+    "--plum": "#7C395B",
+    "--near-black": "#0E0E0F",
   },
   cool: {
     "--bg": "#F4F5F3",
@@ -75,6 +77,8 @@ export const PALETTES: Record<Theme["palette"], Palette> = {
     "--lilac": "#D2CEDA",
     "--lilac-deep": "#7E798C",
     "--butter": "#E8DEBE",
+    "--plum": "#7E798C",
+    "--near-black": "#0E0E0F",
   },
   sage: {
     "--bg": "#F5F2E9",
@@ -93,6 +97,8 @@ export const PALETTES: Record<Theme["palette"], Palette> = {
     "--lilac": "#D3CDD8",
     "--lilac-deep": "#7C7688",
     "--butter": "#EBDDAE",
+    "--plum": "#7C7688",
+    "--near-black": "#0E0E0F",
   },
   blossom: {
     "--bg": "#FCF6F1",
@@ -111,6 +117,8 @@ export const PALETTES: Record<Theme["palette"], Palette> = {
     "--lilac": "#DCCFDA",
     "--lilac-deep": "#8A7889",
     "--butter": "#F0E0BA",
+    "--plum": "#8A7889",
+    "--near-black": "#0E0E0F",
   },
 };
 

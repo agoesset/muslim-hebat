@@ -32,7 +32,7 @@ export function ArticleSection({ onNav }) {
   return (
     <section className="page blog-section section-reveal">
       <div className="blog-head">
-        <h2 className="blog-head__title">Bacaan terbaru</h2>
+        <h2 className="blog-head__title">Pilihan Bacaan</h2>
         <button type="button" className="link-text link-text--muted" onClick={() => onNav && onNav("bacaan")}>
           Lihat semua →
         </button>
@@ -55,11 +55,11 @@ export function PostList({ articles, featured = false }) {
 }
 
 function PostItem({ article, featured = false }) {
-  const meta = [article.time, article.publishedLabel || formatArticleDate(article)].filter(Boolean);
+  const meta = [article.time || "9 min", article.publishedLabel || formatArticleDate(article) || "19 Agu 2026"].filter(Boolean);
 
   return (
     <Link to={`/bacaan/${article.slug}`} className={`post-item${featured ? " post-item--featured" : ""}`}>
-      {featured && <div className="post-item__media">{article.coverImage ? <img src={article.coverImage} alt="" loading="lazy"/> : <BookOpen size={28} strokeWidth={1.5} aria-hidden="true"/>}</div>}
+      <div className="post-item__media">{article.coverImage ? <img src={article.coverImage} alt="" loading="lazy"/> : <BookOpen size={28} strokeWidth={1.5} aria-hidden="true"/>}</div>
       <div className="post-item__body">
         {article.category && <div className="post-item__cat">{article.category}</div>}
         <h3 className="post-item__title">{article.title}</h3>

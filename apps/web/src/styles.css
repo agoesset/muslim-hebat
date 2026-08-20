@@ -1,43 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap");
+
 /* ─── Muslim Hebat – Design Tokens ────────────────────────────────────── */
-/* Palet & ritme mengikuti oatter.shop: warm cream, near-black ink,
-   satu kolom sempit, garis rambut sebagai pemisah, nyaris tanpa kotak. */
 :root {
-  --bg:        #FAF6ED;
-  --bg-soft:   #F3EEE2;
-  --ink:       #1A1A18;
-  --ink-soft:  #7C7A70;
-  --paper:     #FAF6ED; /* sengaja sama dengan --bg — kartu tidak punya bidang sendiri */
+  --bg:        #FAF7F2;
+  --bg-soft:   #FFF6F5;
+  --ink:       #1E2A44;
+  --ink-soft:  #7C395B;
+  --paper:     #FFFFFF;
+  --plum:      #7C395B;
+  --near-black:#0E0E0F;
 
   /* garis rambut — pengganti border tebal & shadow */
-  --line:      rgba(26, 26, 24, 0.14);
-  --line-soft: rgba(26, 26, 24, 0.08);
+  --line:      rgba(30, 42, 68, 0.16);
+  --line-soft: rgba(30, 42, 68, 0.08);
 
   /* accents — versi warm/muted biar nyatu sama cream */
-  --sage:      #C6D8C4;
-  --sage-deep: #6D8A6B;
-  --peach:     #F2D6BE;
-  --peach-deep:#B5825A;
-  --coral:     #F0A794;
-  --coral-deep:#B75F49;
-  --lilac:     #D9CFDD;
-  --lilac-deep:#857A90;
-  --butter:    #EFE1B4;
+  --sage:      #9FAB72;
+  --sage-deep: #7C395B;
+  --peach:     #FFF6F5;
+  --peach-deep:#7C395B;
+  --coral:     #FF7A65;
+  --coral-deep:#7C395B;
+  --lilac:     #FFF6F5;
+  --lilac-deep:#7C395B;
+  --butter:    #FAF7F2;
 
   /* density */
   --pad-card: 20px;
   --gap-grid: 16px;
-  --radius:   8px;
-  --radius-sm:6px;
-  --radius-card: 8px;
+  --radius:   16px;
+  --radius-sm:12px;
+  --radius-card: 16px;
   /* jarak antar-section di halaman blog */
   --sec-gap:  32px;
   /* lebar kolom baca — dipakai .page / .blog-container */
-  --measure:  600px;
+  --measure:  720px;
 
-  /* type — DM Sans untuk semua, termasuk heading */
-  --font-display: "DM Sans", system-ui, sans-serif;
-  --font-body:    "DM Sans", system-ui, sans-serif;
-  --font-hand:    "DM Sans", system-ui, sans-serif;
+  --font-display: "Lora", Georgia, serif;
+  --font-body:    "Poppins", system-ui, sans-serif;
+  --font-hand:    "Poppins", system-ui, sans-serif;
   --font-arabic:  "Amiri Quran", "Scheherazade New", "Amiri", serif;
 }
 
@@ -90,7 +91,7 @@ h1, h2, h3, h4 {
 [data-font="rounded"] { --font-display: "Fraunces", serif; --font-body: "Nunito", system-ui, sans-serif; }
 
 [data-font="grotesk"] h1, [data-font="grotesk"] h2, [data-font="grotesk"] h3, [data-font="grotesk"] h4 {
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 /* ─── Page shell ──────────────────────────────────────────────────────── */
@@ -99,32 +100,32 @@ h1, h2, h3, h4 {
 .page,
 .blog-container { max-width: var(--measure); margin: 0 auto; padding: 0 20px; }
 
-/* Bottom floating nav — pill teks, tanpa ikon */
 .bottom-nav {
-  position: fixed; bottom: 16px; left: 0; right: 0; z-index: 50;
+  position: fixed; bottom: 12px; left: 0; right: 0; z-index: 50;
   display: flex; justify-content: center; pointer-events: none;
 }
 .bottom-nav__pill {
-  display: flex; align-items: center; gap: 2px;
-  background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
-  padding: 4px 6px;
-  box-shadow: 0 1px 6px rgba(26, 26, 24, 0.05);
+  display: grid; grid-template-columns: repeat(5, minmax(54px, 1fr)); align-items: end; gap: 2px;
+  width: min(430px, calc(100vw - 24px));
+  background: var(--paper); border: 1px solid var(--line-soft); border-radius: 22px;
+  padding: 8px 8px 6px;
+  box-shadow: 0 12px 30px rgba(30, 42, 68, 0.12);
   pointer-events: auto;
 }
 .bottom-nav__link {
-  display: inline-flex; align-items: center;
-  padding: 8px 12px; min-height: 34px;
-  font-size: 11px; font-weight: 500; letter-spacing: 0.02em;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px;
+  padding: 4px 2px; min-height: 48px;
+  font-size: 10px; font-weight: 500; letter-spacing: 0;
   color: var(--ink-soft); text-decoration: none;
   border-radius: 999px;
   transition: color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 .bottom-nav__link:hover { color: var(--ink); }
-.bottom-nav__link[aria-current="page"] {
-  color: var(--ink);
-  font-weight: 700;
-  background: var(--sage);
-}
+.bottom-nav__link[aria-current="page"] { color: var(--coral); font-weight: 600; background: transparent; }
+.bottom-nav__icon { display: grid; place-items: center; height: 23px; }
+.bottom-nav__link--fab { transform: translateY(-16px); color: var(--ink-soft); }
+.bottom-nav__link--fab .bottom-nav__icon { width: 52px; height: 52px; border-radius: 50%; color: white; background: var(--coral); box-shadow: 0 8px 18px rgba(255, 122, 101, 0.34); }
+.bottom-nav__link--fab:hover { transform: translateY(-18px); }
 
 /* Ruang untuk bottom nav — konten tidak ketutup */
 body { padding-bottom: 76px; }
@@ -151,7 +152,7 @@ body { padding-bottom: 76px; }
 .sticker {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 10px;
-  background: var(--bg-soft);
+  background: var(--paper);
   color: var(--ink-soft);
   border: 1px solid var(--line-soft);
   border-radius: 999px;
@@ -198,8 +199,10 @@ body { padding-bottom: 76px; }
 .btn:hover { background: rgba(26, 26, 24, 0.04); border-color: var(--ink); }
 .btn:disabled { opacity: 0.45; cursor: default; }
 .btn:disabled:hover { background: transparent; border-color: var(--line); }
-.btn--primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.btn--primary:hover { background: #000; border-color: #000; }
+.btn--primary { background: var(--coral); color: white; border-color: var(--coral); border-radius: 999px; }
+.btn--primary:hover { background: var(--plum); border-color: var(--plum); }
+.btn--outline { background: transparent; color: var(--coral); border-color: var(--coral); border-radius: 999px; }
+.btn--outline:hover { background: var(--bg-soft); border-color: var(--coral); }
 .btn--coral   { background: var(--coral); border-color: transparent; }
 .btn--sage    { background: var(--sage);  border-color: transparent; }
 .btn--ghost   { background: transparent; border-color: transparent; }
@@ -503,16 +506,17 @@ input, textarea, select { min-width: 0; }
   flex-direction: column;
   align-items: flex-start;
   gap: 14px;
-  min-height: 340px;
+  min-height: 400px;
   justify-content: center;
   padding: 48px 34px 40px;
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  border-radius: 28px;
-  background: linear-gradient(135deg, rgba(242, 214, 190, 0.38), rgba(250, 246, 237, 0.65) 58%, rgba(198, 216, 196, 0.28));
+  border-radius: 24px;
+  background: var(--bg-soft);
 }
 .home-hero__content { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; position: relative; z-index: 2; }
+.hero-mosque { position: absolute; width: 48%; right: -2%; bottom: 4%; color: var(--plum); opacity: 0.15; }
 .hero-crescent { position: absolute; width: 250px; height: 250px; right: -24px; top: -48px; max-width: none; color: var(--coral); opacity: 0.18; filter: drop-shadow(0 12px 22px rgba(240, 167, 148, 0.35)); }
 .hero-sparkle { position: absolute; z-index: 3; color: var(--coral); }
 .hero-sparkle--one { width: 25px; left: 48%; top: 25%; animation-delay: -0.4s; }
@@ -532,6 +536,9 @@ input, textarea, select { min-width: 0; }
   line-height: 1.1;
   letter-spacing: -0.035em;
 }
+.home-hero__cta { margin-top: 4px; padding: 12px 20px; }
+.topic-strip { padding: 24px 0 6px; }
+.eyebrow { display: block; color: var(--coral); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 .home-hero__sub {
   margin: 0;
   max-width: 46ch;
@@ -565,23 +572,26 @@ input, textarea, select { min-width: 0; }
 
 /* ── Daftar artikel — garis pemisah, tanpa kotak ──────────────────────── */
 .post-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
   margin-top: 8px;
 }
 .post-item {
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  padding: 18px 0;
-  border: 0;
-  border-top: 1px solid var(--line-soft);
-  background: none;
+  padding: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: var(--paper);
+  overflow: hidden;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
 }
-.post-item:first-child { border-top: 0; }
+.post-item:first-child { border-top: 1px solid var(--line-soft); }
 .post-item:hover .post-item__title,
 .post-item:focus-visible .post-item__title {
   text-decoration: underline;
@@ -593,13 +603,13 @@ input, textarea, select { min-width: 0; }
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--coral);
 }
 .post-item__title {
   margin: 6px 0 0;
   font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 19px;
+  font-weight: 500;
   line-height: 1.3;
   letter-spacing: -0.015em;
 }
@@ -621,16 +631,16 @@ input, textarea, select { min-width: 0; }
   font-size: 12px;
   color: var(--ink-soft);
 }
-.post-item__body { min-width: 0; }
+.post-item__body { min-width: 0; padding: 18px; }
 .post-item--featured {
-  display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: 22px;
-  padding: 18px; margin: 12px 0 8px; border: 1px solid rgba(240, 167, 148, 0.22); border-radius: 18px;
-  background: linear-gradient(135deg, var(--paper), rgba(242, 214, 190, 0.48));
-  box-shadow: 0 8px 24px rgba(77, 58, 42, 0.06);
+  grid-column: 1 / -1; display: flex; gap: 0;
+  padding: 0; margin: 12px 0 8px; border: 1px solid var(--line-soft); border-radius: 16px;
+  background: var(--bg-soft);
+  box-shadow: 0 8px 24px rgba(30, 42, 68, 0.06);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .post-item--featured:hover { transform: translateY(-4px); box-shadow: 0 16px 34px rgba(77, 58, 42, 0.13); }
-.post-item__media { min-height: 190px; border-radius: 13px; overflow: hidden; display: grid; place-items: center; color: var(--sage-deep); background: linear-gradient(145deg, var(--sage), var(--peach) 65%, var(--coral)); }
+.post-item__media { min-height: 170px; overflow: hidden; display: grid; place-items: center; color: var(--plum); background: linear-gradient(145deg, var(--bg-soft), rgba(159, 171, 114, 0.44)); }
 .post-item__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
 .post-item--featured:hover .post-item__media img { transform: scale(1.035); }
 .post-item--featured .post-item__body { align-self: center; }
@@ -638,17 +648,17 @@ input, textarea, select { min-width: 0; }
 .post-item__read svg { opacity: 0; transform: translateX(-5px); transition: opacity 0.2s ease, transform 0.2s ease; }
 .post-item--featured:hover .post-item__read svg, .post-item--featured:focus-visible .post-item__read svg { opacity: 1; transform: translateX(0); }
 
-/* filter kategori — teks, aktif = garis bawah */
 .chip-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 14px;
+  gap: 8px;
   margin: 16px 0 4px;
 }
 .chip {
-  padding: 4px 0;
-  border: 0;
-  background: none;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--bg-soft);
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
@@ -658,12 +668,24 @@ input, textarea, select { min-width: 0; }
 }
 .chip:hover { color: var(--ink); }
 .chip[aria-pressed="true"] {
-  color: var(--ink);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  text-decoration-thickness: 1px;
+  color: white;
+  font-weight: 600;
+  background: var(--coral);
 }
+.chip[aria-current="true"] { color: white; background: var(--coral); }
+
+.archive-head { padding: 48px 0 20px; }
+.reading-tabs { display: flex; gap: 24px; margin: 4px 0 20px; border-bottom: 1px solid var(--line-soft); }
+.reading-tab { position: relative; padding: 10px 0 12px; border: 0; background: transparent; color: var(--ink-soft); font-size: 13px; font-weight: 500; }
+.reading-tab[aria-selected="true"] { color: var(--coral); font-weight: 600; }
+.reading-tab[aria-selected="true"]::after { content: ""; position: absolute; height: 2px; left: 0; right: 0; bottom: -1px; background: var(--coral); border-radius: 2px; }
+
+.placeholder-page { min-height: 65vh; padding-top: 72px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.placeholder-page__icon { width: 54px; height: 54px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--coral); }
+.placeholder-page h1 { font-size: clamp(32px, 7vw, 48px); }
+.placeholder-page p { margin: 0 0 10px; max-width: 44ch; color: var(--ink-soft); }
+.search-bar { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid var(--line-soft); border-radius: 999px; background: var(--paper); color: var(--ink-soft); }
+.search-bar input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); font: 400 14px/1.4 var(--font-body); }
 
 /* ── Newsletter — teks + input inline, tanpa kotak ────────────────────── */
 .news {
@@ -721,10 +743,14 @@ input, textarea, select { min-width: 0; }
 .article-html a { text-decoration: underline; text-underline-offset: 3px; }
 .article-html blockquote {
   margin: 24px 0;
-  padding-left: 16px;
-  border-left: 2px solid var(--line);
-  color: var(--ink-soft);
+  padding: 20px;
+  border: 0;
+  border-left: 4px solid var(--coral);
+  border-radius: 0 12px 12px 0;
+  background: var(--bg-soft);
+  color: var(--plum);
 }
+.article-save { margin-top: 28px; }
 
 @media (max-width: 620px) {
   .home-hero { min-height: 360px; padding: 38px 22px 48px; }
@@ -732,7 +758,9 @@ input, textarea, select { min-width: 0; }
   .hero-sparkle--one { left: 70%; top: 30%; }
   .hero-sparkle--two { left: 82%; top: 60%; }
   .hero-sparkle--three { right: 8%; bottom: 15%; }
-  .post-item--featured { grid-template-columns: 1fr; gap: 16px; padding: 14px; }
+  .hero-mosque { width: 64%; right: -18%; opacity: 0.1; }
+  .post-list { grid-template-columns: 1fr; }
+  .post-item--featured { gap: 0; padding: 0; }
   .post-item__media { min-height: 180px; }
   .news { grid-template-columns: 1fr; gap: 20px; padding: 22px 18px; }
   .news__form { flex-wrap: wrap; max-width: none; }

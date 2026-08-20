@@ -2,6 +2,7 @@ import React from "react";
 // HomePage — blog-first layout: hero, bacaan terbaru, newsletter.
 
 import { ArticleSection, NewsletterBlock } from "./HomePage_more.jsx";
+import { Link } from "react-router-dom";
 
 export function HomePage({ onNav, onOpenCerita }) {
   const homeRef = React.useRef(null);
@@ -52,20 +53,22 @@ export function HomePage({ onNav, onOpenCerita }) {
 /* Copy hero di-hardcode: nilai lama di DB masih ngomongin produk/jadwal ngaji,
    sedangkan site sekarang blog-only. */
 const HERO_COPY = {
-  pill: "bacaan baru tiap minggu",
-  title: "Belajar Islam yang santai.",
-  sub: "Tulisan ringan soal Islam, self-growth, dan ibadah harian.",
-  cta: "Mulai baca",
+  pill: "Bacaan baru hari ini",
+  title: "Menjadi lebih baik, satu bacaan dalam satu waktu.",
+  sub: "Temukan inspirasi hangat untuk bertumbuh, mendekat, dan menjalani hari dengan lebih bermakna.",
+  cta: "Mulai membaca",
 };
+
+const TOPICS = ["Self-Growth", "Ibadah Harian", "Dzikir Pagi", "Muhasabah"];
 
 /* Hero minimal — pill, satu judul, satu kalimat, CTA berupa text link. */
 function Hero({ onNav }) {
   return (
     <section className="page blog-section section-reveal">
       <div className="home-hero">
-        <svg className="hero-crescent float" viewBox="0 0 260 260" aria-hidden="true">
-          <circle cx="130" cy="130" r="92" fill="currentColor"/>
-          <circle cx="170" cy="92" r="92" fill="var(--bg)"/>
+        <svg className="hero-mosque" viewBox="0 0 320 240" aria-hidden="true">
+          <path d="M42 208h236M76 208v-72h64v72m40 0v-94h66v94M92 136c0-24 32-43 32-43s32 19 32 43m38-22c0-30 19-54 19-54s19 24 19 54M213 60V38m-7 0h14" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M102 208v-31c0-13 10-23 22-23s22 10 22 23v31m98 0v-40h22v40" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round"/>
         </svg>
         <div className="hero-sparkles" aria-hidden="true">
           {["one", "two", "three", "four"].map((name) => (
@@ -78,7 +81,7 @@ function Hero({ onNav }) {
           <span className="pill">{HERO_COPY.pill}</span>
           <h1 className="home-hero__title">{HERO_COPY.title}</h1>
           <p className="home-hero__sub">{HERO_COPY.sub}</p>
-          <button type="button" className="link-text" onClick={() => onNav && onNav("bacaan")}>
+          <button type="button" className="btn btn--primary home-hero__cta" onClick={() => onNav && onNav("bacaan")}>
             {HERO_COPY.cta} →
           </button>
         </div>
@@ -89,6 +92,12 @@ function Hero({ onNav }) {
               <path d="M10 37c8-9 16-15 27-25" fill="none" stroke="var(--sage-deep)" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           ))}
+        </div>
+      </div>
+      <div className="topic-strip">
+        <div className="blog-head"><h2 className="blog-head__title">Topik Populer</h2></div>
+        <div className="chip-row">
+          {TOPICS.map((topic, index) => <Link key={topic} to="/bacaan" className="chip" aria-current={index === 0 ? "true" : undefined}>{topic}</Link>)}
         </div>
       </div>
     </section>

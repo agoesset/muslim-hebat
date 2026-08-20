@@ -1,10 +1,13 @@
 import React from "react";
 // HomePage — blog-first layout: hero, bacaan terbaru, newsletter.
 
+import { BookOpen, Moon, Sparkles, Star, Sun } from "lucide-react";
+
 import { Icon } from "./icons.jsx";
-import { Blob, SunDecor } from "./shell.jsx";
+import { Blob } from "./shell.jsx";
 import { ArticleSection, NewsletterBlock } from "./HomePage_more.jsx";
 import { usePublicData } from "./hooks/usePublicData.js";
+import { useMediaQuery } from "./useMediaQuery.js";
 
 const FALLBACK = null;
 
@@ -23,133 +26,140 @@ export function HomePage({ onNav, onOpenCerita }) {
 /* ─── HERO ─────────────────────────────────────────────────────────── */
 function Hero({ onNav, home }) {
   const hero = home?.hero || {};
-  const prayer = home?.prayer || {};
-  const daily = home?.daily || {};
+  const compact = useMediaQuery("(max-width: 760px)");
 
-  const headline = hero.headline || ["Baca Islam", "tanpa drama", "pelan-pelan tiap hari."];
-  const stat = hero.stat || "+ 12,400 pembaca";
+  const headline = hero.headline || [];
+  const line1 = headline[0] || "Belajar Islam";
+  const line2Lead = headline[1] || "yang";
+  const line2Mark = headline[2] || "santai.";
   const pill = hero.pill || "bacaan baru tiap minggu";
   const sub = hero.sub || "Tulisan ringan tentang Islam, self-growth, dan ibadah harian — dibahas santai, tanpa menggurui.";
   const ctaPrimary = hero.ctaPrimary || "Mulai baca";
   const ctaSecondary = hero.ctaSecondary || "Langganan buletin";
 
-  const schedule = prayer.schedule || [
-    { name: "Subuh", time: "04:38", done: true },
-    { name: "Dzuhur", time: "11:52", done: true },
-    { name: "Ashar", time: "15:24", active: true },
-    { name: "Maghrib", time: "17:58" },
-    { name: "Isya", time: "19:08" }
-  ];
-  const nextName = prayer.nextName || "Ashar";
-  const nextTime = prayer.nextTime || "15:24";
-  const nextLabel = prayer.nextLabel || "· 1 jam 12 menit lagi";
-
-  const dailyStats = daily.stats || [
-    { big: "14", sub: "hijriah", tag: "11 Dzul-Q" },
-    { big: "3/5", sub: "sholat selesai" },
-    { big: "3", sub: "bacaan baru" }
-  ];
-  const dailyDate = daily.date || "Rabu, 20 Mei";
-  const dailyLabel = daily.label || "hari ini";
-
   return (
-    <section className="shell" style={{ paddingTop: 24, paddingBottom: 24, position: "relative" }}>
-      <Blob color="var(--peach)" size={260} top={-40} right={120}/>
-      <Blob color="var(--sage)" size={220} top={120} left={-40} opacity={0.4}/>
+    <section
+      className="shell"
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        paddingTop: "clamp(40px, 7vw, 64px)",
+        paddingBottom: "clamp(32px, 6vw, 56px)",
+      }}
+    >
+      <HeroDecor compact={compact}/>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 20, alignItems: "stretch", position: "relative" }}>
-        {/* Big headline card */}
-        <div className="card" style={{ background: "var(--paper)", padding: "36px 40px", display: "flex", flexDirection: "column", gap: 18, position: "relative" }}>
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <span className="pill pill--ink"><Icon.Sparkle size={12}/> {pill}</span>
-            <span className="pill">{stat}</span>
-          </div>
+      <div style={{
+        position: "relative",
+        zIndex: 1,
+        maxWidth: 760,
+        margin: "0 auto",
+        textAlign: "center",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "clamp(14px, 2.4vw, 22px)",
+      }}>
+        <span className="pill" style={{ background: "var(--sage)", borderColor: "transparent", color: "var(--ink)" }}>
+          <Sparkles size={13} aria-hidden="true"/> {pill}
+        </span>
 
-          <h1 style={{ fontSize: "clamp(52px, 6.5vw, 86px)", fontWeight: 700, lineHeight: 0.95 }}>
-            {headline[0] || "Belajar Islam"}<br/>
-            <span style={{ display: "inline-flex", alignItems: "baseline", gap: 14 }}>
-              <span style={{ background: "var(--coral)", padding: "0 18px 6px", borderRadius: 18, display: "inline-block", transform: "rotate(-2deg)" }}>{headline[1] || "tanpa"}</span>
-              <span style={{ fontFamily: "var(--font-hand)", color: "var(--sage-deep)", fontWeight: 500 }}>{headline[2]?.split(" ")[0] || "drama"}</span>
-            </span><br/>
-            {headline[2] ? headline[2].split(" ").slice(1).join(" ") : "santai & konsisten."}
-          </h1>
-
-          <p style={{ fontSize: 17, maxWidth: 480, color: "var(--ink-soft)", margin: 0 }}>
-            {sub}
-          </p>
-
-          <div style={{ display: "flex", gap: 12 }}>
-            <button className="btn btn--primary" onClick={() => onNav && onNav("bacaan")}>
-              {ctaPrimary} <Icon.Arrow size={16}/>
-            </button>
-            <a className="btn" href="#newsletter">
-              {ctaSecondary}
-            </a>
-          </div>
-
-          {/* sticker */}
-          <span className="sticker illus-only" style={{ position: "absolute", top: 22, right: 22, transform: "rotate(8deg)", background: "var(--butter)" }}>
-            ✨ free for u
+        <h1 style={{
+          margin: 0,
+          fontFamily: "var(--font-display)",
+          fontWeight: 700,
+          fontSize: "clamp(42px, 8.5vw, 82px)",
+          lineHeight: 1.03,
+          letterSpacing: "-0.03em",
+        }}>
+          {line1}
+          <br/>
+          {line2Lead}{" "}
+          <span style={{
+            display: "inline-block",
+            background: "var(--coral)",
+            borderRadius: "16px 22px 18px 24px",
+            padding: "0 0.28em 0.08em",
+            transform: "rotate(-1.5deg)",
+          }}>
+            {line2Mark}
           </span>
-        </div>
+        </h1>
 
-        {/* right column stack */}
-        <div style={{ display: "grid", gridTemplateRows: "auto auto", gap: 20 }}>
-          {/* Prayer reminder card */}
-          <div className="card card--ink" style={{ position: "relative", overflow: "hidden" }}>
-            <SunDecor size={140} color="var(--peach)" style={{ position: "absolute", top: -30, right: -30, opacity: 0.85 }}/>
-            <div style={{ position: "relative" }}>
-              <div className="pill pill--paper" style={{ fontSize: 12 }}>
-                <Icon.Bell size={12}/> Sholat berikutnya
-              </div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 64, fontWeight: 700, marginTop: 16, lineHeight: 1, letterSpacing: "-0.04em" }}>
-                {nextName}
-              </div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 36, marginTop: 4, color: "var(--peach)", fontWeight: 600 }}>
-                {nextTime} <span style={{ fontSize: 14, color: "var(--bg)", opacity: 0.6, fontFamily: "var(--font-body)", fontWeight: 500 }}>{nextLabel}</span>
-              </div>
-              <div style={{ display: "flex", gap: 6, marginTop: 24, flexWrap: "wrap" }}>
-                {schedule.map(s => (
-                  <div key={s.name} style={{
-                    flex: "1 1 80px", padding: "8px 10px", borderRadius: 12,
-                    background: s.active ? "var(--peach)" : "rgba(251,243,226,0.08)",
-                    color: s.active ? "var(--ink)" : "var(--bg)",
-                    opacity: s.done ? 0.55 : 1,
-                    border: s.active ? "1.5px solid var(--bg)" : "1px solid transparent",
-                  }}>
-                    <div style={{ fontSize: 10, opacity: 0.75, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600 }}>{s.name}</div>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, marginTop: 2 }}>{s.time}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        <p style={{
+          margin: 0,
+          maxWidth: 540,
+          color: "var(--ink-soft)",
+          fontSize: "clamp(15px, 2.2vw, 18px)",
+          lineHeight: 1.6,
+        }}>
+          {sub}
+        </p>
 
-          {/* Today's micro stats card */}
-          <div className="card card--peach" style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-hand)", fontSize: 26, color: "var(--coral-deep)" }}>{dailyLabel}</span>
-              <span className="pill pill--paper" style={{ fontSize: 11 }}><Icon.Cal size={11}/> {dailyDate}</span>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-              {dailyStats.map(s => <Stat key={s.sub} big={s.big} sub={s.sub} tag={s.tag}/>)}
-            </div>
-            <button className="btn btn--sm" style={{ alignSelf: "flex-start" }}>
-              Lihat tracker lengkap <Icon.Arrow size={12}/>
-            </button>
-          </div>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 4 }}>
+          <button type="button" className="btn btn--primary" onClick={() => onNav && onNav("bacaan")}>
+            {ctaPrimary} <Icon.Arrow size={16}/>
+          </button>
+          <a className="btn" href="#newsletter">
+            {ctaSecondary}
+          </a>
         </div>
       </div>
     </section>
   );
 }
 
-function Stat({ big, sub, tag }) {
+/* Dekorasi hero — murni ilustratif, disembunyikan dari screen reader. */
+function HeroDecor({ compact }) {
+  const base = { position: "absolute", pointerEvents: "none" };
   return (
-    <div style={{ background: "rgba(255,252,245,0.65)", borderRadius: 14, padding: "10px 12px" }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 32, fontWeight: 700, lineHeight: 1 }}>{big}</div>
-      <div style={{ fontSize: 11, marginTop: 4, color: "var(--ink-soft)" }}>{sub}</div>
-      {tag && <div style={{ fontSize: 9, marginTop: 2, fontFamily: "ui-monospace", color: "var(--ink-soft)", opacity: 0.7 }}>{tag}</div>}
+    <div aria-hidden="true" className="illus-only" style={{ position: "absolute", inset: 0, zIndex: 0, overflow: "hidden" }}>
+      <Blob color="var(--peach)" size={compact ? 180 : 260} top={-60} right={compact ? -60 : 40} opacity={0.5}/>
+      <Blob color="var(--sage)" size={compact ? 160 : 230} top={100} left={compact ? -80 : -30} opacity={0.35}/>
+
+      {!compact && (
+        <>
+          <BookOpen
+            size={44}
+            strokeWidth={1.6}
+            color="var(--sage-deep)"
+            style={{ ...base, top: 34, left: "3%", opacity: 0.55, transform: "rotate(-12deg)" }}
+          />
+          <Sun
+            size={58}
+            strokeWidth={1.5}
+            color="var(--peach-deep)"
+            style={{ ...base, top: 12, right: "4%", opacity: 0.6, transform: "rotate(8deg)" }}
+          />
+          <Moon
+            size={34}
+            strokeWidth={1.6}
+            color="var(--lilac-deep)"
+            style={{ ...base, bottom: "16%", left: "7%", opacity: 0.5, transform: "rotate(-8deg)" }}
+          />
+          <Star
+            size={26}
+            strokeWidth={1.6}
+            color="var(--coral-deep)"
+            style={{ ...base, bottom: "22%", right: "8%", opacity: 0.5, transform: "rotate(10deg)" }}
+          />
+          <Sparkles
+            size={22}
+            strokeWidth={1.6}
+            color="var(--peach-deep)"
+            style={{ ...base, top: "42%", left: "1%", opacity: 0.45, transform: "rotate(6deg)" }}
+          />
+        </>
+      )}
+
+      {compact && (
+        <Star
+          size={20}
+          strokeWidth={1.6}
+          color="var(--coral-deep)"
+          style={{ ...base, top: 16, right: 10, opacity: 0.45, transform: "rotate(10deg)" }}
+        />
+      )}
     </div>
   );
 }

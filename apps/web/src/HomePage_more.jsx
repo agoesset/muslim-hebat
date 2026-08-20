@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
+import { ArrowRight, BookOpen, Mail } from "lucide-react";
 import { api } from "./api.js";
 import { usePublicData } from "./hooks/usePublicData.js";
 import { formatArticleDate, formatReadTime } from "./utils";
@@ -29,7 +30,7 @@ export function ArticleSection({ onNav }) {
   if (error || articles.length === 0) return null;
 
   return (
-    <section className="page blog-section">
+    <section className="page blog-section section-reveal">
       <div className="blog-head">
         <h2 className="blog-head__title">Bacaan terbaru</h2>
         <button type="button" className="link-text link-text--muted" onClick={() => onNav && onNav("bacaan")}>
@@ -37,37 +38,36 @@ export function ArticleSection({ onNav }) {
         </button>
       </div>
 
-      <PostList articles={articles.slice(0, 5)}/>
+      <PostList articles={articles.slice(0, 5)} featured/>
     </section>
   );
 }
 
 /* Daftar artikel — judul, excerpt, meta, dipisah garis rambut. */
-export function PostList({ articles }) {
+export function PostList({ articles, featured = false }) {
   return (
     <div className="post-list">
-      {articles.map((a) => (
-        <PostItem key={a.id || a.slug} article={a}/>
+      {articles.map((a, index) => (
+        <PostItem key={a.id || a.slug} article={a} featured={featured && index === 0}/>
       ))}
     </div>
   );
 }
 
-function PostItem({ article }) {
+function PostItem({ article, featured = false }) {
   const meta = [article.time, article.publishedLabel || formatArticleDate(article)].filter(Boolean);
 
   return (
-    <Link to={`/bacaan/${article.slug}`} className="post-item">
-      {article.category && <div className="post-item__cat">{article.category}</div>}
-      <h3 className="post-item__title">{article.title}</h3>
-      {article.excerpt && <p className="post-item__excerpt">{article.excerpt}</p>}
-      <div className="post-item__meta">
-        {meta.map((m, i) => (
-          <React.Fragment key={m}>
-            {i > 0 && <span aria-hidden="true">·</span>}
-            <span>{m}</span>
-          </React.Fragment>
-        ))}
+    <Link to={`/bacaan/${article.slug}`} className={`post-item${featured ? " post-item--featured" : ""}`}>
+      {featured && <div className="post-item__media">{article.coverImage ? <img src={article.coverImage} alt="" loading="lazy"/> : <BookOpen size={28} strokeWidth={1.5} aria-hidden="true"/>}</div>}
+      <div className="post-item__body">
+        {article.category && <div className="post-item__cat">{article.category}</div>}
+        <h3 className="post-item__title">{article.title}</h3>
+        {article.excerpt && <p className="post-item__excerpt">{article.excerpt}</p>}
+        <div className="post-item__meta">
+          {meta.map((m, i) => <React.Fragment key={m}>{i > 0 && <span aria-hidden="true">·</span>}<span>{m}</span></React.Fragment>)}
+        </div>
+        {featured && <span className="post-item__read">Baca <ArrowRight size={15} aria-hidden="true"/></span>}
       </div>
     </Link>
   );
@@ -99,12 +99,12 @@ export function NewsletterBlock() {
   }
 
   return (
-    <section id="newsletter" className="page blog-section">
+    <section id="newsletter" className="page blog-section section-reveal">
       <div className="news">
-        <h2 className="news__title">Bacaan tiap Jumat pagi</h2>
-        <p className="news__sub">
-          1 artikel pilihan, 1 doa, 1 reminder kecil — langsung ke inbox kamu.
-        </p>
+        <div className="news__intro">
+          <span className="news__icon"><Mail size={23} aria-hidden="true"/></span>
+          <div><h2 className="news__title">Bacaan tiap Jumat pagi</h2><p className="news__sub">1 artikel pilihan, 1 doa, 1 reminder kecil — langsung ke inbox kamu.</p></div>
+        </div>
 
         <form className="news__form" onSubmit={submit}>
           <input
@@ -117,7 +117,7 @@ export function NewsletterBlock() {
             onChange={(e) => setEmail(e.target.value)}
             disabled={status === "loading"}
           />
-          <button type="submit" className="link-text" disabled={status === "loading" || !email}>
+          <button type="submit" className="news__button" disabled={status === "loading" || !email}>
             {status === "loading" ? "Mengirim…" : "Langganan →"}
           </button>
         </form>

@@ -14,6 +14,7 @@ import { SubscribersPanel } from "./panels/SubscribersPanel.jsx";
 import { SettingsPanel } from "./panels/SettingsPanel.jsx";
 import { ContactsPanel } from "./panels/ContactsPanel.jsx";
 import { CommentsPanel } from "./panels/CommentsPanel.jsx";
+import { TestimonialsPanel } from "./panels/TestimonialsPanel.jsx";
 
 export function AdminPage() {
   const [user, setUser] = React.useState(null);
@@ -76,6 +77,7 @@ export function AdminPage() {
         <Route path="konten/:resourceType/edit/:id" element={<ContentFormPanel />} />
         <Route path="pesan" element={<ContactsPanel />} />
         <Route path="komentar" element={<CommentsPanel />} />
+        <Route path="testimonials" element={<TestimonialsPanel />} />
         <Route path="subscribers" element={<SubscribersPanel />} />
         <Route path="settings" element={<SettingsPanel />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
@@ -199,6 +201,7 @@ function AdminLayout({ user, onLogout }) {
     { id: "konten/classes", label: "Kelas", icon: "classes", color: "var(--lilac)", badgeKey: "classes" },
     { id: "pesan", label: "Pesan", icon: "mail", color: "var(--butter)", badgeKey: "pesan" },
     { id: "komentar", label: "Komentar", icon: "content", color: "var(--peach)" },
+    { id: "testimonials", label: "Testimonials", icon: "sparkle", color: "var(--coral)" },
     { id: "subscribers", label: "Subscribers", icon: "subscribers", color: "var(--coral)", badgeKey: "subscribers" },
     { id: "settings", label: "Settings", icon: "settings", color: "var(--lilac)" },
   ];

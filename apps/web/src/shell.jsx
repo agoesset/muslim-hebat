@@ -1,8 +1,6 @@
 import React from "react";
 // Shared components: Nav (bottom floating pill), SiteCredits, WaveDivider, sticker decorations.
 
-import { BookOpen, Home, Mail } from "lucide-react";
-
 import { SITE_LINKS } from "./site-links.ts";
 
 export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 }) {
@@ -26,28 +24,24 @@ export function WaveDivider({ color = "var(--ink)", flip = false, height = 48 })
 import { Link } from "react-router-dom";
 
 const NAV_LINKS = [
-  { id: "home",   label: "Beranda", path: "/",       icon: Home },
-  { id: "bacaan", label: "Bacaan",  path: "/bacaan", icon: BookOpen },
-  { id: "kontak", label: "Kontak",  path: "/kontak", icon: Mail },
+  { id: "home",   label: "Beranda", path: "/" },
+  { id: "bacaan", label: "Bacaan",  path: "/bacaan" },
+  { id: "kontak", label: "Kontak",  path: "/kontak" },
 ];
 
-/* Bottom nav — floating pill, icon + label kecil, active state pill sage. */
+/* Bottom nav — pill teks saja; halaman aktif ditandai bold + underline. */
 export function Nav({ page }) {
   return (
     <nav className="bottom-nav" aria-label="Navigasi utama">
       <div className="bottom-nav__pill">
-        <Link to="/" className="bottom-nav__logo" aria-label="Muslim Hebat — beranda">
-          <LogoMark size={32} />
-        </Link>
-        {NAV_LINKS.map(({ id, label, path, icon: LinkIcon }) => (
+        {NAV_LINKS.map(({ id, label, path }) => (
           <Link
             key={id}
             to={path}
             className="bottom-nav__link"
             aria-current={page === id ? "page" : undefined}
           >
-            <LinkIcon size={16} strokeWidth={1.8} aria-hidden="true" />
-            <span>{label}</span>
+            {label}
           </Link>
         ))}
       </div>
@@ -101,14 +95,15 @@ export function Blob({ color = "var(--peach)", size = 200, top, left, right, bot
   );
 }
 
-/* Bottom bar minimalis — pengganti footer besar: copyright + 2 link penting. */
+/* Footer super simpel — center, teks kecil, link underline. */
 export function SiteCredits() {
+  const link = { textDecoration: "underline", textUnderlineOffset: 3 };
   return (
     <div
       style={{
-        padding: 16,
+        padding: "28px 16px 8px",
         textAlign: "center",
-        fontSize: 11,
+        fontSize: 10,
         color: "var(--ink-soft)",
         display: "flex",
         flexWrap: "wrap",
@@ -118,8 +113,8 @@ export function SiteCredits() {
       }}
     >
       <span>© 2026 Muslim Hebat</span>
-      <Link to={SITE_LINKS.kontak} style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>Kontak</Link>
-      <Link to="/unsubscribe" style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>Unsubscribe</Link>
+      <Link to={SITE_LINKS.kontak} style={link}>Kontak</Link>
+      <Link to="/unsubscribe" style={link}>Unsubscribe</Link>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React from "react";
 // HomePage — blog-first layout: hero, bacaan terbaru, newsletter.
 
-import { BookOpen, Moon, Sparkles, Star, Sun } from "lucide-react";
+import { BookOpen, Sparkles } from "lucide-react";
 
 import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
@@ -24,18 +24,21 @@ export function HomePage({ onNav, onOpenCerita }) {
 }
 
 /* ─── HERO ─────────────────────────────────────────────────────────── */
-function Hero({ onNav, home }) {
-  const hero = home?.hero || {};
-  const compact = useMediaQuery("(max-width: 760px)");
+/* Copy hero di-hardcode: nilai lama di DB masih ngomongin produk/jadwal ngaji,
+   sedangkan site sekarang blog-only. Hanya pill yang masih boleh di-override DB. */
+const HERO_COPY = {
+  line1: "Belajar Islam",
+  line2Lead: "yang",
+  line2Mark: "santai.",
+  pill: "bacaan baru tiap minggu",
+  sub: "Tulisan ringan tentang Islam, self-growth, dan ibadah harian — dibahas santai, tanpa menggurui.",
+  ctaPrimary: "Mulai baca",
+  ctaSecondary: "Langganan buletin",
+};
 
-  const headline = hero.headline || [];
-  const line1 = headline[0] || "Belajar Islam";
-  const line2Lead = headline[1] || "yang";
-  const line2Mark = headline[2] || "santai.";
-  const pill = hero.pill || "bacaan baru tiap minggu";
-  const sub = hero.sub || "Tulisan ringan tentang Islam, self-growth, dan ibadah harian — dibahas santai, tanpa menggurui.";
-  const ctaPrimary = hero.ctaPrimary || "Mulai baca";
-  const ctaSecondary = hero.ctaSecondary || "Langganan buletin";
+function Hero({ onNav, home }) {
+  const compact = useMediaQuery("(max-width: 760px)");
+  const pill = home?.hero?.pill || HERO_COPY.pill;
 
   return (
     <section
@@ -43,8 +46,8 @@ function Hero({ onNav, home }) {
       style={{
         position: "relative",
         overflow: "hidden",
-        paddingTop: "clamp(40px, 7vw, 64px)",
-        paddingBottom: "clamp(32px, 6vw, 56px)",
+        paddingTop: "clamp(32px, 5vw, 48px)",
+        paddingBottom: "clamp(24px, 4vw, 40px)",
       }}
     >
       <HeroDecor compact={compact}/>
@@ -52,56 +55,73 @@ function Hero({ onNav, home }) {
       <div style={{
         position: "relative",
         zIndex: 1,
-        maxWidth: 760,
+        maxWidth: 600,
         margin: "0 auto",
         textAlign: "center",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: "clamp(14px, 2.4vw, 22px)",
+        gap: "clamp(10px, 1.8vw, 16px)",
       }}>
-        <span className="pill" style={{ background: "var(--sage)", borderColor: "transparent", color: "var(--ink)" }}>
-          <Sparkles size={13} aria-hidden="true"/> {pill}
+        <BookOpen
+          size={22}
+          strokeWidth={1.6}
+          color="var(--sage-deep)"
+          aria-hidden="true"
+          className="illus-only"
+          style={{ marginBottom: -2 }}
+        />
+
+        <span
+          className="pill"
+          style={{ background: "var(--sage)", borderColor: "transparent", color: "var(--ink)", fontSize: 12 }}
+        >
+          <Sparkles size={12} strokeWidth={1.8} aria-hidden="true"/>
+          {pill}
         </span>
 
         <h1 style={{
           margin: 0,
           fontFamily: "var(--font-display)",
           fontWeight: 700,
-          fontSize: "clamp(42px, 8.5vw, 82px)",
-          lineHeight: 1.03,
+          fontSize: "clamp(34px, 6vw, 56px)",
+          lineHeight: 1.05,
           letterSpacing: "-0.03em",
         }}>
-          {line1}
+          {HERO_COPY.line1}
           <br/>
-          {line2Lead}{" "}
+          {HERO_COPY.line2Lead}{" "}
           <span style={{
             display: "inline-block",
             background: "var(--coral)",
-            borderRadius: "16px 22px 18px 24px",
-            padding: "0 0.28em 0.08em",
-            transform: "rotate(-1.5deg)",
+            borderRadius: 10,
+            padding: "0 0.24em 0.06em",
+            transform: "rotate(-1deg)",
           }}>
-            {line2Mark}
+            {HERO_COPY.line2Mark}
           </span>
         </h1>
 
         <p style={{
           margin: 0,
-          maxWidth: 540,
+          maxWidth: 420,
           color: "var(--ink-soft)",
-          fontSize: "clamp(15px, 2.2vw, 18px)",
-          lineHeight: 1.6,
+          fontSize: "clamp(15px, 1.6vw, 16px)",
+          lineHeight: 1.55,
         }}>
-          {sub}
+          {HERO_COPY.sub}
         </p>
 
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 4 }}>
-          <button type="button" className="btn btn--primary" onClick={() => onNav && onNav("bacaan")}>
-            {ctaPrimary} <Icon.Arrow size={16}/>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginTop: 4, width: "100%" }}>
+          <button
+            type="button"
+            className="btn btn--primary hero-cta"
+            onClick={() => onNav && onNav("bacaan")}
+          >
+            {HERO_COPY.ctaPrimary} <Icon.Arrow size={18}/>
           </button>
-          <a className="btn" href="#newsletter">
-            {ctaSecondary}
+          <a className="hero-cta-link" href="#newsletter">
+            {HERO_COPY.ctaSecondary}
           </a>
         </div>
       </div>
@@ -109,57 +129,11 @@ function Hero({ onNav, home }) {
   );
 }
 
-/* Dekorasi hero — murni ilustratif, disembunyikan dari screen reader. */
+/* Dekorasi hero — satu blob pastel, murni ilustratif & disembunyikan dari screen reader. */
 function HeroDecor({ compact }) {
-  const base = { position: "absolute", pointerEvents: "none" };
   return (
     <div aria-hidden="true" className="illus-only" style={{ position: "absolute", inset: 0, zIndex: 0, overflow: "hidden" }}>
-      <Blob color="var(--peach)" size={compact ? 180 : 260} top={-60} right={compact ? -60 : 40} opacity={0.5}/>
-      <Blob color="var(--sage)" size={compact ? 160 : 230} top={100} left={compact ? -80 : -30} opacity={0.35}/>
-
-      {!compact && (
-        <>
-          <BookOpen
-            size={44}
-            strokeWidth={1.6}
-            color="var(--sage-deep)"
-            style={{ ...base, top: 34, left: "3%", opacity: 0.55, transform: "rotate(-12deg)" }}
-          />
-          <Sun
-            size={58}
-            strokeWidth={1.5}
-            color="var(--peach-deep)"
-            style={{ ...base, top: 12, right: "4%", opacity: 0.6, transform: "rotate(8deg)" }}
-          />
-          <Moon
-            size={34}
-            strokeWidth={1.6}
-            color="var(--lilac-deep)"
-            style={{ ...base, bottom: "16%", left: "7%", opacity: 0.5, transform: "rotate(-8deg)" }}
-          />
-          <Star
-            size={26}
-            strokeWidth={1.6}
-            color="var(--coral-deep)"
-            style={{ ...base, bottom: "22%", right: "8%", opacity: 0.5, transform: "rotate(10deg)" }}
-          />
-          <Sparkles
-            size={22}
-            strokeWidth={1.6}
-            color="var(--peach-deep)"
-            style={{ ...base, top: "42%", left: "1%", opacity: 0.45, transform: "rotate(6deg)" }}
-          />
-        </>
-      )}
-
-      {compact && (
-        <Star
-          size={20}
-          strokeWidth={1.6}
-          color="var(--coral-deep)"
-          style={{ ...base, top: 16, right: 10, opacity: 0.45, transform: "rotate(10deg)" }}
-        />
-      )}
+      <Blob color="var(--peach)" size={compact ? 160 : 220} top={-70} right={compact ? -60 : 10} opacity={0.3}/>
     </div>
   );
 }

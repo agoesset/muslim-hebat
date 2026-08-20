@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, UseGuards, UseInterceptors } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Query, UseGuards, UseInterceptors } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { randomBytes } from "crypto";
 import { AdminAuthGuard } from "../auth/auth.guard";
@@ -8,6 +8,22 @@ import { SubscriberDto, UnsubscribeDto } from "./subscribers.dto";
 
 function newUnsubToken() {
   return randomBytes(24).toString("hex");
+}
+
+const MAX_TAKE = 50;
+function parseNumber(value?: string) {
+  if (value === undefined || value === "") return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.floor(n) : undefined;
+}
+function parseTake(value?: string) {
+  const n = parseNumber(value);
+  if (n === undefined) return MAX_TAKE;
+  return Math.min(Math.max(n, 0), MAX_TAKE);
+}
+function parseSkip(value?: string) {
+  const n = parseNumber(value);
+  return n === undefined || n < 0 ? 0 : n;
 }
 
 @Controller()
@@ -43,8 +59,19 @@ export class SubscribersController {
 
   @Get("admin/subscribers")
   @UseGuards(AdminAuthGuard)
-  list() {
-    return this.prisma.subscriber.findMany({ orderBy: { createdAt: "desc" } });
+  list(
+    @Query("limit") limit?: string,
+    @Query("offset") offset?: string,
+    @Query("q") q?: string
+  ) {
+    return this.prisma.subscriber.findMany({
+      where: q
+        ? { OR: [{ email: { contains: q, mode: "insensitive" } }, { name: { contains: q, mode: "insensitive" } }] }
+        : undefined,
+      orderBy: { createdAt: "desc" },
+      take: parseTake(limit),
+      skip: parseSkip(offset)
+    });
   }
 
   @Post("admin/subscribers")

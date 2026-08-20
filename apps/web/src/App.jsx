@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Nav, Footer } from "./shell.jsx";
+import { Nav, SiteCredits } from "./shell.jsx";
 import { HomePage } from "./HomePage.jsx";
 import { CeritaPage } from "./CeritaPage.jsx";
 import { CeritaDetailPage } from "./CeritaDetailPage.jsx";
@@ -76,14 +76,14 @@ export default function App() {
               </ErrorBoundary>
             }
           />
-          <Route path="*" element={<PublicApp settings={settings} />} />
+          <Route path="*" element={<PublicApp />} />
         </Routes>
       </CtaProvider>
     </BrowserRouter>
   );
 }
 
-function PublicApp({ settings }) {
+function PublicApp() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -99,11 +99,10 @@ function PublicApp({ settings }) {
   return (
     <div>
       <Analytics />
-      <Nav page={page} onSearch={() => setSearchOpen(true)} />
       <GlobalSearch open={searchOpen} onClose={setSearchOpen} onNavigate={navigate} />
       <ErrorBoundary>
         <Routes>
-          <Route path="/" element={<><Seo title="Muslim Hebat — Blog" description="Bacaan ringan tentang Islam, self-growth, dan ibadah harian." /><HomePage onNav={goNav} onOpenCerita={openCerita} /></>} />
+          <Route path="/" element={<><Seo title="Muslim Hebat — Blog" description="Bacaan ringan tentang Islam, self-growth, dan ibadah harian." /><HomePage onNav={goNav} onOpenCerita={openCerita} onSearch={() => setSearchOpen(true)} /></>} />
           <Route path="/bacaan" element={<><Seo title="Bacaan | Muslim Hebat" description="Kumpulan tulisan ringan tentang Islam, self-growth, dan ibadah harian." /><CeritaPage onNav={goNav} onOpenCerita={openCerita} /></>} />
           <Route path="/bacaan/:slug" element={<CeritaDetailRoute onNav={goNav} onOpenCerita={openCerita} />} />
           <Route path="/kontak" element={<ContactPage onNav={goNav} />} />
@@ -111,7 +110,8 @@ function PublicApp({ settings }) {
           <Route path="*" element={<NotFoundPage onNav={goNav} />} />
         </Routes>
       </ErrorBoundary>
-      <Footer settings={settings} />
+      <SiteCredits />
+      <Nav page={page} />
     </div>
   );
 }

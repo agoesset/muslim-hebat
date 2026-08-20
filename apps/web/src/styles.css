@@ -195,11 +195,13 @@ h1, h2, h3, h4 {
 
 /* nav links */
 .nav-link {
-  padding: 8px 14px; border-radius: 999px;
+  padding: 12px 14px; border-radius: 999px;
   font-weight: 500; font-size: 14px;
   color: var(--ink); opacity: 0.7;
   transition: opacity 0.15s, background 0.15s;
   white-space: nowrap;
+  display: inline-flex; align-items: center;
+  min-height: 44px; /* tap target WCAG */
 }
 .nav-link:hover { opacity: 1; background: rgba(31,58,45,0.06); }
 .nav-link[aria-current="page"] { opacity: 1; background: var(--ink); color: var(--bg); }
@@ -218,6 +220,12 @@ h1, h2, h3, h4 {
 
 @keyframes drift { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 .drift { animation: drift 5s ease-in-out infinite; }
+
+/* a11y: hormati preferensi pengguna */
+@media (prefers-reduced-motion: reduce) {
+  .wiggle, .drift { animation: none !important; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+}
 
 /* ─── Responsive layer ───────────────────────────────────────────────── */
 html { overflow-x: hidden; }

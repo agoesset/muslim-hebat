@@ -175,7 +175,7 @@ function FooterCol({ title, items }) {
                 aria-label={isPlaceholder ? `${label} (akan segera hadir)` : undefined}
                 target={href.startsWith("http") ? "_blank" : undefined}
                 rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                style={{ display: "flex", alignItems: "center", gap: 6 }}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 0", minHeight: 32 }}
               >
                 {IconComponent && <IconComponent size={14} />}
                 {label}

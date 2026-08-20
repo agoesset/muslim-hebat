@@ -33,13 +33,15 @@ export function KajianPage({ onNav }) {
   }, [apiEvents]);
 
   const filters = React.useMemo(() => {
+    const base = ["Semua", "Online", "Offline", "Minggu ini"];
     const tags = new Set();
     events.forEach(e => {
       if (e.tags) {
         e.tags.forEach(t => tags.add(t.charAt(0).toUpperCase() + t.slice(1)));
       }
     });
-    return ["Semua", "Online", "Offline", "Minggu ini", ...Array.from(tags)];
+    // hindari duplikat dengan filter bawaan (mis. tag "online" vs "Online")
+    return [...base, ...Array.from(tags).filter(t => !base.includes(t))];
   }, [events]);
 
   const filtered = React.useMemo(() => {
@@ -298,8 +300,8 @@ function MiniCalendar({ events }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
         <span style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 700 }}>{monthNames[currentMonth]} {currentYear}</span>
         <div style={{ display: "flex", gap: 4 }}>
-          <button className="btn btn--sm" style={{ padding: "4px 8px", fontSize: 11 }} onClick={handlePrev}>‹</button>
-          <button className="btn btn--sm" style={{ padding: "4px 8px", fontSize: 11 }} onClick={handleNext}>›</button>
+          <button className="btn btn--sm" aria-label="Bulan sebelumnya" style={{ padding: "4px 10px", fontSize: 13, minWidth: 32, minHeight: 32, display: "inline-flex", alignItems: "center", justifyContent: "center" }} onClick={handlePrev}>‹</button>
+          <button className="btn btn--sm" aria-label="Bulan berikutnya" style={{ padding: "4px 10px", fontSize: 13, minWidth: 32, minHeight: 32, display: "inline-flex", alignItems: "center", justifyContent: "center" }} onClick={handleNext}>›</button>
         </div>
       </div>
       <div className="mini-calendar-grid" style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 3, fontSize: 11 }}>

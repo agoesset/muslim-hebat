@@ -72,18 +72,22 @@ export function ContactPage({ onNav }) {
           ) : (
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <FormField label="Nama" error={errors.name}>
+                <FormField label="Nama" error={errors.name} id="contact-name">
                   <input
+                    id="contact-name"
                     type="text"
+                    autoComplete="name"
                     value={form.name}
                     onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
                     placeholder="Nama kamu"
                     style={inputStyle(errors.name)}
                   />
                 </FormField>
-                <FormField label="Email" error={errors.email}>
+                <FormField label="Email" error={errors.email} id="contact-email">
                   <input
+                    id="contact-email"
                     type="email"
+                    autoComplete="email"
                     value={form.email}
                     onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))}
                     placeholder="email@kamu.com"
@@ -91,8 +95,9 @@ export function ContactPage({ onNav }) {
                   />
                 </FormField>
               </div>
-              <FormField label="Subjek" error={errors.subject}>
+              <FormField label="Subjek" error={errors.subject} id="contact-subject">
                 <input
+                  id="contact-subject"
                   type="text"
                   value={form.subject}
                   onChange={(e) => setForm(f => ({ ...f, subject: e.target.value }))}
@@ -100,8 +105,9 @@ export function ContactPage({ onNav }) {
                   style={inputStyle(errors.subject)}
                 />
               </FormField>
-              <FormField label="Pesan" error={errors.message}>
+              <FormField label="Pesan" error={errors.message} id="contact-message">
                 <textarea
+                  id="contact-message"
                   value={form.message}
                   onChange={(e) => setForm(f => ({ ...f, message: e.target.value }))}
                   placeholder="Tulis pesan kamu di sini..."
@@ -126,12 +132,12 @@ export function ContactPage({ onNav }) {
   );
 }
 
-function FormField({ label, error, children }) {
+function FormField({ label, error, id, children }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <label style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-soft)" }}>{label}</label>
+      <label htmlFor={id} style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-soft)" }}>{label}</label>
       {children}
-      {error && <span style={{ fontSize: 12, color: "var(--coral-deep)" }}>{error}</span>}
+      {error && <span role="alert" style={{ fontSize: 12, color: "var(--coral-deep)" }}>{error}</span>}
     </div>
   );
 }

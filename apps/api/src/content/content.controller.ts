@@ -291,8 +291,17 @@ export class ContentController {
 
   @Get("admin/articles")
   @UseGuards(AdminAuthGuard)
-  adminArticles() {
-    return this.prisma.article.findMany({ orderBy: orderByUpdated });
+  adminArticles(
+    @Query("limit") limit?: string,
+    @Query("offset") offset?: string,
+    @Query("q") q?: string
+  ) {
+    return this.prisma.article.findMany({
+      where: q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { slug: { contains: q, mode: "insensitive" } }] } : undefined,
+      orderBy: orderByUpdated,
+      take: parseTake(limit),
+      skip: parseSkip(offset)
+    });
   }
 
   @Get("admin/articles/:id")
@@ -325,8 +334,17 @@ export class ContentController {
 
   @Get("admin/products")
   @UseGuards(AdminAuthGuard)
-  adminProducts() {
-    return this.prisma.product.findMany({ orderBy: orderByUpdated });
+  adminProducts(
+    @Query("limit") limit?: string,
+    @Query("offset") offset?: string,
+    @Query("q") q?: string
+  ) {
+    return this.prisma.product.findMany({
+      where: q ? { OR: [{ name: { contains: q, mode: "insensitive" } }, { slug: { contains: q, mode: "insensitive" } }] } : undefined,
+      orderBy: orderByUpdated,
+      take: parseTake(limit),
+      skip: parseSkip(offset)
+    });
   }
 
   @Get("admin/products/:id")
@@ -359,8 +377,17 @@ export class ContentController {
 
   @Get("admin/kajian")
   @UseGuards(AdminAuthGuard)
-  adminKajian() {
-    return this.prisma.kajianEvent.findMany({ orderBy: orderByUpdated });
+  adminKajian(
+    @Query("limit") limit?: string,
+    @Query("offset") offset?: string,
+    @Query("q") q?: string
+  ) {
+    return this.prisma.kajianEvent.findMany({
+      where: q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { slug: { contains: q, mode: "insensitive" } }, { speaker: { contains: q, mode: "insensitive" } }] } : undefined,
+      orderBy: orderByUpdated,
+      take: parseTake(limit),
+      skip: parseSkip(offset)
+    });
   }
 
   @Get("admin/kajian/:id")
@@ -393,8 +420,17 @@ export class ContentController {
 
   @Get("admin/classes")
   @UseGuards(AdminAuthGuard)
-  adminClasses() {
-    return this.prisma.course.findMany({ orderBy: orderByUpdated });
+  adminClasses(
+    @Query("limit") limit?: string,
+    @Query("offset") offset?: string,
+    @Query("q") q?: string
+  ) {
+    return this.prisma.course.findMany({
+      where: q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { slug: { contains: q, mode: "insensitive" } }, { instructor: { contains: q, mode: "insensitive" } }] } : undefined,
+      orderBy: orderByUpdated,
+      take: parseTake(limit),
+      skip: parseSkip(offset)
+    });
   }
 
   @Get("admin/classes/:id")

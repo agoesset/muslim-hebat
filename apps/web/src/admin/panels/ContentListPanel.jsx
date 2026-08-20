@@ -17,7 +17,15 @@ export function ContentListPanel() {
 
   const fetchItems = React.useCallback(() => {
     setLoading(true);
-    api(`/admin/${resourceType}`)
+    // Server caps at MAX_TAKE=50 per page; fetch all pages for client-side
+    // status filter + search (counts stay accurate).
+    const PAGE = 50;
+    const fetchPage = (offset) =>
+      api(`/admin/${resourceType}?limit=${PAGE}&offset=${offset}`).then((rows) => {
+        if (rows.length < PAGE) return rows;
+        return fetchPage(offset + PAGE).then((next) => rows.concat(next));
+      });
+    fetchPage(0)
       .then((data) => {
         setItems(data);
       })
@@ -32,8 +40,8 @@ export function ContentListPanel() {
   }, [fetchItems]);
 
   const refreshCounts = React.useCallback(() => {
-    api(`/admin/${resourceType}`).then((d) => {
-      setCounts((c) => ({ ...c, [resourceType]: d.length }));
+    api(`/admin/${resourceType}?limit=50&offset=0`).then((d) => {
+      setCounts((c) => ({ ...c, [resourceType]: Math.max(d.length, c?.[resourceType] || 0) }));
     });
   }, [resourceType, setCounts]);
 
@@ -69,8 +77,8 @@ export function ContentListPanel() {
 
   const formatPrice = (cents) => {
     if (cents === undefined || cents === null) return "-";
-    const rp = cents / 100;
-    return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(rp);
+    // priceCents stores whole rupiah (not cents) — see seed + public UI
+    return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(cents);
   };
 
   const formatDate = (dateStr) => {

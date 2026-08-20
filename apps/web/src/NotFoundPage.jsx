@@ -6,27 +6,23 @@ export function NotFoundPage({ onNav }) {
     <div data-screen-label="404">
       <Seo title="Halaman Tidak Ditemukan" description="Maaf, halaman yang kamu cari tidak ditemukan." noindex />
 
-      <section className="shell" style={{ paddingTop: 48, paddingBottom: 64, textAlign: "center" }}>
-        <div style={{ fontSize: "clamp(80px, 12vw, 160px)", fontWeight: 700, lineHeight: 1, color: "var(--sage-deep)", opacity: 0.3, fontFamily: "var(--font-display)" }}>
-          404
-        </div>
-        <h1 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 700, marginTop: 8, lineHeight: 1.1 }}>
+      <section className="page" style={{ paddingTop: 64, paddingBottom: 48 }}>
+        <div style={{ fontSize: 12, letterSpacing: "0.08em", color: "var(--ink-soft)" }}>404</div>
+        <h1 style={{ fontSize: "clamp(28px, 5vw, 38px)", marginTop: 10, letterSpacing: "-0.03em" }}>
           Halaman tidak ditemukan
         </h1>
-        <p style={{ color: "var(--ink-soft)", maxWidth: 400, margin: "16px auto 0", fontSize: 16 }}>
-          Sepertinya halaman yang kamu cari sudah pindah atau memang tidak pernah ada. Yuk balik ke beranda!
+        <p style={{ color: "var(--ink-soft)", maxWidth: "46ch", margin: "12px 0 0", fontSize: 15 }}>
+          Sepertinya halaman yang kamu cari sudah pindah atau memang tidak pernah ada.
         </p>
 
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 28, flexWrap: "wrap" }}>
-          <button className="btn btn--primary" onClick={() => onNav("home")}>
-            ← Kembali ke beranda
+        <div style={{ display: "flex", gap: 20, marginTop: 20, flexWrap: "wrap" }}>
+          <button type="button" className="link-text" onClick={() => onNav("home")}>
+            Ke beranda →
           </button>
-          <button className="btn" onClick={() => onNav("bacaan")}>
+          <button type="button" className="link-text link-text--muted" onClick={() => onNav("bacaan")}>
             Jelajahi bacaan
           </button>
         </div>
-
-        <div style={{ marginTop: 48, fontSize: 80 }}>🌙</div>
       </section>
     </div>
   );

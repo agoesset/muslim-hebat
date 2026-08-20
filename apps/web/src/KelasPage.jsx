@@ -6,6 +6,8 @@ import { Icon } from "./icons.jsx";
 import { Blob } from "./shell.jsx";
 import { SectionHeader } from "./SectionHeader.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
+import { SkeletonGrid } from "./Skeleton.jsx";
+import { EmptyState } from "./EmptyState.jsx";
 import { usePublicData } from "./hooks/usePublicData.js";
 import { useCta } from "./context/cta-context.jsx";
 
@@ -110,6 +112,16 @@ export function KelasPage({ onNav }) {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+          {loading && <SkeletonGrid count={6} />}
+          {!loading && list.length === 0 && (
+            <EmptyState
+              icon="🎓"
+              title="Belum ada kelas yang cocok"
+              message="Coba level lain — atau mulai dari kelas pemula."
+              actionLabel="Lihat semua level"
+              onAction={() => { setLevel("Semua level"); setCat("Semua"); }}
+            />
+          )}
           {list.map(k => <KelasCard key={k.id} k={k} onOpen={() => navigate(`/kelas/${k.slug}`)}/>) }
         </div>
       </section>

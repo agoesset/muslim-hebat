@@ -18,6 +18,8 @@ import { usePublicData } from "./hooks/usePublicData.js";
 import { CtaProvider } from "./context/cta-context.jsx";
 import { ToastContainer } from "./Toast.jsx";
 import { GlobalSearch } from "./GlobalSearch.jsx";
+import { SkeletonGrid } from "./Skeleton.jsx";
+import { EmptyState } from "./EmptyState.jsx";
 import { ContactPage } from "./ContactPage.jsx";
 import { UnsubscribePage } from "./UnsubscribePage.jsx";
 import { NotFoundPage } from "./NotFoundPage.jsx";
@@ -141,8 +143,8 @@ function CeritaDetailRoute({ onNav, onOpenCerita }) {
     return null;
   }, [apiArticle]);
 
-  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><p>Memuat bacaan…</p></div>;
-  if (error || !cerita) return <div className="shell" style={{ padding: "60px 0" }}><p>Bacaan tidak ditemukan.</p></div>;
+  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><SkeletonGrid count={1} columns={1} cardHeight={280} /></div>;
+  if (error || !cerita) return <div className="shell" style={{ padding: "60px 0" }}><EmptyState icon="📖" title="Bacaan tidak ditemukan" message="Mungkin sudah dipindahkan — coba cari lewat pencarian." /></div>;
 
   return (
     <>
@@ -210,24 +212,24 @@ function EventJsonLd(event) {
 function ProdukDetailRoute({ onNav }) {
   const { slug } = useParams();
   const { data: product, loading, error } = usePublicData(`/public/products/${slug}`);
-  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><p>Memuat produk…</p></div>;
-  if (error || !product) return <div className="shell" style={{ padding: "60px 0" }}><p>Produk tidak ditemukan.</p></div>;
+  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><SkeletonGrid count={1} columns={1} cardHeight={280} /></div>;
+  if (error || !product) return <div className="shell" style={{ padding: "60px 0" }}><EmptyState icon="📦" title="Produk tidak ditemukan" message="Mungkin sudah tidak dijual — coba lihat produk lain." /></div>;
   return <><Seo title={`${product.name} | Muslim Hebat`} description={product.excerpt} image={product.image} jsonLd={ProductJsonLd(product)} /><ProdukDetailPage product={product} onNav={onNav} /></>;
 }
 
 function KelasDetailRoute({ onNav }) {
   const { slug } = useParams();
   const { data: course, loading, error } = usePublicData(`/public/classes/${slug}`);
-  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><p>Memuat kelas…</p></div>;
-  if (error || !course) return <div className="shell" style={{ padding: "60px 0" }}><p>Kelas tidak ditemukan.</p></div>;
+  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><SkeletonGrid count={1} columns={1} cardHeight={280} /></div>;
+  if (error || !course) return <div className="shell" style={{ padding: "60px 0" }}><EmptyState icon="🎓" title="Kelas tidak ditemukan" message="Mungkin pendaftarannya sudah ditutup — coba kelas lain." /></div>;
   return <><Seo title={`${course.title} | Muslim Hebat`} description={course.excerpt} image={course.image} jsonLd={CourseJsonLd(course)} /><KelasDetailPage course={course} onNav={onNav} /></>;
 }
 
 function KajianDetailRoute({ onNav }) {
   const { slug } = useParams();
   const { data: event, loading, error } = usePublicData(`/public/kajian/${slug}`);
-  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><p>Memuat kajian…</p></div>;
-  if (error || !event) return <div className="shell" style={{ padding: "60px 0" }}><p>Kajian tidak ditemukan.</p></div>;
+  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><SkeletonGrid count={1} columns={1} cardHeight={280} /></div>;
+  if (error || !event) return <div className="shell" style={{ padding: "60px 0" }}><EmptyState icon="🕌" title="Kajian tidak ditemukan" message="Mungkin jadwalnya sudah lewat — coba jadwal kajian lain." /></div>;
   return <><Seo title={`${event.title} | Muslim Hebat`} description={event.excerpt} image={event.coverImage} jsonLd={EventJsonLd(event)} /><KajianDetailPage event={event} onNav={onNav} /></>;
 }
 

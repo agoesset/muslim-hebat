@@ -103,7 +103,7 @@ function KajianHero({ events }) {
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
 
-  const activeDays = React.useMemo(() => {
+  const activeDays = (() => {
     if (!events) return [];
     return events
       .filter(e => {
@@ -112,7 +112,7 @@ function KajianHero({ events }) {
         return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       })
       .map(e => new Date(e.startsAt).getDate());
-  }, [events, currentMonth, currentYear]);
+  })();
 
   const cells = [];
   for (let i = 0; i < firstDayIndex; i++) {
@@ -245,7 +245,7 @@ function MiniCalendar({ events }) {
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
 
-  const activeDays = React.useMemo(() => {
+  const activeDays = (() => {
     if (!events) return [];
     return events
       .filter(e => {
@@ -254,7 +254,7 @@ function MiniCalendar({ events }) {
         return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       })
       .map(e => new Date(e.startsAt).getDate());
-  }, [events, currentMonth, currentYear]);
+  })();
 
   const handlePrev = () => {
     if (currentMonth === 0) {

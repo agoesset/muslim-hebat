@@ -152,7 +152,7 @@ export class HomeController {
     }
 
     try {
-      const response = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Jakarta&country=Indonesia&method=2", {
+      const response = await globalThis.fetch("https://api.aladhan.com/v1/timingsByCity?city=Jakarta&country=Indonesia&method=2", {
         signal: AbortSignal.timeout(3000) // 3 seconds timeout
       });
 
@@ -212,9 +212,9 @@ export class HomeController {
       }
     }
 
-    let nextName = "Subuh";
-    let nextTime = timings["Fajr"] || "04:38";
-    let diffLabel = "";
+    let nextName: string;
+    let nextTime: string;
+    let diffLabel: string;
 
     if (nextIndex !== -1) {
       nextName = prayerNames[nextIndex];

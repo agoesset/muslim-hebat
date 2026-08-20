@@ -101,7 +101,9 @@ export function SettingsPanel() {
       savedThemeRef.current = theme;
       try {
         localStorage.setItem("muslim-hebat-theme", JSON.stringify(themeVal));
-      } catch (err) {}
+      } catch (err) {
+        /* non-fatal: storage disabled */
+      }
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {

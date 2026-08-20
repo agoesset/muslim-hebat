@@ -61,7 +61,9 @@ export default function App() {
         applyTheme(themeVal);
         try {
           localStorage.setItem("muslim-hebat-theme", JSON.stringify(themeVal));
-        } catch (e) {}
+        } catch (e) {
+          /* localStorage unavailable (private mode) — non-fatal */
+        }
       }
     }
   }, [settings]);

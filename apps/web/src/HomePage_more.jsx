@@ -66,15 +66,8 @@ function ArticleCard({ article, featured = false, onOpen }) {
   return (
     <article
       className={`blog-card${featured ? " blog-card--featured" : ""}`}
-      role="button"
-      tabIndex={0}
       onClick={() => onOpen && onOpen(article)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onOpen && onOpen(article);
-        }
-      }}
+      style={{ cursor: "pointer" }}
     >
       <ArticleMedia article={article} featured={featured}/>
 

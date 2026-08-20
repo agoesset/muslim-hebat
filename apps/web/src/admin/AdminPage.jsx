@@ -41,7 +41,9 @@ export function AdminPage() {
             applyTheme(themeSetting.value);
             try {
               localStorage.setItem("muslim-hebat-theme", JSON.stringify(themeSetting.value));
-            } catch (e) {}
+            } catch (e) {
+              /* non-fatal: storage disabled */
+            }
           }
         }
       })
@@ -62,7 +64,9 @@ export function AdminPage() {
   return (
     <Routes>
       <Route element={<AdminLayout user={user} onLogout={async () => {
-        try { await api("/auth/logout", { method: "POST" }); } catch {}
+        try { await api("/auth/logout", { method: "POST" }); } catch {
+          /* best-effort logout: clear local state regardless */
+        }
         setUser(null);
       }} />}>
         <Route index element={<DashboardPanel />} />

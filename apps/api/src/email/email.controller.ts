@@ -38,7 +38,7 @@ export class EmailController {
       orderBy: { createdAt: "desc" },
     });
 
-    const recipients = await Promise.all(subscribers.map(async (subscriber) => {
+    const recipients = await Promise.all(subscribers.map(async (subscriber: { id: string; email: string; unsubToken: string | null }) => {
       if (subscriber.unsubToken) {
         return { email: subscriber.email, unsubToken: subscriber.unsubToken };
       }

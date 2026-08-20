@@ -20,6 +20,7 @@ export default defineConfig({
     cssCodeSplit: true,
   },
   server: {
+    allowedHosts: ["dev.muslimhebat.103.42.245.213.sslip.io", "dev.lowcode.my.id"],
     proxy: {
       "/api": "http://127.0.0.1:3000",
       "/health": "http://127.0.0.1:3000",

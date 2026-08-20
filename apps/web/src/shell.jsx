@@ -63,13 +63,25 @@ export function Nav({ page, onSearch }) {
   );
 }
 
+export function LogoMark({ size = 32, style = {} }) {
+  // crescent + star — konsisten dengan favicon/PWA icon set
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label="Logo Muslim Hebat" style={{ display: "block", flexShrink: 0, ...style }}>
+      <rect width="100" height="100" rx="22" fill="var(--ink)" />
+      <path d="M55 25 A18 18 0 1 1 42 65 A22 22 0 1 0 55 25Z" fill="var(--paper)" transform="translate(-7,2)" />
+      <path d="M74 16 L77.5 25 L86 28 L77.5 31 L74 40 L70.5 31 L62 28 L70.5 25 Z" fill="var(--coral)" />
+    </svg>
+  );
+}
+
 export function Logo() {
   return (
-    <img
-      src="/logo.avif"
-      alt="Logo Muslim Hebat"
-      style={{ height: "44px", width: "auto", borderRadius: "10px", objectFit: "contain", display: "block" }}
-    />
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+      <LogoMark size={36} />
+      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 19, color: "var(--ink)", letterSpacing: "-0.01em" }}>
+        Muslim&nbsp;Hebat
+      </span>
+    </span>
   );
 }
 
@@ -141,11 +153,7 @@ export function Footer({ settings }) {
       <div className="shell" style={{ paddingTop: 56, paddingBottom: 32 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr", gap: 32, alignItems: "start" }}>
           <div>
-            <img
-              src="/logo.avif"
-              alt="Logo Muslim Hebat"
-              style={{ height: "64px", width: "auto", borderRadius: "12px", objectFit: "contain" }}
-            />
+            <LogoMark size={56} />
           </div>
           <FooterCol title="Jelajahi" items={explore} />
           <FooterCol title="Bantuan" items={help} />

@@ -87,6 +87,11 @@ h1, h2, h3, h4 {
 /* ─── Page shell ──────────────────────────────────────────────────────── */
 .shell { max-width: 90%; margin: 0 auto; padding: 0 28px; }
 
+/* Container blog — lebar tetap 680px, sinkron dengan BLOG_CONTAINER
+   (HomePage_more.jsx) yang dipakai hero/artikel/newsletter. Header & footer
+   memakai ini supaya sejajar. Admin tetap pakai .shell (90%, full-width). */
+.blog-container { max-width: 720px; margin: 0 auto; padding: 0 28px; }
+
 /* ─── Bento card primitives ──────────────────────────────────────────── */
 .card {
   background: var(--paper);
@@ -278,7 +283,7 @@ img, svg, video, canvas { max-width: 100%; }
 input, textarea, select { min-width: 0; }
 
 @media (max-width: 1100px) {
-  .shell { padding-inline: 22px; }
+  .shell, .blog-container { padding-inline: 22px; }
 
   [style*='grid-template-columns: repeat(6'],
   [style*='grid-template-columns: repeat(5'],
@@ -313,14 +318,14 @@ input, textarea, select { min-width: 0; }
     position: static !important;
   }
 
-  footer .shell > div[style*='grid-template-columns'] {
+  footer .blog-container > div[style*='grid-template-columns'] {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
 /* ─── Tablet breakpoint (new) ────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .shell { padding-inline: 20px; }
+  .shell, .blog-container { padding-inline: 20px; }
 
   /* 4-col → 2-col */
   [style*='grid-template-columns: repeat(4'] {
@@ -338,13 +343,14 @@ input, textarea, select { min-width: 0; }
 
   /* gutter tunggal 16px — max-width 90% dimatikan biar gak dobel inset */
   .shell { max-width: 100%; padding-inline: 16px; }
+  .blog-container { padding-inline: 16px; }
 
   .site-header {
     padding-top: 10px !important;
     padding-bottom: 10px !important;
   }
 
-  .site-header .shell.row {
+  .site-header .blog-container.row {
     align-items: center !important;
     flex-wrap: wrap;
     gap: 8px !important;
@@ -355,7 +361,7 @@ input, textarea, select { min-width: 0; }
   }
 
   /* logo mendorong tombol cari ke kanan; nav turun ke baris kedua */
-  .site-header .shell.row > a:first-child {
+  .site-header .blog-container.row > a:first-child {
     flex: 1 1 auto;
     min-width: 0;
   }
@@ -509,11 +515,11 @@ input, textarea, select { min-width: 0; }
     flex-direction: column !important;
   }
 
-  footer .shell > div[style*='grid-template-columns'] {
+  footer .blog-container > div[style*='grid-template-columns'] {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
-  footer .shell > div[style*='justify-content: space-between'] {
+  footer .blog-container > div[style*='justify-content: space-between'] {
     flex-direction: column;
     gap: 10px;
   }
@@ -537,7 +543,7 @@ input, textarea, select { min-width: 0; }
 @media (max-width: 480px) {
   :root { --pad-card: 16px; --gap-grid: 12px; }
 
-  .shell { padding-inline: 14px; }
+  .shell, .blog-container { padding-inline: 14px; }
 
   .card {
     border-radius: 18px;

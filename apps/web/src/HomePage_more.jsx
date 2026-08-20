@@ -12,7 +12,7 @@ import { formatReadTime, kajianDateParts } from "./utils";
 
 /* Lebar container blog — dipakai seragam oleh hero, artikel, dan newsletter.
    Sengaja inline (bukan ubah .shell global 90%, itu dipakai halaman admin). */
-export const BLOG_CONTAINER = 680;
+export const BLOG_CONTAINER = 720;
 
 /* ─── Articles ──────────────────────────────────────────────────────── */
 export function ArticleSection({ onNav, onOpenCerita }) {

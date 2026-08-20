@@ -33,8 +33,8 @@ export function Nav({ page, onSearch }) {
     { id: "kontak", label: "Kontak", path: "/kontak" },
   ];
   return (
-    <header className="site-header" style={{ paddingTop: 24, paddingBottom: 8, position: "sticky", top: 0, zIndex: 50, background: "var(--bg)" }}>
-      <div className="shell row" style={{ gap: 18 }}>
+    <header className="site-header blog-container" style={{ paddingTop: 24, paddingBottom: 8, position: "sticky", top: 0, zIndex: 50, background: "var(--bg)" }}>
+      <div className="blog-container row" style={{ gap: 18 }}>
         <Link to="/" style={{ background: "none", border: 0, padding: 0, display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
           <Logo />
         </Link>
@@ -141,11 +141,11 @@ export function Footer({ settings }) {
   ];
 
   return (
-    <footer style={{ background: "var(--ink)", color: "var(--bg)", marginTop: 80, position: "relative" }}>
+    <footer className="blog-container" style={{ background: "var(--ink)", color: "var(--bg)", position: "relative", borderRadius: "32px 32px 0 0" }}>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, transform: "translateY(-100%)", lineHeight: 0 }}>
         <WaveDivider color="var(--ink)" height={56}/>
       </div>
-      <div className="shell" style={{ paddingTop: 56, paddingBottom: 32 }}>
+      <div className="blog-container" style={{ paddingTop: 56, paddingBottom: 32 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr", gap: 32, alignItems: "start" }}>
           <div>
             <LogoMark size={56} />

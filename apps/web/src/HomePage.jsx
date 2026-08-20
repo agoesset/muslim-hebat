@@ -38,7 +38,7 @@ const HERO_COPY = {
 
 function Hero({ onNav, home }) {
   const compact = useMediaQuery("(max-width: 760px)");
-  const pill = home?.hero?.pill || HERO_COPY.pill;
+  const pill = HERO_COPY.pill; // blog-only: ignore stale DB copy
 
   return (
     <section

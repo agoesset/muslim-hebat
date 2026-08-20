@@ -6,12 +6,13 @@ import { Blob, SunDecor } from "./shell.jsx";
 import { NewsletterBlock } from "./HomePage_more.jsx";
 
 import { usePublicData } from "./hooks/usePublicData.js";
+import { formatReadTime, kajianDateParts } from "./utils";
 
 const KATEGORI = ["Semua", "Self-growth", "Parenting", "Tafsir santai", "Productivity", "Hubungan", "Ibadah harian"];
 
 function normalizeArticles(api) {
   if (!api) return [];
-  return api.map(a => ({ ...a, cat: a.category }));
+  return api.map(a => ({ ...a, cat: a.category, time: formatReadTime(a) }));
 }
 
 export function CeritaPage({ onNav, onOpenCerita }) {

@@ -38,3 +38,42 @@ export function stringToColor(str: string): string {
   }
   return colors[Math.abs(hash) % colors.length];
 }
+
+const MONTHS_ID = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+const DAYS_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+
+/**
+ * Normalize an article's read-time for display.
+ * DB `readingTime` is an int (minutes); legacy seed rows may only have
+ * `time` as a preformatted string ("6 mnt"). Always render "N mnt".
+ */
+export function formatReadTime(article: { readingTime?: number | null; time?: string | null }): string {
+  if (typeof article.readingTime === "number" && article.readingTime > 0) {
+    return `${article.readingTime} mnt`;
+  }
+  return article.time || "5 mnt";
+}
+
+/**
+ * Derive a kajian's display date parts (date number / month / day name)
+ * from `startsAt` when the denormalized columns are missing
+ * (e.g. content created via admin form before denorm was synced).
+ */
+export function kajianDateParts(
+  event: { startsAt?: string | Date | null; date?: number | null; month?: string | null; day?: string | null }
+): { date: number | string; month: string; day: string } {
+  if (event.date && event.month) {
+    return { date: event.date, month: event.month, day: event.day || "" };
+  }
+  if (event.startsAt) {
+    const d = new Date(event.startsAt);
+    if (!Number.isNaN(d.getTime())) {
+      return {
+        date: d.getDate(),
+        month: MONTHS_ID[d.getMonth()],
+        day: DAYS_ID[d.getDay()].replace("Minggu", "Ahad"),
+      };
+    }
+  }
+  return { date: "-", month: "", day: "" };
+}

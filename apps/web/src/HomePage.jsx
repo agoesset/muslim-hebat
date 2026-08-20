@@ -221,7 +221,7 @@ function BentoMain({ onNav, home, loading }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
               <div className="pill pill--paper" style={{ fontSize: 11 }}><Icon.Sparkle size={11}/> {dzikir.label || "Dzikir pagi"}</div>
-              <h3 style={{ fontSize: 36, marginTop: 12, lineHeight: 1 }}>{dzikir.title || "Mulai pagi"}<br/>dengan dzikir ✿</h3>
+              <h3 style={{ fontSize: 36, marginTop: 12, lineHeight: 1 }}>{dzikir.title || "Mulai pagi dengan dzikir ✿"}</h3>
             </div>
             <SunDecor size={70} color="var(--butter)" style={{ flexShrink: 0 }}/>
           </div>

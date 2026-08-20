@@ -55,6 +55,24 @@ export function formatReadTime(article: { readingTime?: number | null; time?: st
 }
 
 /**
+ * Human-readable publish date for an article card ("20 Mei 2026").
+ * Prefers `publishedAt`, falls back to `createdAt`, then to the legacy
+ * preformatted `date` string. Returns "" when nothing usable is present.
+ */
+export function formatArticleDate(
+  article: { publishedAt?: string | Date | null; createdAt?: string | Date | null; date?: string | null }
+): string {
+  const raw = article.publishedAt || article.createdAt;
+  if (raw) {
+    const d = new Date(raw);
+    if (!Number.isNaN(d.getTime())) {
+      return `${d.getDate()} ${MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
+    }
+  }
+  return article.date || "";
+}
+
+/**
  * Derive a kajian's display date parts (date number / month / day name)
  * from `startsAt` when the denormalized columns are missing
  * (e.g. content created via admin form before denorm was synced).

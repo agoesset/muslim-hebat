@@ -610,6 +610,36 @@ describe("ContentController", () => {
     });
   });
 
+  describe("publicStats", () => {
+    it("returns published counts for every public content type without side effects", async () => {
+      mockPrisma.article.count.mockResolvedValueOnce(9);
+      mockPrisma.product.count.mockResolvedValueOnce(4);
+      mockPrisma.kajianEvent.count.mockResolvedValueOnce(3);
+
+      const result = await controller.publicStats();
+
+      expect(mockPrisma.article.count).toHaveBeenCalledWith({ where: { status: "PUBLISHED" } });
+      expect(mockPrisma.product.count).toHaveBeenCalledWith({ where: { status: "PUBLISHED" } });
+      expect(mockPrisma.kajianEvent.count).toHaveBeenCalledWith({ where: { status: "PUBLISHED" } });
+      expect(result).toEqual({ articles: 9, products: 4, kajian: 3 });
+      expect(mockPrisma.article.update).not.toHaveBeenCalled();
+      expect(mockPrisma.product.update).not.toHaveBeenCalled();
+      expect(mockPrisma.kajianEvent.update).not.toHaveBeenCalled();
+    });
+
+    it("returns zero for every content type when no published content exists", async () => {
+      mockPrisma.article.count.mockResolvedValueOnce(0);
+      mockPrisma.product.count.mockResolvedValueOnce(0);
+      mockPrisma.kajianEvent.count.mockResolvedValueOnce(0);
+
+      await expect(controller.publicStats()).resolves.toEqual({
+        articles: 0,
+        products: 0,
+        kajian: 0
+      });
+    });
+  });
+
   describe("adminStats", () => {
     it("returns aggregate counts", async () => {
       const result = await controller.adminStats();

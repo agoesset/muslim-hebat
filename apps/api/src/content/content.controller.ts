@@ -63,6 +63,19 @@ function buildSearchWhere(search?: string, fields: string[] = ["title", "excerpt
 export class ContentController {
   constructor(private readonly prisma: PrismaService) {}
 
+  // ─── Public Stats ────────────────────────────────────────────────
+
+  @Get("public/stats")
+  async publicStats() {
+    const [articles, products, kajian] = await Promise.all([
+      this.prisma.article.count({ where: publishedWhere }),
+      this.prisma.product.count({ where: publishedWhere }),
+      this.prisma.kajianEvent.count({ where: publishedWhere })
+    ]);
+
+    return { articles, products, kajian };
+  }
+
   // ─── Public Articles ─────────────────────────────────────────────────
 
   @Get("public/articles")

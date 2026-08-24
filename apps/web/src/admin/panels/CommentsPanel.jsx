@@ -1,5 +1,5 @@
 import React from "react";
-import { api } from "../../api.js";
+import { api } from "../../api.ts";
 import { renderAdminIcon } from "../../lucide-icons.jsx";
 
 export function CommentsPanel() {

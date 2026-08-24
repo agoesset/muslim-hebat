@@ -1,5 +1,5 @@
 import React from "react";
-import { api } from "../api.js";
+import { api } from "../api.ts";
 
 export function usePublicData(endpoint, fallback = null) {
   const [data, setData] = React.useState(fallback);

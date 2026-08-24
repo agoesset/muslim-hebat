@@ -5,7 +5,7 @@ import { Nav, SiteCredits } from "./shell.jsx";
 import { HomePage } from "./HomePage.jsx";
 import { CeritaPage } from "./CeritaPage.jsx";
 import { CeritaDetailPage } from "./CeritaDetailPage.jsx";
-import { applyTheme, DEFAULT_THEME } from "./theme.js";
+import { applyTheme, DEFAULT_THEME } from "./theme.ts";
 import { Seo } from "./seo.jsx";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import { Analytics } from "./components/Analytics.jsx";

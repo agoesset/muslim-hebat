@@ -1,10 +1,10 @@
 import React from "react";
 
-export function Skeleton({ width, height, circle = false, className = "" }) {
+export function Skeleton({ width, height, circle = false, className = "", style = {} }) {
   return (
     <div
       className={`skeleton ${circle ? "skeleton-circle" : ""} ${className}`}
-      style={{ width: width || "100%", height: height || "1em" }}
+      style={{ width: width ?? "100%", height: height ?? "1em", ...style }}
     />
   );
 }

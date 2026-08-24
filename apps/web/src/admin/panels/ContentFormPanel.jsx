@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate, Link, useOutletContext } from "react-router-dom";
-import { api } from "../../api.js";
+import { api } from "../../api.ts";
 import { renderAdminIcon } from "../../lucide-icons.jsx";
 import { resources, statusConfig } from "../constants.js";
 import { RichTextEditor } from "../RichTextEditor.jsx";

@@ -12,11 +12,11 @@ import {
   getTestimonials
 } from "./public.js";
 
-vi.mock("../api.js", () => ({
+vi.mock("../api.ts", () => ({
   api: vi.fn()
 }));
 
-import { api } from "../api.js";
+import { api } from "../api.ts";
 
 const mockArticle = {
   id: "article-1",

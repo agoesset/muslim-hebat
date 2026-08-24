@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink, Routes, Route, Outlet, Navigate } from "react-router-dom";
-import { api } from "../api.js";
-import { applyTheme } from "../theme.js";
+import { api } from "../api.ts";
+import { applyTheme } from "../theme.ts";
 import { LogoMark } from "../shell.jsx";
 import { renderAdminIcon } from "../lucide-icons.jsx";
 import "../styles.css";

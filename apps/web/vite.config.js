@@ -15,9 +15,9 @@ export default defineConfig({
       : null,
   ].filter(Boolean),
   test: {
-    // Test komponen (*.test.jsx) butuh DOM; test util/API tetap di node
-    // karena resolusi import mereka bergantung pada mode node vite.
-    environmentMatchGlobs: [["**/*.test.jsx", "jsdom"]],
+    // Semua test jalan di jsdom: test komponen butuh DOM, dan test util/API
+    // tidak terpengaruh karena resolusi import tidak bergantung pada environment.
+    environment: "jsdom",
     setupFiles: ["./vitest.setup.js"],
   },
   build: {

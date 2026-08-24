@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { api } from "../api.js";
+import { api } from "../api.ts";
 import { trackEvent } from "../analytics.js";
 
 const CtaContext = createContext(null);

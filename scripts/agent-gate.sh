@@ -45,9 +45,10 @@ if [ "$SCOPE" = "all" ] || [ "$SCOPE" = "api" ]; then
 fi
 
 if [ "$SCOPE" = "all" ] || [ "$SCOPE" = "web" ]; then
-  run_step "web · lint"  npm run lint  -w @muslim-hebat/web
-  run_step "web · test"  npm run test  -w @muslim-hebat/web
-  run_step "web · build" npm run build -w @muslim-hebat/web
+  run_step "web · lint"      npm run lint      -w @muslim-hebat/web
+  run_step "web · typecheck" npm run typecheck -w @muslim-hebat/web
+  run_step "web · test"      npm run test      -w @muslim-hebat/web
+  run_step "web · build"     npm run build     -w @muslim-hebat/web
 fi
 
 printf '\n\033[1m═══ RINGKASAN ═══\033[0m\n'

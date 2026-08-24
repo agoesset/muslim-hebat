@@ -1,7 +1,7 @@
 import React from "react";
-import { api } from "../../api.js";
+import { api } from "../../api.ts";
 import { renderAdminIcon } from "../../lucide-icons.jsx";
-import { applyTheme } from "../../theme.js";
+import { applyTheme } from "../../theme.ts";
 
 export function SettingsPanel() {
   const [theme, setTheme] = React.useState({

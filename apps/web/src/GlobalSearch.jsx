@@ -1,7 +1,7 @@
 import React from "react";
 import { Icon } from "./icons.jsx";
 import { Skeleton } from "./Skeleton.jsx";
-import { api } from "./api.js";
+import { api } from "./api.ts";
 
 export function GlobalSearch({ open, onClose, onNavigate }) {
   const [query, setQuery] = React.useState("");

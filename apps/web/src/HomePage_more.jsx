@@ -3,7 +3,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, Mail } from "lucide-react";
-import { api } from "./api.js";
+import { api } from "./api.ts";
 import { usePublicData } from "./hooks/usePublicData.js";
 import { formatArticleDate, formatReadTime } from "./utils";
 

@@ -55,15 +55,65 @@ describe("Skeleton", () => {
     expect(container.querySelector(".skeleton")).toHaveClass("skeleton", "my-skeleton");
   });
 
-  it("should ignore an unsupported style prop", () => {
-    // Skeleton tidak menerima `style`; hanya width/height yang berpengaruh.
-    // Perilaku ini didokumentasikan di sini karena dipakai (keliru) oleh
-    // SkeletonArticle/SkeletonKajianRow/LazyImage.
+  it("should apply the style prop to the rendered element", () => {
+    // Dipakai oleh SkeletonArticle/SkeletonKajianRow/SkeletonBatchCard/LazyImage:
+    // `style` harus sampai ke elemen, bukan dibuang diam-diam.
     const { container } = render(<Skeleton height={24} style={{ width: "60%", marginBottom: 16 }} />);
 
     const el = container.querySelector(".skeleton");
-    expect(el).toHaveStyle({ width: "100%", height: "24px" });
-    expect(el.style.marginBottom).toBe("");
+    expect(el).toHaveStyle({ width: "60%", height: "24px" });
+    expect(el.style.marginBottom).toBe("16px");
+  });
+
+  it("should let the style prop override the width and height defaults", () => {
+    const { container } = render(<Skeleton width={100} height={10} style={{ width: "60%", height: "3rem" }} />);
+
+    const el = container.querySelector(".skeleton");
+    expect(el).toHaveStyle({ width: "60%" });
+    expect(el.style.height).toBe("3rem");
+  });
+
+  it("should apply style properties unrelated to width and height verbatim", () => {
+    const { container } = render(
+      <Skeleton style={{ marginTop: 24, borderRadius: 999, position: "absolute", inset: 0 }} />
+    );
+
+    const el = container.querySelector(".skeleton");
+    expect(el).toHaveStyle({ marginTop: "24px", borderRadius: "999px", position: "absolute" });
+    expect(el.style.inset).toBe("0px");
+    expect(el).toHaveStyle({ width: "100%" });
+    expect(el.style.height).toBe("1em");
+  });
+
+  it("should behave exactly as before when no style prop is given", () => {
+    const { container } = render(<Skeleton width={86} height={86} className="x" />);
+
+    const el = container.querySelector(".skeleton");
+    expect(el).toHaveStyle({ width: "86px", height: "86px" });
+    expect(el).toHaveClass("skeleton", "x");
+    expect(el.getAttribute("style")).toBe("width: 86px; height: 86px;");
+  });
+
+  it("should keep a zero width instead of falling back to full width", () => {
+    const { container } = render(<Skeleton width={0} />);
+
+    const el = container.querySelector(".skeleton");
+    expect(el.style.width).toBe("0px");
+  });
+
+  it("should keep a zero height instead of falling back to one em", () => {
+    const { container } = render(<Skeleton height={0} />);
+
+    const el = container.querySelector(".skeleton");
+    expect(el.style.height).toBe("0px");
+  });
+
+  it("should fall back to the defaults when width and height are undefined", () => {
+    const { container } = render(<Skeleton width={undefined} height={undefined} />);
+
+    const el = container.querySelector(".skeleton");
+    expect(el).toHaveStyle({ width: "100%" });
+    expect(el.style.height).toBe("1em");
   });
 });
 

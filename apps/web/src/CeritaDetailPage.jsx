@@ -4,7 +4,7 @@ import React from "react";
 import DOMPurify from "dompurify";
 import { Bookmark } from "lucide-react";
 import { NewsletterBlock } from "./HomePage_more.jsx";
-import { api } from "./api.js";
+import { api } from "./api.ts";
 import { usePublicData } from "./hooks/usePublicData.js";
 import { toast } from "./Toast.jsx";
 import { shareContent } from "./share.js";

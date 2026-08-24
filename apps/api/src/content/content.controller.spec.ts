@@ -220,6 +220,153 @@ describe("ContentController", () => {
     });
   });
 
+  describe("relatedArticles", () => {
+    const candidate = (id: string, overrides: Record<string, unknown> = {}) => ({
+      ...mockArticle,
+      id,
+      slug: id,
+      featured: false,
+      ...overrides
+    });
+
+    it("returns an array of related articles", async () => {
+      const related = { ...mockArticle, id: "article-2", slug: "related" };
+      mockPrisma.article.findMany.mockResolvedValueOnce([related]);
+
+      const result = await controller.relatedArticles("test-article");
+
+      expect(result).toEqual([related]);
+    });
+
+    it("excludes the source article", async () => {
+      await controller.relatedArticles("test-article");
+
+      expect(mockPrisma.article.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ id: { not: "article-1" } }) })
+      );
+    });
+
+    it("queries only published source and candidates", async () => {
+      await controller.relatedArticles("test-article");
+
+      expect(mockPrisma.article.findFirst).toHaveBeenCalledWith({
+        where: { slug: "test-article", status: "PUBLISHED" }
+      });
+      expect(mockPrisma.article.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ status: "PUBLISHED" }) })
+      );
+    });
+
+    it("prioritizes shared tags before same category", async () => {
+      const tagMatch = candidate("tag-match", { category: "Other", tags: ["test"], updatedAt: new Date("2024-01-01") });
+      const categoryMatch = candidate("category-match", { category: "Test", tags: [], updatedAt: new Date("2025-01-01") });
+      mockPrisma.article.findMany.mockResolvedValueOnce([categoryMatch, tagMatch]);
+
+      const result = await controller.relatedArticles("test-article");
+
+      expect(result).toEqual([tagMatch, categoryMatch]);
+    });
+
+    it("fills remaining slots with the newest other articles", async () => {
+      const relevant = candidate("relevant", { tags: ["test"], updatedAt: new Date("2023-01-01") });
+      const older = candidate("older", { category: "Other", tags: [], updatedAt: new Date("2024-01-01") });
+      const newest = candidate("newest", { category: "Other", tags: [], updatedAt: new Date("2025-01-01") });
+      mockPrisma.article.findMany.mockResolvedValueOnce([newest, older, relevant]);
+
+      const result = await controller.relatedArticles("test-article");
+
+      expect(result).toEqual([relevant, newest, older]);
+    });
+
+    it("does not return duplicate articles", async () => {
+      const related = candidate("duplicate");
+      mockPrisma.article.findMany.mockResolvedValueOnce([related, related]);
+
+      const result = await controller.relatedArticles("test-article");
+
+      expect(result).toEqual([related]);
+    });
+
+    it("returns at most the requested limit", async () => {
+      mockPrisma.article.findMany.mockResolvedValueOnce(Array.from({ length: 8 }, (_, index) => candidate(`article-${index + 2}`)));
+
+      const result = await controller.relatedArticles("test-article", "5");
+
+      expect(result).toHaveLength(5);
+    });
+
+    it("bounds every candidate query with take", async () => {
+      mockPrisma.article.findMany.mockResolvedValueOnce([
+        candidate("relevant", { tags: ["test"] })
+      ]);
+
+      await controller.relatedArticles("test-article", "5");
+
+      expect(mockPrisma.article.findMany).toHaveBeenCalledTimes(2);
+      for (const [query] of mockPrisma.article.findMany.mock.calls) {
+        expect(query.take).toEqual(expect.any(Number));
+        expect(query.take).toBeGreaterThan(0);
+        expect(query.take).toBeLessThanOrEqual(5);
+      }
+    });
+
+    it.each([["99", 10], ["0", 1]])("clamps limit %s to %d", async (limit, expected) => {
+      mockPrisma.article.findMany.mockResolvedValueOnce(Array.from({ length: 12 }, (_, index) => candidate(`article-${index + 2}`)));
+
+      const result = await controller.relatedArticles("test-article", limit);
+
+      expect(result).toHaveLength(expected);
+    });
+
+    it("uses the default limit for a non-numeric value", async () => {
+      mockPrisma.article.findMany.mockResolvedValueOnce(Array.from({ length: 5 }, (_, index) => candidate(`article-${index + 2}`)));
+
+      const result = await controller.relatedArticles("test-article", "abc");
+
+      expect(result).toHaveLength(3);
+    });
+
+    it("throws the exact not-found error for an unknown or draft source", async () => {
+      mockPrisma.article.findFirst.mockResolvedValueOnce(null);
+
+      await expect(controller.relatedArticles("missing")).rejects.toMatchObject({
+        response: { statusCode: 404, message: "Article not found", error: "Not Found" }
+      });
+      expect(mockPrisma.article.findMany).not.toHaveBeenCalled();
+    });
+
+    it("fills from newest articles when the source has no tags or category", async () => {
+      const source = candidate("source", { tags: [], category: null });
+      const older = candidate("older", { updatedAt: new Date("2024-01-01") });
+      const newer = candidate("newer", { updatedAt: new Date("2025-01-01") });
+      mockPrisma.article.findFirst.mockResolvedValueOnce(source);
+      mockPrisma.article.findMany.mockResolvedValueOnce([newer, older]);
+
+      const result = await controller.relatedArticles("source");
+
+      expect(result).toEqual([newer, older]);
+      expect(mockPrisma.article.findMany).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.article.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        take: 3,
+        where: expect.not.objectContaining({ OR: expect.anything() })
+      }));
+    });
+
+    it("returns an empty array when no other article exists", async () => {
+      mockPrisma.article.findMany.mockResolvedValueOnce([]);
+
+      await expect(controller.relatedArticles("test-article")).resolves.toEqual([]);
+    });
+
+    it("uses no more than two candidate reads and performs no writes", async () => {
+      await controller.relatedArticles("test-article");
+
+      expect(mockPrisma.article.findFirst).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.article.findMany.mock.calls.length).toBeLessThanOrEqual(2);
+      expect(mockPrisma.article.update).not.toHaveBeenCalled();
+    });
+  });
+
   describe("clapArticle", () => {
     it("should increment claps for a published article", async () => {
       await controller.clapArticle("test-article");

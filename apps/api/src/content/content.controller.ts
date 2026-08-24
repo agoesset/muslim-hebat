@@ -21,6 +21,8 @@ import {
 const publishedWhere = { status: "PUBLISHED" as const };
 const orderByUpdated = { updatedAt: "desc" as const };
 const MAX_TAKE = 50;
+const RELATED_DEFAULT = 3;
+const RELATED_MAX = 10;
 
 function parseNumber(value?: string) {
   if (value === undefined) return undefined;
@@ -32,6 +34,12 @@ function parseTake(value?: string) {
   const n = parseNumber(value);
   if (n === undefined) return MAX_TAKE;
   return Math.min(Math.max(n, 0), MAX_TAKE);
+}
+
+function parseRelatedLimit(value?: string) {
+  const n = parseNumber(value);
+  if (n === undefined) return RELATED_DEFAULT;
+  return Math.min(Math.max(Math.trunc(n), 1), RELATED_MAX);
 }
 
 function parseSkip(value?: string) {
@@ -74,6 +82,54 @@ export class ContentController {
       take: parseTake(limit),
       skip: parseSkip(offset)
     });
+  }
+
+  @Get("public/articles/:slug/related")
+  async relatedArticles(@Param("slug") slug: string, @Query("limit") limit?: string) {
+    const source = await this.prisma.article.findFirst({
+      where: { slug, ...publishedWhere }
+    });
+    if (!source) throw new NotFoundException("Article not found");
+
+    const limitValue = parseRelatedLimit(limit);
+    const relevanceFilters = [
+      ...(source.tags.length > 0 ? [{ tags: { hasSome: source.tags } }] : []),
+      ...(source.category !== null ? [{ category: source.category }] : [])
+    ];
+    const relevant = relevanceFilters.length > 0
+      ? await this.prisma.article.findMany({
+          where: {
+            ...publishedWhere,
+            id: { not: source.id },
+            OR: relevanceFilters
+          },
+          orderBy: orderByUpdated,
+          take: limitValue
+        })
+      : [];
+    const fillers = relevant.length < limitValue
+      ? await this.prisma.article.findMany({
+          where: {
+            ...publishedWhere,
+            id: { notIn: [source.id, ...relevant.map((article) => article.id)] }
+          },
+          orderBy: orderByUpdated,
+          take: limitValue - relevant.length
+        })
+      : [];
+    const sourceTags = new Set(source.tags);
+    const priority = (article: typeof source) => {
+      if (article.tags.some((tag) => sourceTags.has(tag))) return 1;
+      if (source.category !== null && article.category === source.category) return 2;
+      return 3;
+    };
+    const unique = [...new Map([...relevant, ...fillers]
+      .filter((article) => article.id !== source.id)
+      .map((article) => [article.id, article])).values()];
+
+    return unique
+      .sort((a, b) => priority(a) - priority(b) || b.updatedAt.getTime() - a.updatedAt.getTime())
+      .slice(0, limitValue);
   }
 
   @Get("public/articles/:slug")

@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 
@@ -14,6 +14,12 @@ export default defineConfig({
         })
       : null,
   ].filter(Boolean),
+  test: {
+    // Test komponen (*.test.jsx) butuh DOM; test util/API tetap di node
+    // karena resolusi import mereka bergantung pada mode node vite.
+    environmentMatchGlobs: [["**/*.test.jsx", "jsdom"]],
+    setupFiles: ["./vitest.setup.js"],
+  },
   build: {
     sourcemap: true,
     modulePreload: { polyfill: false },

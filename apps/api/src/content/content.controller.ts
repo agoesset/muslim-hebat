@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, UseGuards, UseInterceptors } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
+import type { Article } from "@prisma/client";
 import { PrismaService } from "../prisma.service";
 import { AdminAuthGuard } from "../auth/auth.guard";
 import { AuditInterceptor } from "../audit/audit.interceptor";
@@ -111,24 +112,24 @@ export class ContentController {
       ? await this.prisma.article.findMany({
           where: {
             ...publishedWhere,
-            id: { notIn: [source.id, ...relevant.map((article) => article.id)] }
+            id: { notIn: [source.id, ...relevant.map((article: Article) => article.id)] }
           },
           orderBy: orderByUpdated,
           take: limitValue - relevant.length
         })
       : [];
     const sourceTags = new Set(source.tags);
-    const priority = (article: typeof source) => {
-      if (article.tags.some((tag) => sourceTags.has(tag))) return 1;
+    const priority = (article: Article) => {
+      if (article.tags.some((tag: string) => sourceTags.has(tag))) return 1;
       if (source.category !== null && article.category === source.category) return 2;
       return 3;
     };
     const unique = [...new Map([...relevant, ...fillers]
-      .filter((article) => article.id !== source.id)
-      .map((article) => [article.id, article])).values()];
+      .filter((article: Article) => article.id !== source.id)
+      .map((article: Article) => [article.id, article])).values()];
 
     return unique
-      .sort((a, b) => priority(a) - priority(b) || b.updatedAt.getTime() - a.updatedAt.getTime())
+      .sort((a: Article, b: Article) => priority(a) - priority(b) || b.updatedAt.getTime() - a.updatedAt.getTime())
       .slice(0, limitValue);
   }
 

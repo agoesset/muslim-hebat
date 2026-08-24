@@ -8,3 +8,6 @@ backups/
 apps/*/.env
 uploads/
 .hermes/
+
+# git worktrees (superpowers workflow)
+.worktrees/

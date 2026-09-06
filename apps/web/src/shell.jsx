@@ -1,5 +1,5 @@
 import React from "react";
-import { Bookmark, Grid2X2, Home, Search, UserRound } from "lucide-react";
+import { Bookmark, CalendarDays, Home, Search, UserRound } from "lucide-react";
 // Shared components: Nav (bottom floating pill), SiteCredits, WaveDivider, sticker decorations.
 
 import { SITE_LINKS } from "./site-links.ts";
@@ -27,7 +27,7 @@ import { Link } from "react-router-dom";
 const NAV_LINKS = [
   { id: "home", label: "Beranda", path: "/", icon: Home },
   { id: "bacaan", label: "Bacaan", path: "/bacaan", icon: Bookmark },
-  { id: "kategori", label: "Kategori", path: "/bacaan", icon: Grid2X2, fab: true },
+  { id: "kajian", label: "Kajian", path: "/kajian", icon: CalendarDays, fab: true },
   { id: "cari", label: "Cari", path: "/cari", icon: Search },
   { id: "profil", label: "Profil", path: "/profil", icon: UserRound },
 ];

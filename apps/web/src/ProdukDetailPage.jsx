@@ -53,6 +53,11 @@ export function ProdukDetailPage({ product, onNav }) {
               </button>
               <button className="btn" onClick={() => onNav("produk")}>Lihat produk lain</button>
             </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 18, fontSize: 14, color: "var(--ink-soft)" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Icon.Star size={13}/>{p.rating || 4.9} / 5</span>
+              <span aria-hidden="true">·</span>
+              <span>{(p.sold || 0).toLocaleString("id")} terjual</span>
+            </div>
           </div>
           <div className="card" style={{ minHeight: 360, background: p.color || "var(--peach)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 150, border: "1.5px solid var(--ink)", boxShadow: "6px 7px 0 var(--ink)" }}>
             {p.emoji || "🎁"}

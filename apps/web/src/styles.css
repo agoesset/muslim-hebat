@@ -303,7 +303,20 @@ body { padding-bottom: 76px; }
 
 /* a11y: hormati preferensi pengguna */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation: none !important; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+  .twinkle, .float, .drift, .wiggle { animation: none !important; transform: none !important; }
+  .home-reveal-root .section-reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* ─── Preferensi membaca artikel ────────────────────────────────────── */
+.article-html {
+  font-size: var(--article-font-size, 17px);
+  line-height: var(--article-line-height, 1.8);
 }
 
 /* ─── Skeleton loading ───────────────────────────────────────────────── */
@@ -734,7 +747,7 @@ input, textarea, select { min-width: 0; }
 }
 
 /* ── Artikel (detail) ─────────────────────────────────────────────────── */
-.article-html { font-size: 16px; line-height: 1.75; }
+.article-html { font-size: var(--article-font-size, 16px); line-height: var(--article-line-height, 1.75); }
 .article-html p { margin: 0 0 18px; }
 .article-html h2 { font-size: 20px; margin: 32px 0 10px; }
 .article-html h3 { font-size: 17px; margin: 26px 0 8px; }
@@ -751,6 +764,19 @@ input, textarea, select { min-width: 0; }
   color: var(--plum);
 }
 .article-save { margin-top: 28px; }
+
+/* ── Halaman pencarian / profil / koleksi ─────────────────────────────── */
+.search-page, .saved-page, .profile-page { min-height: 60vh; padding-top: 48px; }
+.search-page .search-bar { margin: 18px 0 24px; }
+.search-results { margin: 0 0 28px; }
+.search-results h2 { font-size: 20px; margin-bottom: 10px; }
+.search-result { display: flex; gap: 12px; align-items: center; padding: 14px 16px; margin-bottom: 8px; }
+.search-result small { display: block; color: var(--ink-soft); margin-top: 2px; }
+.saved-list { display: flex; flex-direction: column; gap: 12px; }
+.saved-item { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.saved-item h3 { margin: 4px 0; }
+.profile-card { padding: 20px; margin-bottom: 14px; }
+.preference-actions { display: flex; gap: 8px; align-items: center; }
 
 @media (max-width: 620px) {
   .home-hero { min-height: 360px; padding: 38px 22px 48px; }

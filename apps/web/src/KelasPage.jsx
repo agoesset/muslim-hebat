@@ -138,6 +138,7 @@ function BatchOpenSection({ courses }) {
   const open = courses
     .filter(k => k.batch && k.status !== "closed")
     .sort((a, b) => (a.startDate || "").localeCompare(b.startDate || ""));
+  const earlyBird = open.find(k => k.status === "early-bird");
 
   return (
     <section className="shell" style={{ marginBottom: 40 }}>
@@ -147,6 +148,11 @@ function BatchOpenSection({ courses }) {
         sub="Pendaftaran kelas live Zoom dibuka per batch — daftar sebelum slot habis, biar bisa ikut dari sesi pertama."
         right={<button className="btn btn--sm btn--ghost">Semua jadwal batch <Icon.Arrow size={12}/></button>}
       />
+      {earlyBird && (
+        <p style={{ margin: "-12px 0 16px", fontSize: 13, color: "var(--ink-soft)" }}>
+          🐦 Early bird <strong>{earlyBird.batch}</strong> untuk {earlyBird.title} masih dibuka.
+        </p>
+      )}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
         {open.slice(0, 4).map(k => <BatchOpenCard key={k.id} k={k}/>)}
       </div>

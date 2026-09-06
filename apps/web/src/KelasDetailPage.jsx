@@ -50,15 +50,20 @@ export function KelasDetailPage({ course, onNav }) {
               <button className="btn btn--primary" onClick={cta}>{isFree ? "Mulai gratis" : "Daftar via WhatsApp"} <Icon.Arrow size={14}/></button>
               <button className="btn" onClick={() => onNav("kelas")}>Lihat kelas lain</button>
             </div>
+            {k.batch && k.statusDetail === "early-bird" && (
+              <p style={{ marginTop: 14, fontSize: 13, color: "var(--ink-soft)" }}>Early bird {k.batch} masih dibuka — daftar sebelum slot habis.</p>
+            )}
           </div>
           <aside className="card card--sage" style={{ padding: 26, boxShadow: "6px 7px 0 var(--ink)" }}>
             <div style={{ fontSize: 96, textAlign: "center" }}>{k.emoji || "🎓"}</div>
             <h3 style={{ marginBottom: 8 }}>Info batch</h3>
             <p><strong>Harga:</strong> {price}</p>
+            {!!k.originalPriceCents && <p><strong>Harga normal:</strong> <span style={{ textDecoration: "line-through" }}>{rupiah(k.originalPriceCents)}</span></p>}
             <p><strong>Batch:</strong> {k.batch || "On-demand"}</p>
             <p><strong>Mulai:</strong> {k.startDate || "Bisa mulai kapan aja"}</p>
             <p><strong>Jadwal:</strong> {k.schedule || "Fleksibel"}</p>
             <p><strong>Platform:</strong> {k.platform || "Online"}</p>
+            {!!k.slots && <p><strong>Slot:</strong> {k.slotsTaken || 0}/{k.slots} terisi</p>}
           </aside>
         </div>
       </section>

@@ -1,6 +1,5 @@
 import React from "react";
-import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Bookmark, Search, UserRound } from "lucide-react";
+import { BrowserRouter, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Nav, SiteCredits } from "./shell.jsx";
 import { HomePage } from "./HomePage.jsx";
 import { CeritaPage } from "./CeritaPage.jsx";
@@ -18,6 +17,17 @@ import { EmptyState } from "./EmptyState.jsx";
 import { ContactPage } from "./ContactPage.jsx";
 import { UnsubscribePage } from "./UnsubscribePage.jsx";
 import { NotFoundPage } from "./NotFoundPage.jsx";
+import { SearchPage } from "./SearchPage.jsx";
+import { SavedArticlesPage } from "./SavedArticlesPage.jsx";
+import { ProfilePage } from "./ProfilePage.jsx";
+import { KajianPage } from "./KajianPage.jsx";
+import { KajianDetailPage } from "./KajianDetailPage.jsx";
+import { KelasPage } from "./KelasPage.jsx";
+import { KelasDetailPage } from "./KelasDetailPage.jsx";
+import { ProdukPage } from "./ProdukPage.jsx";
+import { ProdukDetailPage } from "./ProdukDetailPage.jsx";
+import { getKajianBySlug, getClass, getProduct } from "./api/public.js";
+import { applyReadingPreferences } from "./ProfilePage.jsx";
 
 const AdminPage = React.lazy(() =>
   import("./admin/AdminPage.jsx").then((mod) => ({ default: mod.AdminPage }))
@@ -90,13 +100,17 @@ function PublicApp() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = React.useState(false);
-  const page = location.pathname.startsWith("/bacaan/") ? "bacaan" :
-    pageIds[location.pathname] || "home";
+  const page = location.pathname.startsWith("/bacaan/") ? "bacaan"
+    : location.pathname.startsWith("/kajian/") || location.pathname === "/kajian" ? "kajian"
+    : location.pathname.startsWith("/kelas/") || location.pathname === "/kelas" ? "kelas"
+    : location.pathname.startsWith("/produk/") || location.pathname === "/produk" ? "produk"
+    : pageIds[location.pathname] || "home";
   const goNav = (id) => navigate(routeForPage(id));
   const openCerita = (cerita) => navigate(`/bacaan/${cerita.slug}`);
 
   React.useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
+    applyReadingPreferences();
   }, [location.pathname]);
 
   return (
@@ -108,9 +122,15 @@ function PublicApp() {
           <Route path="/" element={<><Seo title="Muslim Hebat — Blog" description="Bacaan ringan tentang Islam, self-growth, dan ibadah harian." /><HomePage onNav={goNav} onOpenCerita={openCerita} onSearch={() => setSearchOpen(true)} /></>} />
           <Route path="/bacaan" element={<><Seo title="Bacaan | Muslim Hebat" description="Kumpulan tulisan ringan tentang Islam, self-growth, dan ibadah harian." /><CeritaPage onNav={goNav} onOpenCerita={openCerita} /></>} />
           <Route path="/bacaan/:slug" element={<CeritaDetailRoute onNav={goNav} onOpenCerita={openCerita} />} />
-          <Route path="/cari" element={<PlaceholderPage icon={Search} eyebrow="Temukan inspirasi" title="Cari Bacaan" description="Cari artikel berdasarkan topik, judul, atau kata kunci." search />} />
-          <Route path="/disimpan" element={<PlaceholderPage icon={Bookmark} eyebrow="Koleksi pribadi" title="Artikel Disimpan" description="Artikel yang kamu simpan akan tampil di sini." />} />
-          <Route path="/profil" element={<PlaceholderPage icon={UserRound} eyebrow="Ruangmu" title="Profil" description="Kelola profil dan temukan kembali bacaan favoritmu." savedLink />} />
+          <Route path="/kajian" element={<><Seo title="Kajian | Muslim Hebat" description="Jadwal kajian mingguan dan acara komunitas Muslim Hebat." /><KajianPage onNav={goNav} /></>} />
+          <Route path="/kajian/:slug" element={<DetailRoute getter={getKajianBySlug} component={KajianDetailPage} loadingLabel="Kajian" onNav={goNav} seoKey="Event" />} />
+          <Route path="/kelas" element={<><Seo title="Kelas | Muslim Hebat" description="Kelas online tahsin, tahfidz, dan pengembangan diri Muslim." /><KelasPage onNav={goNav} /></>} />
+          <Route path="/kelas/:slug" element={<DetailRoute getter={getClass} component={KelasDetailPage} loadingLabel="Kelas" onNav={goNav} seoKey="Course" />} />
+          <Route path="/produk" element={<><Seo title="Produk | Muslim Hebat" description="Worksheets, planner, dan produk digital Muslim Hebat." /><ProdukPage onNav={goNav} /></>} />
+          <Route path="/produk/:slug" element={<DetailRoute getter={getProduct} component={ProdukDetailPage} loadingLabel="Produk" onNav={goNav} seoKey="Product" />} />
+          <Route path="/cari" element={<SearchPage />} />
+          <Route path="/disimpan" element={<SavedArticlesPage />} />
+          <Route path="/profil" element={<ProfilePage />} />
           <Route path="/kontak" element={<ContactPage onNav={goNav} />} />
           <Route path="/unsubscribe" element={<UnsubscribePage onNav={goNav} />} />
           <Route path="*" element={<NotFoundPage onNav={goNav} />} />
@@ -119,19 +139,6 @@ function PublicApp() {
       <SiteCredits />
       <Nav page={page} />
     </div>
-  );
-}
-
-function PlaceholderPage({ icon: PageIcon, eyebrow, title, description, search = false, savedLink = false }) {
-  return (
-    <main className="page placeholder-page">
-      <span className="placeholder-page__icon"><PageIcon size={28} strokeWidth={1.7} aria-hidden="true" /></span>
-      <span className="eyebrow">{eyebrow}</span>
-      <h1>{title}</h1>
-      <p>{description}</p>
-      {search && <label className="search-bar"><Search size={19} aria-hidden="true" /><input type="search" placeholder="istighfar" aria-label="Cari bacaan" /></label>}
-      {savedLink && <Link className="btn btn--outline" to="/disimpan"><Bookmark size={17} aria-hidden="true" />Lihat artikel disimpan</Link>}
-    </main>
   );
 }
 
@@ -172,8 +179,51 @@ function routeForPage(id) {
   return {
     home: "/",
     bacaan: "/bacaan",
+    kajian: "/kajian",
+    kelas: "/kelas",
+    produk: "/produk",
     cari: "/cari",
     profil: "/profil",
     kontak: "/kontak"
   }[id] || "/";
+}
+
+function DetailRoute({ getter, component: Page, loadingLabel, onNav, seoKey, map = (item) => item }) {
+  const { slug } = useParams();
+  const [item, setItem] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  const getterRef = React.useRef(getter);
+  const mapRef = React.useRef(map);
+
+  React.useEffect(() => {
+    getterRef.current = getter;
+    mapRef.current = map;
+  });
+
+  React.useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    getterRef.current(slug)
+      .then((data) => { if (!cancelled) setItem(mapRef.current(data)); })
+      .catch((err) => { if (!cancelled) setError(err.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  if (loading) return <div className="shell" style={{ padding: "60px 0" }}><p style={{ color: "var(--ink-soft)" }}>Memuat {loadingLabel}…</p></div>;
+  if (error || !item) return <div className="shell" style={{ padding: "60px 0" }}><EmptyState icon="🧭" title={`${loadingLabel} tidak ditemukan`} message="Mungkin sudah dipindahkan atau belum diterbitkan." /></div>;
+
+  return (
+    <>
+      <Seo
+        title={`${item.title || item.name} | Muslim Hebat`}
+        description={item.excerpt}
+        image={item.coverImage || item.image}
+        jsonLd={{ "@context": "https://schema.org", "@type": seoKey, name: item.title || item.name, description: item.excerpt, image: item.coverImage || item.image }}
+      />
+      <Page event={item} course={item} product={item} item={item} onNav={onNav} />
+    </>
+  );
 }

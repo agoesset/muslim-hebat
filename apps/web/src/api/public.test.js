@@ -91,6 +91,12 @@ const mockCourse = {
   rating: 5.0,
   students: 480,
   reviews: 124,
+  batch: "Batch #5",
+  startDate: "12 Sep 2026",
+  startDay: "Rabu",
+  schedule: "Rabu, 19:30–21:00 WIB",
+  slots: 30,
+  slotsTaken: 12,
   image: null,
   color: "var(--sage)",
   tags: ["tahsin", "pemula"],
@@ -208,6 +214,30 @@ describe("public API helpers", () => {
 
       expect(api).toHaveBeenCalledWith("/public/classes/test-course");
       expect(result.slug).toBe("test-course");
+    });
+
+    it("should preserve real batch/schedule/slot data instead of synthetic defaults", async () => {
+      api.mockResolvedValue(mockCourse);
+
+      const result = await getClass("test-course");
+
+      expect(result.batch).toBe("Batch #5");
+      expect(result.startDate).toBe("12 Sep 2026");
+      expect(result.startDay).toBe("Rabu");
+      expect(result.schedule).toBe("Rabu, 19:30–21:00 WIB");
+      expect(result.slots).toBe(30);
+      expect(result.slotsTaken).toBe(12);
+    });
+
+    it("should fall back to live-class defaults only when CMS fields are empty", async () => {
+      api.mockResolvedValue({ ...mockCourse, batch: null, schedule: null, slots: null, startDate: null, startDay: null });
+
+      const result = await getClass("test-course");
+
+      expect(result.batch).toBe("Batch #1");
+      expect(result.schedule).toBe("Senin & Rabu, 19:30–21:00 WIB");
+      expect(result.slots).toBe(50);
+      expect(result.startDate).toBeTruthy();
     });
   });
 

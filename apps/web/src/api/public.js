@@ -76,6 +76,11 @@ export async function getClass(slug) {
   return mapClass(data);
 }
 
+export async function getSearchResults(term) {
+  const query = new URLSearchParams({ q: term.trim() });
+  return api(`/public/search?${query}`);
+}
+
 // ─── Testimonials ─────────────────────────────────────────────────────
 export async function getTestimonials(params = {}) {
   const query = new URLSearchParams();
@@ -131,6 +136,7 @@ function mapArticle(a) {
 
 function mapProduct(p) {
   return {
+    ...p,
     id: p.id,
     slug: p.slug,
     name: p.name,
@@ -159,6 +165,7 @@ function mapKajian(k) {
     ? `${String(startsAt.getHours()).padStart(2, "0")}.${String(startsAt.getMinutes()).padStart(2, "0")} WIB`
     : "";
   return {
+    ...k,
     id: k.id,
     slug: k.slug,
     title: k.title,
@@ -202,6 +209,7 @@ function mapClass(c) {
   else if (c.tags?.includes("almost-full")) status = "almost-full";
 
   return {
+    ...c,
     id: c.id,
     slug: c.slug,
     cat: c.category || "Umum",
@@ -220,12 +228,12 @@ function mapClass(c) {
     originalPrice: c.originalPriceCents || null,
     tag: c.tags?.[0] || "",
     format: c.format || "On-demand",
-    batch: isLive ? defaultBatch : null,
-    startDate: isLive ? startDateStr : null,
-    startDay: isLive ? startDayStr : null,
-    schedule: isLive ? "Senin & Rabu, 19:30–21:00 WIB" : null,
-    platform: isLive ? "Zoom + grup WA" : "Akses seumur hidup",
-    slots: isLive ? 50 : null,
+    batch: c.batch || (isLive ? defaultBatch : null),
+    startDate: c.startDate || (isLive ? startDateStr : null),
+    startDay: c.startDay || (isLive ? startDayStr : null),
+    schedule: c.schedule || (isLive ? "Senin & Rabu, 19:30–21:00 WIB" : null),
+    platform: c.platform || (isLive ? "Zoom + grup WA" : "Akses seumur hidup"),
+    slots: c.slots || (isLive ? 50 : null),
     slotsTaken: isLive ? (c.slotsTaken || 0) : null,
     status: status,
     desc: c.description || c.excerpt,

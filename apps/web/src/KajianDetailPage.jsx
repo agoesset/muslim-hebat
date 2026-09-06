@@ -9,11 +9,30 @@ function rupiah(cents = 0, free = true) {
   return free || !cents ? "Gratis" : `Rp ${Number(cents).toLocaleString("id")}`;
 }
 
+function formatCountdown(startsAt) {
+  if (!startsAt) return "";
+  const target = new Date(startsAt);
+  const diff = target.getTime() - Date.now();
+  if (diff <= 0) return "";
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  return `${days ? `${days} hari ` : ""}${hours ? `${hours} jam ` : ""}${minutes ? `${minutes} menit` : ""}`.trim();
+}
+
+function buildIcs(event) {
+  const start = new Date(event.startsAt);
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${start.toISOString().replace(/[-:]/g, "").split(".")[0]}Z/${end.toISOString().replace(/[-:]/g, "").split(".")[0]}Z&details=${encodeURIComponent(event.excerpt || "")}&location=${encodeURIComponent(event.location || "")}`;
+}
+
 export function KajianDetailPage({ event, onNav }) {
   const { openInterest } = useCta();
   const e = event;
   const dateParts = kajianDateParts(e);
   const price = rupiah(e.priceCents, e.free);
+  const countdown = formatCountdown(e.startsAt);
+  const calendarUrl = e.startsAt ? buildIcs(e) : "";
   const daftar = () => openInterest({ title: `Daftar: ${e.title}`, source: `kajian:${e.slug}`, intent: "event", price });
   const reminder = () => openInterest({ title: `Reminder: ${e.title}`, source: `kajian-reminder:${e.slug}`, intent: "reminder" });
 
@@ -43,10 +62,25 @@ export function KajianDetailPage({ event, onNav }) {
               <span><Icon.Clock size={13}/> {e.time || "Jadwal menyusul"}</span>
               <span><Icon.Pin size={13}/> {e.location || "Online"}</span>
             </div>
+            {(e.attendees || 0) > 0 && (
+              <div style={{ marginTop: 8, fontSize: 14, color: "var(--ink-soft)" }}>
+                {(e.attendees).toLocaleString("id")} peserta sudah daftar
+              </div>
+            )}
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 24 }}>
               <button className="btn btn--primary" onClick={daftar}>Daftar kajian <Icon.Arrow size={14}/></button>
               <button className="btn" onClick={reminder}><Icon.Bell size={13}/> Minta reminder</button>
+              {calendarUrl && (
+                <a className="btn" href={calendarUrl} target="_blank" rel="noopener noreferrer">
+                  <Icon.Cal size={13}/> Tambah ke kalender
+                </a>
+              )}
             </div>
+            {countdown && (
+              <p style={{ marginTop: 14, fontSize: 13, color: "var(--ink-soft)" }}>
+                Dimulai dalam <strong>{countdown}</strong> — {e.location || "Online"}
+              </p>
+            )}
           </div>
         </div>
       </section>

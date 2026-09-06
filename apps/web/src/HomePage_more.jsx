@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, Mail } from "lucide-react";
 import { api } from "./api.ts";
 import { usePublicData } from "./hooks/usePublicData.js";
-import { formatArticleDate, formatReadTime } from "./utils";
+import { formatArticleDate, formatHijriDate, formatReadTime } from "./utils";
 
 /* ─── Articles ──────────────────────────────────────────────────────── */
 export function ArticleSection({ onNav }) {
@@ -16,6 +16,7 @@ export function ArticleSection({ onNav }) {
         ...a,
         time: formatReadTime(a),
         publishedLabel: formatArticleDate(a),
+        hijriLabel: formatHijriDate(a.publishedAt || a.createdAt),
       })),
     [apiArticles]
   );

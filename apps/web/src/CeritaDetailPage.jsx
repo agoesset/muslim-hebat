@@ -8,7 +8,8 @@ import { api } from "./api.ts";
 import { usePublicData } from "./hooks/usePublicData.js";
 import { toast } from "./Toast.jsx";
 import { shareContent } from "./share.js";
-import { formatReadTime } from "./utils";
+import { formatHijriDate, formatReadTime } from "./utils";
+import { isArticleSaved, toggleSavedArticle } from "./saved-articles.js";
 
 export function CeritaDetailPage({ onNav, cerita }) {
   const c = cerita;
@@ -52,7 +53,7 @@ export function CeritaDetailPage({ onNav, cerita }) {
 }
 
 function CeritaDetailHero({ c }) {
-  const meta = [c.cat, formatArticleDate(c), formatReadTime(c)].filter(Boolean);
+  const meta = [c.cat, formatArticleDate(c), formatReadTime(c), formatHijriDate(c.publishedAt || c.createdAt)].filter(Boolean);
 
   return (
     <section className="page blog-section" style={{ paddingTop: 20 }}>
@@ -94,23 +95,12 @@ function CeritaDetailHero({ c }) {
 
 function CeritaBody({ c, clapped, setClapped }) {
   const tags = [c.cat, c.tag].filter(Boolean);
-  const storageKey = `muslim-hebat:bookmark:${c.slug}`;
-  const [saved, setSaved] = React.useState(() => {
-    try {
-      return localStorage.getItem(storageKey) === "true";
-    } catch {
-      return false;
-    }
-  });
+  const [saved, setSaved] = React.useState(() => isArticleSaved(c.slug));
 
   function toggleSaved() {
     const next = !saved;
     setSaved(next);
-    try {
-      localStorage.setItem(storageKey, String(next));
-    } catch {
-      // Bookmark tetap berfungsi untuk sesi aktif jika storage tidak tersedia.
-    }
+    toggleSavedArticle({ id: c.id, slug: c.slug, title: c.title, excerpt: c.excerpt, category: c.cat, coverImage: c.coverImage });
   }
 
   return (
@@ -227,10 +217,15 @@ function CommentsSection({ slug }) {
   const [submitting, setSubmitting] = React.useState(false);
 
   const comments = Array.isArray(apiComments) ? apiComments : [];
+  const spamPattern = /(https?:\/\/|www\.)\S+/i;
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!name.trim() || !text.trim() || submitting) return;
+    if (spamPattern.test(text)) {
+      toast("Komentar berisi tautan tidak diizinkan.", "error");
+      return;
+    }
     setSubmitting(true);
     try {
       const newComment = await api(`/public/articles/${slug}/comments`, {

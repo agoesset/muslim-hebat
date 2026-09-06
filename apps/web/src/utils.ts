@@ -95,3 +95,21 @@ export function kajianDateParts(
   }
   return { date: "-", month: "", day: "" };
 }
+
+/**
+ * Format a date as a Hijri (Islamic) date string, e.g. "1 Ramadan 1447 H".
+ * Returns "" for invalid input.
+ */
+export function formatHijriDate(date: string | Date | number): string {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return "";
+  const parts = new Intl.DateTimeFormat("id-ID-u-ca-islamic", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).formatToParts(d);
+  const day = parts.find((p: { type: string; value: string }) => p.type === "day")?.value || "";
+  const month = parts.find((p: { type: string; value: string }) => p.type === "month")?.value || "";
+  const year = parts.find((p: { type: string; value: string }) => p.type === "year")?.value || "";
+  return `${day} ${month} ${year} H`.trim();
+}

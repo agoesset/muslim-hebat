@@ -76,6 +76,11 @@ export async function getClass(slug) {
   return mapClass(data);
 }
 
+export async function getSearchResults(term) {
+  const query = new URLSearchParams({ q: term.trim() });
+  return api(`/public/search?${query}`);
+}
+
 // ─── Testimonials ─────────────────────────────────────────────────────
 export async function getTestimonials(params = {}) {
   const query = new URLSearchParams();
@@ -131,6 +136,7 @@ function mapArticle(a) {
 
 function mapProduct(p) {
   return {
+    ...p,
     id: p.id,
     slug: p.slug,
     name: p.name,
@@ -159,6 +165,7 @@ function mapKajian(k) {
     ? `${String(startsAt.getHours()).padStart(2, "0")}.${String(startsAt.getMinutes()).padStart(2, "0")} WIB`
     : "";
   return {
+    ...k,
     id: k.id,
     slug: k.slug,
     title: k.title,
@@ -202,6 +209,7 @@ function mapClass(c) {
   else if (c.tags?.includes("almost-full")) status = "almost-full";
 
   return {
+    ...c,
     id: c.id,
     slug: c.slug,
     cat: c.category || "Umum",
